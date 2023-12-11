@@ -1,0 +1,67 @@
+\chapter{Introduction}
+\label{chapter:introduction}
+\thispagestyle{myheadings}
+
+\section{A Brief History Of Kleene Algebra}
+\label{sec:history}
+
+
+\paragraph{Our Contributions}
+
+\section{Technical Background}
+
+\subsection{Constructing Models}
+
+Upper-triangular matrix model plays an important role in this paper.
+Given a KA \(𝒦\), the square upper-triangular matrices over \(𝒦\) of size \(n\), 
+denoted as \(M_{n}(𝒦)\), forms a Kleene Algebra, 
+with matrix addition, matrix multiplication, 
+and a star operation inductively defined as follows~\cite{Kozen_1994}:
+\[
+  \begin{bmatrix}
+    A & B \\
+    0 & D
+  \end{bmatrix}^* ≜
+  \begin{bmatrix}
+    A^* & A^* B D^* \\  
+    0 & D^*
+  \end{bmatrix},
+\]
+where \(A, D\) are square block matrices, and \(B\) is a block matrix.
+
+\begin{corollary}\label{the: diagonal projection is homomorphism}
+  Projections of the diagonal element of upper-triangular matrices 
+  are homomorphisms:
+  \[π_{n, n}: M_{m}(𝒦) → 𝒦 \text{ where } n ≤ m.\]
+\end{corollary}
+
+\begin{proof}
+  By induction on the input term.
+\end{proof}
+
+\begin{corollary}\label{the: diagonal image of free model is closed under sub KA}
+  Given an interpretation into a matrix model \(I: \KA(X) → M_m(𝒦)\)
+  and a Kleene subalgebra \(𝒦' ⊆ 𝒦\), 
+  any diagonal projection \(π_{n, n}\) satisfy the following equivalences:
+  \[∀ a ∈ X, π_{n, n}(I(a)) ⊆ 𝒦' ⟺ ∀ e ∈ \KA(X), π_{n, n}(I(e)) ⊆ 𝒦'.\]
+\end{corollary}
+
+\begin{proof}
+  Direct consequence of \Cref*{the: diagonal projection is homomorphism}.
+\end{proof}
+
+Another important class of models are models bounded by a single element:
+\begin{theorem}
+  Given a KA \(𝒦\), and an element \(p ∈ 𝒦\), 
+  if \(p ≥ 1\) and \(p ⋅ p ≤ p\), then all the element in \(𝒦\) that is smaller than \(p\)
+  forms a Kleene Algebra.
+\end{theorem}
+
+\begin{proof}
+  We need to show that \(\{q ∣ q ≤ p\}\) is closed under all operation of KA.
+  We will show the star case as an example.
+  Given an element \(q ≤ p\), we need to show \(q^* ≤ p\).
+  By induction rule \[q p ≤ p p ≤ p ⟹ q^* p ≤ p ⟹ q^* ≤ q^* p ≤ p.\qedhere\]
+\end{proof}
+We denote the Kleene algebra formed by all the elements in \(𝒦\) 
+that is less than \(p\) as \(𝒦ₚ\).

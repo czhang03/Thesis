@@ -1,0 +1,1423 @@
+\chapter{Kleene Algebra with Atomic Commutativity}
+\label{chapter:body}
+\thispagestyle{myheadings}
+
+% set this to the location of the figures for this chapter. it may
+% also want to be ../Figures/2_Body/ or something. make sure that
+% it has a trailing directory separator (i.e., '/')!
+\graphicspath{{2_Commutativity/Figures/}}
+
+\section{Free KA with Atomic Commutativity}
+
+It is common to extend Kleene Algebra with additional equations 
+to enrich the theory\cite{DBLP:conf/fossacs/DoumaneKPP19, Kozen_Mamouras_2014, Pous_Rot_Wagemaker_2022}.
+In this paper we will consider atomic commutativity hypotheses,
+where the equations in the hypotheses are of the form \(p q = q p\)
+with \(p\) and \(q\) being primitives.
+
+A \emph{commutable set} \((X, ∼)\) is a set with a reflexive symmetric relation \(∼: X × X\)
+called \emph{commuting relation},
+we typically omit \(∼\) and just denote the commutable set as \(X\).
+In this paper we only consider finite commutable sets.
+
+We say a commutable set \(X\) is \emph{discrete} if the relation \(∼\) is the identity relation.
+A homomorphism \(h: X → Y\) between two commutable set \(X\) and \(Y\)
+is a function that preserves the commuting relation:
+\[x₁ ∼ x₂ ⟹ h(x₁) ∼ h(x₂).\]
+The carrier of a commutable set \(X\) can be considered as a discrete commutable set,
+and we denote this discrete commutable set as \(X_≁\).
+There is a canonical homomorphism:
+\begin{align*}
+  [-]_∼ & : X_≁ → X \\  
+  [x]_∼ & ≜ x.
+\end{align*}
+
+We can construct the free KA a commutable set \(X\) by 
+taking all the KA terms over \(X\) modulo the equalities provable from KA axioms plus
+the following equations \(\{p q = q p ∣ p ∼ q\}\).
+Intuitively, the commuting relation of \(X\) specifies 
+the atomic commutativity hypotheses in \(\KA(X)\).
+Since the free KA over a set is just a free KA over discrete commutable set,
+we abuse the notation to denote the free KA over a commutable set \(X\) as \(\KA(X)\).
+
+Notice all Kleene Algebra form a commutable set, 
+with the commuting relation defined as follows:
+\[e₁ ∼ e₂ ⟺ e₁ ⋅ e₂ = e₂ ⋅ e₁.\]
+We can show that the free KA over commutable set enjoys 
+similar universal property as free KA over set.
+We first prove the universal property without the uniqueness requirement:
+
+\begin{theorem}\label{the: existence of KA with commutable set lifting}
+  For all commutable set \(X\), a KA \(𝒦\), and a commutable set homomorphism \(Î: X → 𝒦\),
+  then there is a KA interpretation \(I: \KA(X) → 𝒦\), s.t. the following diagram commutes:
+  \[\begin{tikzcd}
+    \KA(X) \ar[dashed]{r}{I} & 𝒦 \\ 
+    X \ar[swap]{ur}{Î} \ar[hookrightarrow]{u}{i}
+  \end{tikzcd}\]
+\end{theorem}
+\begin{proof}
+  Given the function \(Î\), 
+  we can apply the standard technique to generate the homomorphism \(I\) 
+  by induction on the input:
+  \begin{align*}
+    I(a) & ≜ Î(a) & a ∈ X \\  
+    I(1) & ≜ 1_𝒦 \\  
+    I(0) & ≜ 0_𝒦 \\  
+    I(e₁ + e₂) & ≜ I(e₁) + I(e₂) \\
+    I(e₁ ⋅ e₂) & ≜ I(e₁) ⋅ I(e₂) \\
+    I(e^*) & ≜ I(e)^*
+  \end{align*}
+  such a homomorphism exists, and makes the diagram commute:
+  \[I(a) = Î(a), ∀ a ∈ X.\]
+\end{proof}
+
+To prove uniqueness, we will prove a stronger theorem first.
+\begin{theorem}\label{the: ordered of homomorphism is determined by order on the primitives}
+  Given two interpretation \(I, I': \KA(X) → 𝒦\),
+  \[I(e) ≥ I'(e) ⟺ ∀ a ∈ X, I(a) ≥ I'(a),\]
+  this result implies \(I(e) = I'(e) ⟺ ∀ a ∈ X, I(a) = I'(a).\)
+\end{theorem}
+
+\begin{proof}
+  By induction on the structure of \(e\), and all KA operations preserve order.
+  We show the star case as example: assume \(I(e) ≥ I'(e)\),
+  we need to show \(I(e^*) ≥ I'(e^*)\).
+  Since \(I\) is a homomorphism, and star preserves order:
+  \[I(e^*) = (I(e))^* ≥ (I'(e))^* = I'(e^*).\]
+\end{proof}
+
+\begin{corollary}[Universal Property]
+  For all commutable set \(X\), a KA \(𝒦\), and a commutable set homomorphism \(Î: X → 𝒦\),
+  then there is a unique KA interpretation \(I: \KA(X) → 𝒦\), s.t. the following diagram commutes:
+  \[\begin{tikzcd}
+    \KA(X) \ar[dashed]{r}{I} & 𝒦 \\ 
+    X \ar[swap]{ur}{Î} \ar[hookrightarrow]{u}{i}
+  \end{tikzcd}\]
+\end{corollary}
+
+\begin{proof}
+  By \Cref{the: existence of KA with commutable set lifting}, \(I\) exists. 
+  By \Cref{the: ordered of homomorphism is determined by order on the primitives},
+  if there exists another interpretation \(I'\) that makes the diagram commute,
+  then \[I(a) = I'(a), ∀ a ∈ X ⟹ I(e) = I'(e).\]
+\end{proof}
+As usual, we will use the notation \(I\) for both \(I\) and \(Î\).
+
+The words over a commutable set \(X\) are monoid terms modulo
+monoid equations plus the commutativity axioms \(\{a b = b a ∣ a ∼ b\}\).
+We still use \(ϵ\) as the identity of the monoid and call it the empty word;  
+and we use the same notation \(\Word(X)\) for all the words over \(X\).
+The language model over a commutable set \(X\) is the powerset of 
+all words over \(X\), with operation defined by Kozen~\cite{DBLP:conf/lics/Kozen97},
+denoted as \(ℒ_X\).
+The language interpretation is generated by the same action on primitives
+as in Kleene Algebra:
+\begin{align*}
+  L & : X → ℒ_X \\
+  L & (a) = \{a\}
+\end{align*}
+
+
+\paragraph*{Notation}
+In the rest of the article, notations \(\KA(X)\), \(\Word(X)\), and \(ℒ_X\)
+always refers to the commutative variant, where \(X\) is a commutable set.
+When we are referring to the non-commutative KA (word, language model, etc.), 
+we will consider them as the KA (word, language model, etc.) over a discrete commutable set.
+As we have mentioned before, \(2 ≜ \{0, 1\}\)
+denotes the unique KA that only contains two distinct identities;  
+this KA is also the free KA generated by the empty set \(\KA(∅)\).
+Finally, when given a finite set of terms \(S ⊆ \KA(X)\), 
+we will sometimes use \(S\) to denote 
+the sum of all its elements \((∑_{e ∈ S} e) ∈ \KA(e)\).
+
+
+\section{Word Inhabitant Problem}
+
+Given a commutable set,
+we allow a word in \(ℒ_X\) to be implicitly coerced into \(\KA(X)\),
+where we pick the multiplication operator in \(\KA(X)\) as the monoidal multiplication.
+
+Then given a word \(w ∈ ℒ_X\) and a KA expression \(e ∈ \KA(X)\),
+the word inhabitant problem is the following inequality: \[w ≤ e.\]
+The problem is complete with language interpretation when:
+\[w ∈ L(e) ⟺ w ≤ e.\] 
+We will show that the word inhabitance problem is complete and decidable
+in Kleene Algebra with atomic commutativity hypotheses.
+
+The core technique of this section is to construct 
+a sound empty word predicate \(E: \KA(X) → 2\) 
+and derivative operation \(δₐ: \KA(X) → \KA(X)\).
+
+\subsection{Empty Word Predicate}
+
+In this section we will prove a stronger result than 
+the soundness of empty word predicate:
+\[∀ e ∈ \KA(X), e = E(e) + e',\]
+where \(E: \KA(X) → 2\) is the empty word predicate 
+on the free KA over any commutable set \(X\), and \(ϵ ∉ L(e')\). 
+This result is obtained by decomposing using the following matrix model.
+
+\begin{theorem}
+  For any Kleene Algebra \(𝒦\), 
+  matrix of the following shapes forms a Kleene Algebra:
+  \[D_E(𝒦) ≜ \{\begin{bmatrix}
+    p & q \\
+    0 & p + q
+  \end{bmatrix} ∣ p, q ∈ 𝒦\}.\]
+\end{theorem}
+
+\begin{proof}
+  We will only need to show that matrix of this shape is closed under all the KA operations.
+
+  The identities and addition are easy to verify. 
+  So we will only focus on verifying the closure under multiplication and star operation.
+
+  The multiplication case:
+  \[
+    \begin{bmatrix}
+      p₁ & q₁ \\
+      0 & p₁ + q₁
+    \end{bmatrix} 
+    \begin{bmatrix}
+      p₂ & q₂ \\
+      0 & p₂ + q₂
+    \end{bmatrix} = 
+    \begin{bmatrix}
+      p₁ p₂ & p₁ q₂ + q₁ (p₂ + q₂) \\
+      0 & (p₁ + q₁) (p₂ + q₂)
+    \end{bmatrix}.
+  \]
+  Since \(p₁p₂ + p₁ q₂ + q₁ (p₂ + q₂) = (p₁ + q₁) (p₂ + q₂)\),
+  these matrices are closed under multiplication.
+
+  The star case:
+  \[
+    \begin{bmatrix}
+      p & q \\
+      0 & p + q
+    \end{bmatrix}^* = 
+    \begin{bmatrix}
+      p^* & p^* q (p + q)^* \\
+      0 & (p + q)^*
+    \end{bmatrix}.
+  \]
+  With a standard theorem of KA \((p + q)^* = p^*(q p^*)^*\),
+  we are able to derive the closure under star operation:
+  \begin{align*}
+    p^* + p^* q (p + q)^* 
+      & = p^* + p^* q p^* (q p^*)^* \\ 
+      & = p^* (1 + q p^* (q p^*)^*) \\  
+      & = p^* (q p^*)^* = (p + q)^*
+  \end{align*}
+\end{proof}
+
+Given any commutable set \(X\), consider the following matrix: 
+\[D_E(\KA(X)) ∋ u_E ≜ \begin{bmatrix}
+  1 & X X^* \\  
+  0 & X^*
+\end{bmatrix},\]
+where \(X\) is a shorthand for the expression \((∑_{x ∈ X} x)\).
+By simply unfolding the definition, we can verify that \(u_E ⋅ u_E = u_E\)
+and \(u_E ≥ 1\).
+Therefore, all the matrices less than \(u_E\) in \(D_E(\KA(X))\) forms a Kleene Algebra.
+We denote this Kleene Algebra as \(D_E(\KA(X))_{u_E}\).
+
+In order to decompose an arbitrary expression,
+we will define an interpretation into \(D_E(\KA(X))_{u_E}\) 
+by lifting the following actions
+\begin{align*}
+  I_E & : \KA(X) → D_E(\KA(X))_{u_E} \\
+  I_E & (a) ≜ 
+  \begin{bmatrix}
+    0 & a \\  
+    0 & a
+  \end{bmatrix}.
+\end{align*}
+Because the projection \(π_{2,2}\) is a homomorphism,
+then \(π_{2,2} ∘ I_E\) is an interpretation.
+Recall that interpretation is uniquely determined by the action on the primitives,
+and \[π_{2,2} ∘ I_E(a) = a, ∀ a ∈ X.\]
+Therefore, for all term in \(e ∈ \KA(X)\),
+the \(2,2\) component of \(I_E(e)\) is exactly \(e\) itself:
+\[π_{2,2} ∘ I_E(e) = e.\]
+
+Then we define the empty word predicate as follows:
+\[E(e) ≜ π_{1,1}(I_E(e)), \quad e' ≜ π_{1,2}(I_E(e)).\]
+By \Cref{the: diagonal image of free model is closed under sub KA},
+and \(π_{1,1}(I_E(a)) = 0 ∈ 2\) for all primitives \(a\),
+\[∀e ∈ \KA(X), E(e) = π_{1,1}(I_E(e)) ∈ 2 ⊆ \KA(X).\]
+Therefore, we can treat \(E\) as a homomorphism of the type \(\KA(X) → 2\).
+
+\begin{corollary}[empty word decomposition]\label{the: empty word decomposition}
+  All expression \(e ∈ \KA(X)\) over a commutable set \(X\)
+  can be decomposed in the following way:
+  \[e = E(e) + e' \text{ where } ϵ ∉ L(e').\]
+\end{corollary}
+
+\begin{proof}
+  Recall that 
+  \[\begin{bmatrix}
+    E(e) & e' \\  
+    0 & e 
+  \end{bmatrix} ≜ I_E(e).\]
+  Since  \(I_E(e) ∈ D_E(\KA(X))\), we have 
+  \[e = E(e) + e'.\]
+
+  Furthermore, since elements in \(D_E(\KA(X))_{u_E}\) is bounded by \(u_E\),
+  \[e' = π_{2,2}(I_E(e)) ≤ X X^*.\]
+  Because \(ϵ ∉ L(X X^*)\), and \(l\) is a homomorphism,
+  we conclude \(ϵ ∉ L(e) ⊆ L(X X^*)\).
+\end{proof}
+
+\begin{corollary}[Soundness Of Empty Word Property]
+  Let \(E: ℒ_X → 2\) the empty word predicate on the language over a commutable set
+  \(E(l) = ϵ ∈ l,\) then the following diagram commute
+  \[\begin{tikzcd}
+    \KA(K) \ar{r}{E} \ar{d}{l} & 2 \\  
+    ℒ_K \ar[swap]{ur}{E}
+  \end{tikzcd}\]
+\end{corollary}
+
+\begin{proof}
+  We only need to prove that for all \(e ∈ \KA(X)\), 
+  \[E(e) = 1 ⟺ ϵ ∈ l.\]
+  We show this by case analysis on \(E(e)\):
+  \begin{itemize}
+    \item If \(E(e) = 1\), then 
+      \[L(e) = L(E(e)) ∪ L(e') = \{ϵ\} ∪ L(e') ∋ ϵ.\]
+    \item If \(E(e) = 0\), recall that \(ϵ ∉ L(e')\),
+      \[L(e) = L(E(e)) ∪ L(e') = L(e') ∌ ϵ.\]
+  \end{itemize}
+\end{proof}
+
+\subsection{Derivative}
+
+Similar to the last section, 
+the derivative operation will also be defined by a decomposition:
+for all \(e ∈ \KA(X)\) and \(a ∈ X\),
+\[e = a ⋅ δₐ(e) + ρₐ(e),\]
+where the language interpretation for \(a ⋅ δₐ(e)\) and \(ρₐ(e)\) are disjoint.
+This result will imply the soundness of derivative.
+
+\begin{theorem}
+  Given a KA \(𝒦\) and an element \(t ∈ 𝒦\),
+  the following matrices form a KA:
+  \[Dₜ(𝒦) = \{\begin{bmatrix}
+    a & b & c \\
+    0 & d & 0 \\  
+    0 & 0 & d
+  \end{bmatrix} ∣ d = a + b + t c, a t = t a\}\]
+\end{theorem}
+
+\begin{proof}
+  We need to show that these matrices are closed under KA operations.
+  The closure under identities and addition are trivial, 
+  we only show the multiplication case and the star case.
+
+  The multiplication case:
+  \begin{align*}
+    & \begin{bmatrix}
+      p₁ & q₁ & r₁ \\
+      0 & s₁ & 0 \\  
+      0 & 0 & s₁
+    \end{bmatrix}
+    \begin{bmatrix}
+      p₂ & q₂ & r₂ \\
+      0 & s₂ & 0 \\  
+      0 & 0 & s₂
+    \end{bmatrix} \\
+    ={} & \begin{bmatrix}
+      p₁ p₂ & p₁q₂ + q₁s₂ & p₁ r₂ + r₁ s₂ \\
+      0 & s₁ s₂ & 0 \\  
+      0 & 0 & s₁ s₂
+    \end{bmatrix}
+  \end{align*}
+  We verify that the equation is preserved:
+  \begin{align*}
+    s₁ s₂ & = (p₁ + q₁ + p r₁) ⋅ s₂ \\  
+    & = p₁ s₂ + q₁ s₂ + p r₁ s₂ \\  
+    & = p₁ (p₂ + q₂ + p r₂) + q₁ s₂ + p r₁ s₂ \\  
+    & = p₁ p₂ + (p₁q₂ + q₁s₂) + p₁ p r₂ + p r₁ s₂ \\ 
+    & = p₁ p₂ + (p₁q₂ + q₁s₂) + p(p₁ r₂ + r₁ s₂) 
+  \end{align*}
+  The last step uses the commutativity of \(t\) and \(p₁\).
+  Then we verify the commutativity condition:
+  \[(p₁ p₂) t = p₁ t p₂ = t (p₁ p₂).\]
+  Hence, \(Dₜ(𝒦)\) is closed under multiplication.
+
+  The star case:
+  \[
+    \begin{bmatrix}
+      p & q & r \\
+      0 & s & 0 \\  
+      0 & 0 & s
+    \end{bmatrix}^*
+    = 
+    \begin{bmatrix}
+      p^*  & p^*  q s^* & p^*  r s^* \\
+      0 & s^* & 0 \\  
+      0 & 0 & s^*
+    \end{bmatrix}
+  \]
+  the equation is preserved:
+  \begin{align*}
+    s^* & = (p + q + t c)^* \\  
+    & = p^* ((q + pc) p^*)^*\\
+    & = p^* (1 + (q + pc) p^* ((q + pc) p^* )^*) \\
+    & = p^* (1 + (q + pc) s^*) \\ 
+    & = p^* + p^* q s^* + p^* t r s^* \\
+    & = p^* + p^* q s^* + t p^* r s^*
+  \end{align*}
+  The last line is by standard KA theorem:
+  \[p t = t p ⟹ p^*  t = t p^* .\]
+  The commutativity condition \(p^*  t = t p^*\) is also implied by the above theorem.
+  Therefore, \(Dₜ(𝒦)\) is closes under star operations.
+\end{proof}
+
+Given a commutable set \(X\), and an element \(a ∈ X\),
+we can partition the rest of the elements in \(X\)
+by whether they commute with \(a\):
+\[X_{∼ a} ≜ \{b ∣ b ∼ a, b ≠ a\}, \quad X_{≁ a} = \{b ∣ b ≁ a\}.\]
+Since \(a\) commutes with every element of \(X_{∼ a}\), 
+\(a\) commutes with \(X_{∼ a}\): \(X_{∼ a} ⋅ a = a ⋅ X_{∼ a}\),
+then by standard theorem of KA: \[X_{∼ a}^* ⋅ a = a ⋅ X_{∼ a}^*.\]
+
+Consider the following matrix:
+\[Dₐ(\KA(X)) ∋ uₐ = 
+\begin{bmatrix}
+  X_{∼ a}^* & X_{∼ a}^* X_{≁ a} X^* & X^* \\  
+  0 & X^* & 0 \\  
+  0 & 0 & X^*
+\end{bmatrix}.\]
+It is easy to verify that \(uₐ ≥ 1\) and \(uₐ ⋅ uₐ ≤ uₐ\).
+Therefore, the elements under \(uₐ\) forms a KA: \(Dₐ(\KA(X))_{uₐ}\).
+The purpose of model \(Dₐ(\KA(X))_{uₐ}\) is clear when we look at the 
+language interpretation for each of the component,
+let \[\begin{bmatrix}
+  p & q & r \\  
+  0 & s & 0 \\  
+  0 & 0 & s 
+\end{bmatrix} ∈ Dₐ(\KA(X))_{uₐ}\]
+then 
+\begin{itemize}
+  \item \(L(p) ≤ L(X_{∼a}^*)\) contains only words with symbols that commutes with primitive \(a\),
+    but is not \(a\).
+  \item \(L(q) ≤ L(X_{∼a}^* X_{≁a} X^*)\) contains words that starts with 
+    arbitrary number of primitives that commutes with \(a\), 
+    then a primitive that does not commute with \(a\), followed by arbitrary primitives.
+\end{itemize}
+Both \(L(p)\) and \(L(q)\) do not contain words of the form \(a ⋅ w\) 
+for any word \(w ∈ \Word(X)\); by the property of \(Dₐ(\KA(X))\):
+\[L(s) = L(p) + L(q) + a ⋅ L(r).\]
+Thus, \(L(r)\) will be the language derivative of \(L(s)\) with respect to primitive \(a\), 
+
+To apply this decomposition on an arbitrary expression, we define an
+interpretation by lifting the following action on primitives:
+\begin{align*}
+  I_a & : X → Dₐ(\KA(X))_{uₐ} \\
+  I_a & (b) ≜ \begin{cases}
+    \begin{bmatrix}
+      b & 0 & 0 \\
+      0 & b & 0 \\
+      0 & 0 & b 
+    \end{bmatrix} & b ∈ X_{∼ a} \\  
+    \begin{bmatrix}
+      0 & b & 0 \\
+      0 & b & 0 \\
+      0 & 0 & b 
+    \end{bmatrix} & b ∈ X_{≁ a} \\
+    \begin{bmatrix}
+      0 & 0 & 1 \\
+      0 & b & 0 \\
+      0 & 0 & b 
+    \end{bmatrix} & b = a 
+  \end{cases}
+\end{align*}
+
+Again, since \(π_{3,3}\) and \(π_{2,2}\) are homomorphisms, 
+\(π_{3,3} ∘ I_a\) and \(π_{2,2} ∘ I_a\) are interpretations.
+Because interpretations are uniquely determined by the action on the primitives, 
+and 
+\[∀ b ∈ X, π_{3,3} ∘ I_a(b) = π_{2,2} ∘ I_a(b) = b,\]
+then \(π_{3,3} ∘ I_a\) and \(π_{2,2} ∘ I_a\) are both identity homomorphisms.
+This means the \(2,2\) and \(3,3\) component of \(I_a(e)\) are exactly \(e\) 
+for all \(e ∈ \KA(X)\). Let 
+\[\begin{bmatrix}
+  p & q & r \\  
+  0 & e & 0 \\  
+  0 & 0 & e 
+\end{bmatrix} ≜ Iₐ(e) ∈ Dₐ(\KA(X))_{uₐ}.\]
+We can define the derivative \(δₐ\) and residual \(ρₐ\) as follows:
+\[δₐ(e) ≜ r, \quad ρₐ(e) ≜ p + q.\]
+Then the following corollary can be derived simply from 
+the definition of \(Dₐ(\KA(X))_{uₐ}\).
+
+\begin{corollary}[decomposition]\label{the: decomposition of derivative and residual}
+  For all expressions \(e ∈ \KA(X)\), primitives \(a ∈ X\),
+  and word \(w ∈ ℒ_X\),
+  \[e = ρₐ(e) + a ⋅ δₐ(e) \text{ and } a ⋅ w ∉ L(ρₐ(e)).\]
+\end{corollary}
+
+\begin{theorem}[Soundness Property]
+  For a primitive \(a\) in a commutable set \(X\),
+  let the derivative on language \(δₐ\) defined as \(δₐ(l) ≜ \{s ∣ a ⋅ w ∈ l\}\),
+  the following diagram commute:
+  \[\begin{tikzcd}
+    \KA(X) \ar{r}{δₐ} \ar{d}{L} & \KA(X) \ar{d}{L} \\  
+    ℒ_X \ar{r}{δₐ} & ℒ_X 
+  \end{tikzcd}\]
+\end{theorem}
+
+\begin{proof}
+  Given any word \(w ∈ ℒ_X\) and in \(e ∈ \KA(X)\):
+  \begin{align*}
+    & s ∈ δₐ(L(e)) \\  
+    & ⟺ a ⋅ w ∈ L(e) & \text{by definition of language \(δₐ\)}\\  
+    & ⟺ a ⋅ w ∈ L(ρₐ(e) + a ⋅ δₐ(e)) & \text{\Cref{the: decomposition of derivative and residual}} \\  
+    & ⟺ a ⋅ w ∈ L(a ⋅ δₐ(e)) & \text{\(a ⋅ w ∉ L(ρₐ(e))\)}\\  
+    & ⟺ s ∈ L(δₐ(e)).
+  \end{align*}
+  Thus, for all \(e ∈ \KA(X)\), \(δₐ(L(e)) = L(δₐ(e))\), we have reached our conclusion.
+\end{proof}
+
+Finally, we prove a Galois connection that the derivative is expected to satisfy.
+
+\begin{lemma}[Basic Algebraic Properties]
+  Following basic algebraic properties are true,
+  for all primitive \(a\) and expressions \(e, e'\):
+  \begin{align*}
+    δₐ(a e) & = e \\
+    ρₐ(a e) & = 0 \\  
+    δₐ(ρₐ(e)) & = 0 \\
+    e ≥ e' & ⟹ δₐ(e) ≥ δₐ(e') \\  
+    e ≥ e' & ⟹ ρₐ(e) ≥ ρₐ(e') 
+  \end{align*}
+\end{lemma}
+
+\begin{proof}
+  We first compute \(Iₐ(a e)\):
+  \[Iₐ(a e) = Iₐ(a) ⋅ Iₐ(e) = 
+  \begin{bmatrix}
+    0 & 0 & 1 \\  
+    0 & a & 0 \\  
+    0 & 0 & a 
+  \end{bmatrix}
+  \begin{bmatrix}
+    p & q & r \\  
+    0 & e & 0 \\  
+    0 & 0 & e 
+  \end{bmatrix},
+  \]
+  for some expressions \(p, q, r ∈ \KA(X)\).
+  Then 
+  \[Iₐ(a e) = 
+  \begin{bmatrix}
+    0 & 0 & 1 \\  
+    0 & a & 0 \\  
+    0 & 0 & a 
+  \end{bmatrix}
+  \begin{bmatrix}
+    p & q & r \\  
+    0 & e & 0 \\  
+    0 & 0 & e 
+  \end{bmatrix}
+  = \begin{bmatrix}
+    0 & 0 & e \\  
+    0 & a e & 0 \\
+    0 & 0 & ae
+  \end{bmatrix}.\]
+  Therefore, we obtain the conclusion \(δₐ(a e) = e\) and \(ρₐ(a e) = 0\).
+
+  Notice that \(ρ(e) ≤ X_{∼ a}^* + X_{∼ a}^* X_{≁ a} X^*\),
+  therefore 
+  \begin{align*}
+    Iₐ(ρ(e)) & ≤ Iₐ(X_{∼ a}^* + X_{∼ a}^* X_{≁ a} X^*)\\ 
+    & = \begin{bmatrix}
+      X_{∼ a}^* & X_{∼ a}^* X_{≁ a} X^* & 0 \\  
+      0 & X_{∼ a}^* + X_{∼ a}^* X_{≁ a} X^* & 0 \\
+      0 & 0 & X_{∼ a}^* + X_{∼ a}^* X_{≁ a} X^*
+    \end{bmatrix}
+  \end{align*}
+  Therefore \(Iₐ(ρ(e)) ≤ 0\), and since \(0\) is the smallest element,
+  We obtain the conclusion \(Iₐ(ρ(e)) = 0\).
+
+  The monotonicity can be derived from the monotonicity of \(Iₐ\).
+  When \(e ≥ e'\), we have \(Iₐ(e) ≥ Iₐ(e')\). 
+  Recall that the ordering on matrices are component order,
+  since \(δₐ(e)\) and \(ρₐ(e)\) are 
+  either component of \(Iₐ(e)\) or the sum of components of \(Iₐ(e)\),
+  therefore \(δₐ(e) ≥ δₐ(e')\) and \(ρₐ(e) ≥ ρₐ(e')\).
+\end{proof}
+
+\begin{theorem}[Galois Connection]\label{the: Galois connection for derivative}
+  Given a commutative set \(X\), for all expression \(e, e' ∈ \KA(X)\) and primitive \(a ∈ X\),
+  \[a e ≤ e' ⟺ e ≤ δₐ(e').\]
+\end{theorem}
+
+\begin{proof}
+  We first show \(a e ≤ e' ⟺ e ≤ δₐ(e')\):
+  \(⟹\) direction can be proved by applying \(δₐ\) to both sides:
+  \[a e ≤ e' ⟹ δₐ(a e) ≤ δₐ(e') ⟹ e ≤ δₐ(e').\]
+  \(⟸\) direction proven by multiplying \(a\) on both sides:
+  \[e ≤ δₐ(e') ⟹ a e ≤ a δₐ(e') ⟹ a e ≤ a δₐ(e') ≤ e'.\]
+\end{proof}
+
+\subsection{Decidability And Completeness}
+
+In this section, we prove the completeness and decidability of the word inhabitance problem,
+by explicitly define an algorithm to check for word inhabitance.
+
+\begin{theorem}[Decidability and Completeness]\label{the: decidability and completeness of word inhabitant}
+  Given a word \(w ∈ \Word(X)\) and an expression \(e ∈ \KA(X)\),
+  we can define the following algorithm to test for inhabitants:
+  \begin{align*}
+    i & : \Word(X) × \KA(X) → 2 \\  
+    i & (ϵ, e) ≜ E(e) \\  
+    i & (a ⋅ w, e) ≜ i(w, δₐ(e))
+  \end{align*}
+  Such an algorithm will always terminate,
+  and it is sound:
+  \[w ∈ L(e) ⟺ i(w, e) = 1 ⟺ w ≤ e.\]
+\end{theorem}
+
+\begin{proof}
+  The algorithm \(i\) will terminate because both \(δₐ\) and \(E\)
+  can be computed by computing the interpretation \(Iₐ\) and \(I_E\).
+
+  We first show \(w ∈ L(e) ⟺ i(w, e)\) by induction on \(w\).
+  \begin{itemize}
+    \item If \(w = ϵ\), then \(ϵ ∈ L(e) ⟺ E(e) = 1\) by soundness of \(E\).
+    \item If \(w = a ⋅ w'\) then:
+    \begin{align*}
+      a ⋅ w' ∈ L(e) 
+      & ⟺ w' ∈ δₐ(L(e)) 
+        & \text{definition}\\  
+      & ⟺ w' ∈ L(δₐ(e)) 
+        & \text{soundness of \(δₐ\)} \\  
+      & ⟺ i(w, δₐ(e))
+        & \text{induction hypothesis}
+    \end{align*}
+  \end{itemize}
+
+  We then show \(i(w, e) = 1 ⟺ w ≤ e\) by induction on \(w\).
+  \begin{itemize}
+    \item If \(w = ϵ\), then \(i(ϵ, e) = E(e)\).
+      When \(E(e) = 1\), then \(1 = E(e) ≤ e\);  
+      When \(E(e) = 0\), then \(1 ≰ e\), 
+      because \(1 ≤ e\) is not true in the language interpretation.
+    \item If \(w = a ⋅ w'\) then:
+    \begin{align*}
+      a ⋅ w' ≤ e 
+      & ⟺ w' ≤ δₐ(e) 
+        & \text{\Cref{the: Galois connection for derivative}} \\  
+      & ⟺ i(w, δₐ(e))
+        & \text{induction hypothesis}
+    \end{align*}
+  \end{itemize}
+\end{proof}
+
+
+\subsection{Fundamental Theorem}
+
+Fundamental theorem is an important soundness condition 
+for the definition of derivative and empty word predicate,
+it also exhibits a strong connection between KA and automata~\cite{Silva_2010,Kozen_Silva_2020}.
+Because of the significance of the fundamental theorem,
+we decide to prove it for KA with atomic commutativity,
+despite it is not used in the rest of the paper.
+
+In order to show the fundamental theorem for KA with atomic commutativity,
+we will establish the relation between derivative and empty word predicate in KA 
+with their counterparts in KA with commutativity,
+and with this relation, we can show that fundamental theorem KA implies 
+the fundamental theorem in KA with commutativity
+
+Recall that for all commutable set \(X\), 
+we can construct a discrete commutable set \(X_≁\) 
+by replacing the commuting relation in \(X\) with the identity relation.
+Notice that \(\KA(X_≁)\) is a free KA, and 
+by \Cref{the: uniqueness of E and delta in free KA}, 
+derivative and empty word predicate is unique on free KAs.
+Since our definition of \(E\) and \(δₐ\) are sound, 
+therefore they are exactly the conventional \(E\) and \(δₐ\) when applied to a term 
+in the free KA.
+Therefore, the fundamental theorem holds for \(\KA(X_≁)\):
+\[∀ e_≁ ∈ \KA(X_≁), e_≁ = E(e_≁) + ∑_{a ∈ X} a ⋅ δₐ(e_≁).\]
+
+Finally, there is a canonical KA homomorphism from \(\KA(X_≁)\) to \(\KA(X)\),
+by lifting the following action on the primitives:
+\[[a]_∼ ≜ a.\]
+This KA homomorphism imposes the commutativity of \(X\) to the input expression, 
+and this homomorphism is surjective.
+
+\begin{lemma}
+  Consider a Kleene Algebra \(𝒦\) and an element \(t ∈ 𝒦\),
+  there is a homomorphism:
+  \begin{align*}
+    h & : Dₜ(𝒦) → M_2(𝒦) \\
+    h & (\begin{bmatrix}
+      p & q & r \\
+      0 & s & 0 \\
+      0 & 0 & s
+    \end{bmatrix}) = 
+    \begin{bmatrix}
+      p & r \\
+      0 & s
+    \end{bmatrix}
+  \end{align*}
+\end{lemma}
+
+\begin{proof}
+  Perseverance of identities and addition is trivial,
+  we will only check for perseverance of multiplication and star
+
+  The multiplication case:
+  \begin{align*}
+    & h(\begin{bmatrix}
+      p₁ & q₁ & r₁ \\
+      0 & s₁ & 0 \\  
+      0 & 0 & s₁
+    \end{bmatrix}
+    \begin{bmatrix}
+      p₂ & q₂ & r₂ \\
+      0 & s₂ & 0 \\  
+      0 & 0 & s₂
+    \end{bmatrix}) \\
+    ={} & h(\begin{bmatrix}
+      p₁ p₂ & p₁q₂ + q₁s₂ & p₁ r₂ + r₁ s₂ \\
+      0 & s₁ s₂ & 0 \\  
+      0 & 0 & s₁ s₂
+    \end{bmatrix}) \\
+    = {}& \begin{bmatrix}
+      p₁ p₂& p₁ r₂ + r₁ s₂ \\
+      0 & s₁ s₂ 
+    \end{bmatrix} \\
+    = {}& h(\begin{bmatrix}
+      p₁ & q₁ & r₁ \\
+      0 & s₁ & 0 \\  
+      0 & 0 & s₁
+    \end{bmatrix}) ⋅
+    h(\begin{bmatrix}
+      p₂ & q₂ & r₂ \\
+      0 & s₂ & 0 \\  
+      0 & 0 & s₂
+    \end{bmatrix}).
+  \end{align*}
+
+  The star case:
+  \begin{align*}
+    h(\begin{bmatrix}
+      p & q & r \\
+      0 & s & 0 \\  
+      0 & 0 & s
+    \end{bmatrix}^*)
+    & = 
+    h(\begin{bmatrix}
+      p^*  & p^*  q s^* & p^*  r s^* \\
+      0 & s^* & 0 \\  
+      0 & 0 & s^*
+    \end{bmatrix})\\
+    & = \begin{bmatrix}
+      p^* & p^*  r s^* \\
+      0 & s^* 
+    \end{bmatrix}
+    = h(\begin{bmatrix}
+      p & q & r \\
+      0 & s & 0 \\  
+      0 & 0 & s
+    \end{bmatrix})^*.
+  \end{align*}
+\end{proof}
+
+Since the derivative \(δₐ(e)\) is defined as the \(1, 3\) component of \(Iₐ(e)\),
+after we apply above homomorphism \(h\) to \(Iₐ(e)\),
+the derivative \(δₐ(e)\) becomes the \(1, 2\) component of the matrix:
+\[∀ e ∈ \KA(X), δₐ(e) = π_{1, 2} (h(Iₐ(e))).\]
+
+\begin{lemma}\label{the: lemma for fundamental thoerem}
+  Let \(X\) be a commutable set, for all non-commutativity expressions \(e_≁ ∈ \KA(X_≁)\):
+  \[E([e_≁]_∼) = [E(e_≁)]_∼, \quad δₐ([e_≁]_∼) ≥ [δₐ(e_≁)]_∼.\]
+\end{lemma}
+
+\begin{proof}
+  Consider the following interpretations 
+  \[I_E ∘ [-]_∼ \text{ and } [-]_∼ ∘ I_E: \KA(X_≁) → \KA(X).\]
+  Their actions coincide on the primitives:
+  \[∀ a ∈ X_≁,
+  I_E([a]_∼) = \begin{bmatrix}
+    0 & a \\ 
+    0 & a 
+  \end{bmatrix} = [E(a)]_∼.\]
+  Therefore, by \Cref{the: ordered of homomorphism is determined by order on the primitives},
+  \[∀ e_≁ ∈ \KA(X_≁), I_E([e_≁]_∼) = [I_E(e_≁)]_∼.\]
+  Since \(E\) is a component of \(I_E\),
+  \[E([e_≁]_∼) = [E(e_≁)]_∼.\]
+
+  The same can be done for derivatives. 
+  We consider the following interpretations:
+  \[h ∘ I_a ∘ [-]_∼ \text{ and } [-]_∼ ∘ h ∘ I_a: \KA(X_≁) → \KA(X).\]
+  Given a primitive \(b\), 
+  \begin{itemize}
+    \item if \(b = a\), then 
+      \[∀ b ∈ X_≁,
+      h(Iₐ([b]_∼)) = \begin{bmatrix}
+        0 & 1 \\ 
+        0 & b
+      \end{bmatrix} = [h(Iₐ(b))]_∼;\]
+    \item if \(b ≠ a\), then 
+      \[h ∘ Iₐ([b]_∼) = \begin{cases}
+        \begin{bmatrix}
+          0 & 0 \\ 
+          0 & b 
+        \end{bmatrix} & b ≁ a \text{ in \(X\)}\\
+        \begin{bmatrix}
+          b & 0 \\ 
+          0 & b 
+        \end{bmatrix} & b ∼ a \text{ in \(X\)}
+      \end{cases}\]
+      both of which are greater than 
+      \[[h(Iₐ(b))]_∼ = \begin{bmatrix}
+        0 & 0 \\ 
+        0 & b 
+      \end{bmatrix} \quad \text{because \(b ≁ a\) in \(X_≁\)}.\]
+  \end{itemize}
+  Therefore, for all primitive \(b ∈ X_{≁}\), \(h(Iₐ([b]_∼)) ≥ [h(Iₐ(b))]_∼\).
+  By \Cref{the: ordered of homomorphism is determined by order on the primitives}
+  \[∀ e_≁ ∈ \KA(X_≁), h ∘ Iₐ([e_≁]_∼) ≥ [h ∘ Iₐ(e_≁)]_∼.\]
+  Since \(δₐ\) is a component of \(h ∘ Iₐ\), 
+  \[δₐ([e_≁]_∼) ≥ [δₐ(e_≁)]_∼.\qedhere\]
+\end{proof}
+
+The above lemma state that the derivative for commutative expression in \(\KA(X)\)
+is always larger than their non-commutativity counterparts in \(\KA(X_≁)\).
+Since \(\KA(X_≁)\) is a free KA, 
+we can easily derive the fundamental theorem for \(\KA(X)\) 
+using its connection with \(\KA(X_≁)\).
+
+\begin{theorem}[Fundamental Thoerem]
+  For all \(e ∈ \KA(X)\), the following equality holds:
+  \[e = E(e) + ∑_{a ∈ X} a ⋅ δₐ(e)\]
+\end{theorem}
+
+\begin{proof}
+  We first show \(e ≥ E(e) + ∑_{a ∈ X} a ⋅ δₐ(e)\),
+  which is a direct consequence of decompositions in 
+  \cref{the: decomposition of derivative and residual,the: empty word decomposition}:
+  \begin{align*}
+    e & ≥ E(e),\\ 
+    e & ≥ a ⋅ δₐ(e), ∀ a ∈ X.
+  \end{align*}
+
+  We then show \(e ≤ E(e) + ∑_{a ∈ X} a ⋅ δₐ(e)\).
+  Since \([-]_∼\) is a surjective homomorphism, 
+  we consider \(e_≁ ∈ \KA(X_≁)\) s.t. \([e_≁]_∼ = e\).
+  Because \(\KA(X_≁)\) is a free KA, fundamental theorem holds for \(e_≁\):
+  \[e_≁ ≤ E(e_≁) + ∑_{a ∈ X} a ⋅ δₐ(e_≁).\]
+  We can apply the homomorphism \([-]_∼\) to both sides:
+  \[e ≤ [E(e_≁)]_∼ + ∑_{a ∈ X} a ⋅ [δₐ(e_≁)]_∼.\]
+  By \Cref{the: lemma for fundamental thoerem},
+  \begin{align*}
+    [E(e_≁)]_∼ & = E([e_≁]_∼) = E(e), \\  
+    [δₐ(e_≁)]_∼ & ≤ δₐ([e_≁]_∼) = δₐ(e).
+  \end{align*}
+  Thus, obtain the desired inequality:
+  \[e ≤ [E(e_≁)]_∼ + ∑_{a ∈ X} a ⋅ [δₐ(e_≁)]_∼ ≤ E(e) + ∑_{a ∈ X} a ⋅ δₐ(e).\]
+\end{proof}
+
+\section{Undecidability}
+
+In this section, we will show the undecidability result for general 
+Kleene Algebra equalities with atomic commutativity hypotheses.
+The undecidability result is obtained by using a proof to simulate 
+the execution of a two-counter machine. 
+From there, we can encode state reachability of terminating two-counter machines 
+into an KA inequality. Enabling us to carry out a diagonal argument,
+similar to the proof of undecidability of halting problem.
+
+\subsection{Encoding Two-Counter Machines}
+
+Counter machine is a well-studied machine~\cite{Minsky_1961,Minsky_1967,Lambek_1961},
+and it can simulate any Turing machine~\cite[Theorem 14.1-1]{Minsky_1967} with just two counters.
+In this paper, we only consider two-counter machines.
+A two-counter machine \(M ≜ (S, ŝ, ι)\) consists of a finite set of \emph{state} \(S\), 
+a start state \(ŝ ∈ S\), and each state is equipped with an instruction \(ι: S → I_S\),
+where instructions \(I_S\) is defined as follows:
+\begin{align*}
+  I_S & ≜ \{ \Inc(s, q) ∣ s ∈ \{1,2\}, q ∈ Q \} \\
+      & ∪ \{ \Dec(s, q) ∣ s ∈ \{1,2\}, q ∈ Q \} \\
+      & ∪ \{ \If(s, q₁, q₂) ∣ s ∈ \{1,2\}, q₁,q₂ ∈ Q \} \\
+      & ∪ \{ \Halt \}.
+\end{align*}
+Each instruction has a semantics, we define \(S_⊥ ≜ S + \{⊥\}\):
+\begin{align*}
+  ⟦i⟧ & : ℕ × ℕ → S_⊥ × ℕ × ℕ \\
+  ⟦\Inc(1,s)⟧&(n, m) ≜ (s,n+1,m) \\
+  ⟦\Inc(2,s)⟧&(n, m) ≜ (s,n,m+1) \\
+  ⟦\Dec(1,s)⟧&(n, m) ≜ (s,\max(n-1,0),m) \\
+  ⟦\Dec(2,s)⟧&(n, m) ≜ (s,n,\max(m-1,0)) \\
+  ⟦\If(1,q₁,q₂)⟧&(n, m) ≜ 
+    \begin{cases}
+      (s₁,n,m) & \text{if $n = 0$} \\
+      (s₂,n,m) & \text{if $n ≠ 0$}
+    \end{cases} \\
+  ⟦\If(2,s₁,s₂)⟧&(n, m) ≜ 
+    \begin{cases}
+      (s₁,n,m) & \text{if $m = 0$} \\
+      (s₂,n,m) & \text{if $m ≠ 0$}
+    \end{cases} \\
+  ⟦\Halt⟧&(n,m) ≜ (⊥, n, m).
+\end{align*}
+
+From the semantics of the instruction, 
+we can define a transition relation for any machine \(M\):
+\begin{align*}
+  R_M & ∈ (S × ℕ × ℕ) × (S_⊥ × ℕ × ℕ) \\  
+  R_M & ≜ \{((s, m, n), ⟦ι(s)⟧(m, n)) ∣ s ∈ S; m, n ∈ ℕ\}.
+\end{align*}
+Note that \(R_M\) is a functional relation, 
+that is for all input \((s, m, n) ∈ (S × ℕ × ℕ)\) there exists 
+a unique element in \(S_⊥ × ℕ × ℕ\) relating to it.
+We call the elements in \(S_⊥ × ℕ × ℕ\) \emph{configurations} of the machine \(M\).
+Let \(R_M^*\) be the reflexive transition closure for \(R_M\),
+and we write \(c →^* c'\) if \((c, c') ∈ R_M^*\).
+We say a state \(s ∈ S\) is \emph{reachable} from input \((n, m)\)
+when there exists \(n', m' ∈ ℕ\), s.t. \((ŝ, m, n) →^* (s, n', m')\).
+
+Finally, we can consider a machine as a partial function,
+we say that \(M(m, n)\) returns \((m', n')\) when \((ŝ, m, n) →^* (⊥, n', m')\).
+Since complex data structure can be encoded as a pair of numbers 
+using the classical Gödel numbers,
+we will abuse the notation to say \(M(i)\) returns \(o\)
+for input \(i\) and output \(o\) of arbitrary type, not just pairs of numbers.
+
+Given a two-counter machine with finite state set \(S\),
+We define the set \(Σ = S + \{⊥, a, b\}\) and the following commutable set \(Σ̈\):
+\begin{itemize}
+  \item the carrier is \(⟨Σ| ∪ |Σ⟩\), 
+    where \[⟨Σ| ≜ \{σₗ ∣ σ ∈ Σ\} \text{ and } |Σ⟩ ≜ \{σᵣ ∣ σ ∈ Σ\};\]
+  \item the commuting relation is \(⟨σ| ∼ |σ'⟩\), 
+    where \(σ, σ' ∈ Σ\).
+\end{itemize}
+We call primitives in \(⟨Σ|\) \emph{left primitives} and 
+primitives in \(|Σ⟩\) \emph{right primitives}.
+This definition of commutativity is similar to BiKA~\cite{Antonopoulos_Koskinen_Le_Nagasamudram_Naumann_Ngo_2022},
+however instead of using an underlying KA with two homomorphisms,
+we simply impose the commutativity onto the primitives.
+We consider \(Σ\) as a discrete commutable set,
+therefore we can define the free Kleene algebra \(\KA(Σ)\) and 
+the free KA with atomic commutative \(\KA(Σ̈)\).
+
+There are three function we can define from \(Σ\) to \(\Word(Σ̈)\):
+\begin{align*}
+  ⟨-|: & Σ → \Word(Σ̈) &  
+  |-⟩: & Σ → \Word(Σ̈) & 
+  ⟨-⟩: & Σ → \Word(Σ̈) \\  
+  ⟨σ| & ≜ σₗ & 
+  |σ⟩ & ≜ σᵣ & 
+  ⟨σ⟩ & ≜ σₗ ⋅ σᵣ.
+\end{align*}
+
+These maps can be lifted to monoidal homomorphism on words \(\Word(Σ̈) → \Word(Σ̈)\):
+\(⟨w|\) is the word \(w\) with all primitives replaced by corresponding left primitives
+and \(|w⟩\) is the word \(w\) with all primitives replaced by corresponding right primitives.
+
+By composing \(⟨-|, |-⟩, ⟨-⟩\) with the natural monoidal embedding \(\Word(Σ̈) → \KA(Σ̈)\), 
+where the monoidal operation of \(\KA(Σ̈)\) is multiplication with identity \(1\),
+we can obtain functions in \(Σ → \KA(Σ̈)\).
+Similarly, these maps can be lifted to KA homomorphisms \(\KA(Σ) → \KA(Σ̈)\):
+\begin{itemize}
+  \item \(⟨e|\) and \(|e⟩\) will replace all the primitives in \(e\)
+    with their respective left primitives or right primitives.
+  \item \(⟨e⟩\) will produce two expression with \emph{matching} left and right primitives. 
+\end{itemize}
+We will abbreviate the multiplication \(⟨ e₁ | ⋅ | e₂ ⟩\) as \(⟨ e₁ | e₂ ⟩\).
+
+\begin{example}
+  Consider \(a ∈ Σ\), then \(⟨a^*⟩ ∈ \KA(Σ̈)\) and 
+  \[L(⟨a^*⟩) = \{⟨a^n | a^n ⟩ ∣ n ∈ ℕ\}.\]
+  More generally, given an expression \(e ∈ \KA(Σ)\), 
+  then \(⟨e⟩ ∈ \KA(Σ̈)\) and 
+  \[L(⟨e⟩) = \{ ⟨w | w⟩ ∣ w ∈ L(e)\}.\]
+\end{example}
+
+For a word in \(\Word(Σ̈)\) we can always canonically separate it into 
+its left and right components,
+this separation gives a normal form for all the words in \(\Word(Σ̈)\).
+
+\begin{definition}
+  For a word \(w\), the \emph{left component} \(⟨wₗ|\) is the word formed 
+  by all the left primitives in its original order,
+  and the \emph{right component} \(|wᵣ⟩\) is the word formed 
+  by all the right primitives in its original order.
+  The concatenation of the left component and the right component 
+  is equal to the original word.
+  Therefore, for all word \(w, w' ∈ \Word(Σ̈)\),
+  \[w = w' ⟺ wᵣ = wᵣ' ∧ wₗ = wₗ'.\]
+\end{definition}
+
+\begin{example}
+  Consider the following word \[w ≜ ⟨ s | s' ⟩ ⋅ ⟨aᵐ bⁿ | a^{m+1} bⁿ ⟩,\]
+  then its left component \(⟨wₗ| = ⟨s aᵐ bⁿ|\) 
+  and the right component is \(|wᵣ⟩ = |s' a^{m+1} bⁿ⟩\).
+  The concatenation of right and left component is equal to the original word:
+  \[⟨wₗ | wᵣ ⟩ = ⟨s aᵐ bⁿ|s' a^{m+1} bⁿ⟩ = ⟨ s | s' ⟩ ⋅ ⟨aᵐ bⁿ | a^{m+1} bⁿ ⟩.\]
+\end{example}
+
+We first show couple useful lemmas about \(\KA(Σ)\) and \(\KA(Σ̈)\):
+\begin{lemma}
+  We first prove several lemmas that will be useful in our derivation.
+  For all \(e, e₁, e₂, e₁', e₂' ∈ \KA(Σ)\) 
+  \begin{align}
+    ⟨ e₁ | e₂ ⟩ & = | e₂ ⟩ ⋅ ⟨ e₁ |; \\
+    ⟨ e₁ | e₂ ⟩ ≤ ⟨ e₁' | e₂' ⟩ & ⟺ e₁ ≤ e₁' ∧ e₂ ≤ e₂'; 
+      \label[ineq]{the: left right order decompose}\\
+    ⟨e^*⟩ & ≤ ⟨e^*|e^*⟩. \label[ineq]{the: matching star less than left right star}
+  \end{align}
+\end{lemma}
+
+\begin{proof}
+  \(⟨ e₁ | e₂ ⟩ = | e₂ ⟩ ⋅ ⟨ e₁ |\) can be derived by induction on 
+  structure of \(e₁\), the only non-trivial case is the star case,
+  which can be proven using the induction rule.
+
+  The equivalence
+  \[⟨ e₁ | e₂ ⟩ ≤ ⟨ e₁' | e₂' ⟩ ⟺ e₁ ≤ e₁' ∧ e₂ ≤ e₂'\]
+  can be derived as follows:
+  The \(⟸\) part can be shown by multiplication preserves order.
+  The \(⟹\) part can be shown by looking at the language interpretation:
+  if \(L(e₁) ≰ L(e₁')\) or \(L(e₂) ≰ L(e₂')\),
+  then we can derive
+  \[L(⟨ e₁ | e₂ ⟩) ≰ L(⟨ e₁' | e₂' ⟩)\]
+
+  \(⟨e^*⟩ ≤ ⟨e^*|e^*⟩\) can be shown by induction rule,
+  because
+  \begin{align*}
+    ⟨e^*|e^*⟩ & ≥ 1,\\  
+    ⟨e^*|e^*⟩ & ≥ ⟨e e^*| e e^*⟩ = ⟨e|e⟩ ⋅ ⟨e^*|e^*⟩ = ⟨e⟩ ⋅ ⟨e^*|e^*⟩,  
+  \end{align*}
+  by induction rule \(⟨e^*|e^*⟩ ≥ ⟨e^*⟩\).
+\end{proof}
+
+
+We can encode components of the machine as Kleene Algebra terms.
+\begin{definition}\label{def:instruction-interpretation}
+  For simplicity, we will implicitly coerce all the configuration 
+  into an expression in \(\KA(Σ)\) in the following way:
+  for \(s ∈ S_⊥\),
+  \begin{align*}
+    (s, m, n) & ↦ s aᵐ bⁿ.
+  \end{align*}
+
+  We interpret each instruction $i ∈ I_S$ as an element $[i] ∈ \KA(Σ̈)$ as follows.
+  \begin{align*}
+    [\Inc(1,s)] & ≜ |s⟩ ⟨a^*⟩ |a⟩ ⟨b^*⟩ \\
+    [\Inc(2,s)] & ≜ |s⟩⟨a^* b^*⟩|b⟩ \\
+    [\Dec(1,s)] & ≜ |s⟩⟨a^*⟩⟨a|⟨b^*⟩ + |s⟩⟨b^*⟩ \\
+    [\Dec(2,s)] & ≜ |s⟩⟨a^* b^*⟩⟨b| + |s⟩⟨a^*⟩ \\
+    [\If(1,s₁,s₂)] & ≜ |s₁⟩⟨b^*⟩ + |s₂⟩⟨a⁺⟩⟨b^*⟩ \\
+    [\If(2,s₁,s₂)] & ≜ |s₁⟩⟨a^*⟩ + |s₂⟩⟨a^*⟩⟨b⟩⁺ \\
+    [\Halt] & ≜ |⊥⟩ ⟨a^* b^*⟩.
+  \end{align*}
+  The transition relation is encoded as \(R_M ∈ \KA(Σ̈)\):
+  \[R_M ≜ ∑_{s ∈ S} ⟨s| ⋅ [ι(s)].\]
+\end{definition}
+
+The reason for such encoding is apparent when we look the language interpretation:
+\begin{corollary}[Language Soundness]\label{the: language encoding soundness of machine}
+  Given a machine \(M ≜ (S, ŝ, ι)\), \(c ∈ S × ℕ × ℕ\), and \(c' ∈ S_⊥ × ℕ × ℕ\), 
+  the following equivalence holds
+  \begin{align}
+    ⟦i⟧(m, n) = c' & ⟺ ⟨aᵐ bⁿ | c'⟩ ∈ L([i]);\label[equiv]{the: instruction language soundness}\\
+    c → c' & ⟺ ⟨c | c'⟩ ∈ L(R_M).\label[equiv]{the: transition language soundness}
+  \end{align}
+\end{corollary}
+
+\begin{proof}
+  The equivalence
+  \[⟦i⟧(m, n) = c' ⟺ ⟨aᵐ bⁿ | c' ⟩ ∈ L([i])\]
+  can be shown by looking at each case of instruction \(i\), 
+  and explicitly compute the language model for each instruction.
+
+  Therefore,
+  \begin{align*}
+    & (s, m, n) → (s', m', n') \\
+    & ⟺ (s', m', n') = ⟦ι(s)⟧(m, n) \\
+    & ⟺ ⟨aᵐ bⁿ | s' a^{m'} b^{n'} ⟩ ∈ L([ι(s)]) \\  
+    & ⟺ ⟨ s aᵐ bⁿ | s' a^{m'} b^{n'} ⟩ ∈ L(⟨s| ⋅ [ι(s)]) \\  
+    & ⟺ ⟨ s aᵐ bⁿ | s' a^{m'} b^{n'} ⟩ ∈ L(R_M). \qedhere
+  \end{align*}
+\end{proof}
+
+\begin{corollary}\label{the: transition encoding is functional}
+  Because the transition relation of any machine \(M = (S, ŝ, ι)\) is functional,
+  therefore for all word \(w ∈ L(S a^* b^*)\), 
+  there exists a word \(w' ∈ L(S_⊥ a^* b^*)\)
+  s.t. \(⟨w | w'⟩ ∈ L(R_M)\).
+\end{corollary}
+
+
+\subsection{From Reachability to Undecidability}
+
+Our undecidability result relies on an equivalence between provability of 
+a KA inequality and state reachability in a certain kind of machine.
+In order to obtain such equivalence,
+we will start with the provability of a single transition.
+
+We will first define two useful terms.
+For a machine \(M ≜ (S, ŝ, ι)\), and a subset of states \(S' ⊆ S\), 
+we can define all the configuration for \(S'\) including termination:
+\begin{align*}
+  C_{S'} & ∈ \KA(Σ) \\
+  C_{S'} & ≜ S'_⊥ a^*b^*.
+\end{align*}
+And the term \(N_S\) representing left-right configuration mismatch:
+\begin{align*}
+  N_S & ∈ \KA(Σ̈) \\
+  N_S & ≜ ∑_{s ≠ s' ∈ S} ⟨s| s'⟩ (⟨a+b|+|a+b⟩)^* & \text{state mismatch} \\
+    & + ⟨S⟩ ⟨a^*⟩ (⟨a|⁺ + |a⟩⁺) ⟨b^* | b^*⟩ & \text{counter \(a\) mismatch} \\  
+    & + ⟨S⟩ ⟨a^* b^*⟩ (⟨b|⁺ + |b⟩⁺) & \text{counter \(b\) mismatch} \\
+\end{align*}
+
+And we can use these terms to bound the encoding of transition \(R_M\):
+\begin{lemma}
+  For all instructions \(i ∈ I_S\) and transition \(R_M ∈ \KA(Σ̈)\),
+  let \(S\) be the state set of \(M\):
+  \begin{align}
+    [i] & ≤ ⟨a^* b^* | C_S⟩ = ⟨a^* b^* | S_⊥ ⋅ a^* b^*⟩; \label[ineq]{the: upper bound encoding instruction}\\
+    R_M & ≤ ⟨C_S ∣ C_S⟩ = ⟨S_⊥ ⋅ a^* b^* | S_⊥ ⋅ a^* b^*⟩. \label[ineq]{the: upper bound encoding transition}
+  \end{align}
+\end{lemma}
+
+\begin{proof}
+  The first inequality can be proven by looking at each case of \(i\),
+  and apply \Cref{the: matching star less than left right star}
+  when necessary.
+
+  The second inequality can be proven by unfolding the definition of \(R_M\):
+  \begin{align*}
+    R_M & = ∑_{s ∈ S} ⟨s| ⋅ [ι(s)] \\
+    & ≤ ∑_{s ∈ S} ⟨s| ⋅ ⟨a^* b^* | S_⊥ ⋅ a^* b^*⟩ 
+      & \text{by \Cref{the: upper bound encoding instruction}}\\
+    & ≤ ⟨S ⋅ a^* b^* | S_⊥ ⋅ a^* b^*⟩ ≤ ⟨C_S ∣ C_S⟩. 
+  \end{align*}
+\end{proof}
+
+With the above tools in place, 
+we will establish the connection of provability and a single transition.
+\begin{theorem}[provability of single transition]\label{the: single step transition soundness}
+  In any machine \(M\), \((s, m, n) → (s', m', n')\) 
+  if and only if the following inequality is provable:
+  \[| s aᵐ bⁿ ⟩ R_M ≤ ⟨C_S⟩ ⋅ |s' a^{m'} b^{n'}⟩ + N_S ⋅ |C_{S}⟩.\]
+\end{theorem}
+
+\begin{proof}
+  To prove the \(⟹\) direction, 
+  we will first unfold definition of the left-hand side:
+  \begin{align*}
+    & | s aᵐ bⁿ ⟩ R_M \\
+    & = | s aᵐ bⁿ ⟩ ⋅ (∑_{s₁ ∈ S} ⟨s₁| ⋅ [ι(s₁)]) \\   
+    & = ∑_{s₁ ∈ S} | s aᵐ bⁿ ⟩ ⋅ ⟨s₁| ⋅ [ι(s₁)] \\  
+    & = ⟨s| s aᵐ bⁿ ⟩ ⋅ [ι(s)] + ∑_{s₁ ≠ s} ⟨s₁| s aᵐ bⁿ ⟩ ⋅ [ι(s₁)].
+  \end{align*}
+  It suffices to show the following inequalities:
+  \begin{align*}
+    ⟨s| s aᵐ bⁿ ⟩ ⋅ [ι(s)] & ≤ ⟨C_S⟩ |s' a^{m'} b^{n'}⟩ + N_S |C_S⟩; \\  
+    ∑_{s₁ ≠ s} ⟨s₁| s aᵐ bⁿ ⟩ ⋅ [ι(s₁)] & 
+      ≤ ⟨C_S⟩ |s' a^{m'} b^{n'}⟩ + N_S |C_S⟩.
+  \end{align*}
+
+  We show the second inequality first:
+  \begin{align*}
+    & ∑_{s₁ ≠ s} ⟨s₁| s aᵐ bⁿ ⟩ ⋅ [ι(s₁)] \\   
+    & ≤ ∑_{s₁ ≠ s} ⟨s₁| s aᵐ bⁿ ⟩ ⋅ ⟨a^* b^*|C_S⟩ \\  
+    & ≤ ∑_{s ≠ s' ∈ S} ⟨s|s'⟩ (⟨a+b|+|a+b⟩)^* |C_S⟩\\
+    & ≤ N_S |C_S⟩ ≤ ⟨C_S⟩ |s' a^{m'} b^{n'}⟩ + N_S |C_S⟩,
+  \end{align*}
+
+  To show the first inequality:
+  \[⟨s| s aᵐ bⁿ ⟩ ⋅ [ι(s)] ≤ ⟨C_S⟩ |s' a^{m'} b^{n'}⟩ + N_S |C_S⟩.\] 
+  We need to look at all the cases for \(ι(s)\),
+  we show the \(\If(1, s)\) case as examples:
+  \begin{itemize}
+    \item If \(ι(s) = \If(1, s₁', s₂')\) and \(m = 0\),
+      then \((s, 0, n) → (s₁', 0, n)\):
+      \begin{align*}
+        & ⟨s | s bⁿ⟩ ⋅ [ι(s)] \\
+        & = ⟨s |s bⁿ⟩ ⋅ (|s₁'⟩ ⟨b^*⟩ + |s₂'⟩ ⟨a⁺⟩⟨b^*⟩) \\[5px]
+        & = ⟨s |s bⁿ⟩ ⋅ |s₁'⟩ ⋅ (∑_{i ≤ n} ⟨bⁱ⟩ + ⟨bⁿ⟩ ⋅ ⟨b⁺⟩) \\
+        & \qquad + ⟨s | s bⁿ⟩ ⋅ |s₂'⟩ ⋅ ⟨a⁺⟩⟨b^*⟩ \\[5px]
+        & = (∑_{i < n} ⟨s bⁱ|s bⁿ⟩ |s₁' bⁱ⟩) 
+          + ⟨ s bⁿ | s bⁿ ⟩ ⋅ |s₁' bⁿ ⟩ \\
+        & \qquad + ⟨ s bⁿ b | s bⁿ⟩ |s₁' bⁿ b⟩⟨b^*⟩ \\  
+        & \qquad + ⟨s a | s bⁿ⟩ ⋅ |s₂' a⟩ ⋅ ⟨a^* b^*⟩
+      \end{align*}
+      Notice:
+      \begin{align*}
+        ∑_{i < n} ⟨s bⁱ|s bⁿ⟩ |s₁' bⁱ⟩ & ≤ ⟨S⟩ ⟨a^* b^*⟩ |b⁺⟩ ⋅ |C_S⟩ ≤ N_S ⋅ |C_S⟩; \\
+        ⟨ s bⁿ | s bⁿ ⟩ ⋅ |s₁' bⁿ ⟩ & ≤ ⟨C_S⟩ ⋅ |s₁' bⁿ⟩;\\
+        ⟨ s bⁿ b | s bⁿ ⟩ |s₁' bⁿ b⟩⟨b^*⟩ 
+            & ≤ ⟨ s bⁿ b | s bⁿ ⟩ |s₁' bⁿ b⟩⟨b^* | b^*⟩ \\  
+            & ≤ ⟨ s bⁿ b b^*| s bⁿ ⟩ |s₁' bⁿ b b^*⟩ \\  
+            & ≤ ⟨S⟩ ⟨a^* b^*⟩ ⟨b⁺| ⋅ |C_S⟩ ≤ N_S ⋅ |C_S⟩; \\  
+        ⟨s a | s bⁿ⟩ ⋅ |s₂' a⟩ ⋅ ⟨a^* b^*⟩ 
+            & ≤ ⟨s a | s bⁿ⟩ ⋅ |s₂' a⟩ ⋅ ⟨a^* | a^*⟩⟨b^* | b^*⟩ \\  
+            & ≤ ⟨s a a^* b^*| s bⁿ⟩ ⋅ |s₂' a b^* a^*⟩ \\  
+            & ≤ ⟨S⟩ ⟨a^*⟩ ⟨a|⁺ ⟨b^* | b^*⟩ ⋅ |C_S⟩ \\
+            & ≤ N_S ⋅ |C_S⟩.
+      \end{align*}
+      Thus, we obtain the inequality we desire:
+      \[| s aᵐ bⁿ ⟩ ⋅ ⟨s| ⋅ [ι(s)] ≤ ⟨C_S⟩ ⋅ |s₁' bⁿ⟩ + N_S |C_S⟩.\]
+    \item If \(ι(s) = \If(1, s₁', s₂')\) and \(m ≠ 0\),
+      then \((s, m, n) → (s₂', m, n)\), and the proof is similar to above:
+      \begin{align*}
+        & ⟨s|s aᵐ bⁿ⟩ ⋅ [ι(s)] \\
+        & = ⟨s|s aᵐ bⁿ⟩ ⋅ (|s₁'⟩ ⟨b^*⟩ + |s₂'⟩ ⟨a⁺b^*⟩) \\[5px]
+        & = ⟨s |s aᵐ bⁿ⟩ ⋅ |s₁'⟩ ⟨b^*⟩ \\
+        & \qquad + ⟨s | s aᵐ bⁿ⟩ ⋅ |s₂'⟩ ⋅ 
+            (∑_{i ≤ m, j ≤ n}⟨aⁱ bʲ⟩ + ⟨aᵐ a⁺ bⁿ b⁺⟩) \\[5px]
+        & = ⟨s |s aᵐ bⁿ⟩ ⋅ |s₁'⟩ ⟨b^*⟩ \\
+        & \qquad + (∑_{i < m, j ≤ n} ⟨s aⁱ bʲ| s aᵐ bⁿ⟩ ⋅ |s₂' aⁱ bʲ⟩) \\  
+        & \qquad + (∑_{i = m, j ≤ n} ⟨s aⁱ bʲ| s aᵐ bⁿ⟩ ⋅ |s₂'aⁱ bʲ⟩) \\  
+        & \qquad + ⟨s aᵐ bⁿ| s aᵐ bⁿ⟩ ⋅ |s₂'aᵐ bⁿ⟩ \\
+        & \qquad + ⟨s aᵐ a⁺ bⁿ b⁺|s aᵐ bⁿ⟩ ⋅ |s₁' aᵐ a⁺ bⁿ b⁺⟩
+      \end{align*}
+      Then we obtain the following inequality
+      \begin{align*}
+        ⟨s |s aᵐ bⁿ⟩ ⋅ |s₁'⟩ ⟨b^*⟩ 
+          & ≤ ⟨s b^* |s aᵐ bⁿ⟩ ⋅ |s₁' b^*⟩ \\
+          & ≤ ⟨S⟩ ⟨a^*⟩ |a⟩⁺ ⟨b^* | b^*⟩ ⋅ |C_S⟩ \\  
+          & ≤ N_S |C_S⟩; \\ 
+        (∑_{i < m, j ≤ n} ⟨s aⁱ bʲ| s aᵐ bⁿ⟩ ⋅ |s₂' aⁱ bʲ⟩) 
+          & ≤ ⟨S⟩ ⟨a^*⟩ |a⟩⁺ ⟨b^* | b^*⟩ ⋅ |C_S⟩ \\  
+          & ≤ N_S |C_S⟩; \\
+        (∑_{i = m, j ≤ n} ⟨s aⁱ bʲ| s aᵐ bⁿ⟩ ⋅ |s₂'aⁱ bʲ⟩)
+          & ≤ ⟨S⟩ ⟨a^* b^*⟩ |b⟩⁺ ⋅ |C_S⟩\\  
+          & ≤ N_S |C_S⟩; \\  
+        ⟨s aᵐ bⁿ| s aᵐ bⁿ⟩ ⋅ |s₂'aᵐ bⁿ⟩ 
+          & ≤ ⟨C_S⟩ ⋅ |s₂' aᵐ bⁿ⟩;  \\
+        ⟨s aᵐ a⁺ bⁿ b⁺|s aᵐ bⁿ⟩ ⋅ |s₁' aᵐ a⁺ bⁿ b⁺⟩
+          & ≤ ⟨S⟩ ⟨a^*⟩ |a⟩⁺ ⟨b^* | b^*⟩ ⋅ |C_S⟩ \\  
+          & ≤ N_S |C_S⟩ 
+        \end{align*}
+      Thus, we obtain the inequality we desire:
+      \[| s aᵐ bⁿ ⟩ ⋅ ⟨s| ⋅ [ι(s)] ≤ ⟨C_S⟩ ⋅ |s₂' aᵐ bⁿ⟩ + N_S |C_S⟩.\]
+  \end{itemize}
+
+  The \(⟸\) direction can be shown by looking at the language model.
+  If the inequality holds, then the language interpretation holds:
+  \[| s aᵐ bⁿ ⟩ L(R_M) ⊆ L(⟨C_S⟩) ⋅ |s' a^{m'} b^{n'}⟩ + L(N_S) ⋅ L(|C_{S}⟩).\]
+
+  By \Cref{the: transition encoding is functional},
+  there exists a word \(w ∈ L(R_M)\) s.t. its left component is \(⟨ s aᵐ bⁿ |\);
+  we write the right component of \(w\) as \(|wᵣ⟩\).
+  By \Cref{the: decidability and completeness of word inhabitant}, \(w ≤ R_M\); and
+  by \Cref{the: upper bound encoding transition,the: left right order decompose},
+  \[⟨ s aᵐ bⁿ | wᵣ⟩ ≤ R_M ≤ ⟨C_S|C_S⟩ ⟹ wᵣ ≤ C_S.\]
+  Therefore, \(wᵣ ∈ L(C_S)\) and by the definition of \(L(N_S) ⋅ L(|C_{S}⟩)\),
+  \[| s aᵐ bⁿ ⟩ ⋅ ⟨ s aᵐ bⁿ | wᵣ ⟩ = ⟨ s aᵐ bⁿ | s aᵐ bⁿ ⟩ ⋅ | wᵣ ⟩ ∉ L(N_S) ⋅ L(|C_{S}⟩).\]
+
+  Because of the language inclusion
+  \[| s aᵐ bⁿ ⟩ L(R_M) ⊆ L(⟨C_S⟩) ⋅ |s' a^{m'} b^{n'}⟩ + L(N_S) ⋅ L(|C_{S}⟩),\]
+  we have
+  \[⟨ s aᵐ bⁿ | s aᵐ bⁿ ⟩ ⋅ | wᵣ ⟩ ∈ L(⟨C_S⟩) ⋅ |s' a^{m'} b^{n'}⟩\]
+  therefore \(wᵣ = s' a^{m'} b^{n'}\), and by \Cref{the: transition language soundness}:
+  \[w = ⟨ s aᵐ bⁿ | s' a^{m'} b^{n'}⟩ ∈ R_M  
+  ⟹ (s, m, n) → (s', m', n').\]
+\end{proof}
+
+We can further extend our previous result to establish a connection 
+between provability and state reachability in certain type of machines. 
+This result will be the core of our diagonal argument.
+
+\begin{theorem}
+  For a machine \(M ≜ (S, ŝ, ι)\) and an input \((m, n)\), 
+  if the set of reachable configurations from the input is finite,
+  then a set \(S' ⊆ S\) contains all the reachable states from input \((m, n)\) 
+  if and only if the following inequality is provable:
+  \begin{align}
+    |ŝ aⁿ bᵐ⟩ R_M^* ≤ ⟨C_S^*⟩ |C_{S'}⟩ + ⟨C_S^*⟩ N_S ⟨C_S^* | C_S^*⟩.
+    \label[ineq]{ineq: reachability inequality}
+  \end{align}
+\end{theorem}
+\begin{proof}
+  The \(⟹\) direction.
+  We define the following term:
+  \[\KA(Σ) ∋ Cᵣ ≜ ∑ \{cᵣ ∣ \text{\(cᵣ\) is reachable}\}.\]
+  \(Cᵣ\) is well-defined because there are only finitely many reachable configurations.
+  By \Cref{the: single step transition soundness}, 
+  assume \(cᵣ → cᵣ'\), we have the following inequality:
+  \begin{align*}
+    |cᵣ⟩ R_M 
+    & ≤ ⟨C_S⟩ |cᵣ'⟩ + N_S |C_S⟩ \\ 
+    & ≤ ⟨C_S⟩ |Cᵣ⟩ + N_S |C_S⟩ & \text{\(cᵣ'\) is reachable}
+  \end{align*}
+  Since the above inequality is true for every reachable configuration \(cᵣ\),
+  then the following inequality is true:
+  \[|Cᵣ⟩ R_M  = ∑_{cᵣ} |cᵣ⟩ R_M ≤ ⟨C_S⟩ |Cᵣ⟩ + N_S |C_S⟩.\]
+
+  To show provability of \Cref{ineq: reachability inequality}, 
+  we will prove a stronger inequality:
+  \[|ŝ aⁿ bᵐ⟩ R_M^* ≤ ⟨C_S^*⟩ |Cᵣ⟩ + ⟨C_S^*⟩ N_S ⟨C_S^* | C_S^*⟩.\]
+  With \Cref{the: single step transition soundness,the: upper bound encoding transition},
+  we can derive the following two inequality:
+  \begin{align*}
+    ⟨C_S^*⟩ |Cᵣ⟩ R_M 
+      & ≤ ⟨C_S^*⟩ ⟨C_S⟩ |Cᵣ⟩ + ⟨C_S^*⟩ N_S |C_S⟩ \\
+      & ≤ ⟨C_S^*⟩ |Cᵣ⟩ + ⟨C_S^*⟩ N_S ⟨C_S^* | C_S^*⟩ \\
+    ⟨C_S^*⟩ N_S ⟨C_S^* | C_S^*⟩ R_M
+      & ≤ ⟨C_S^*⟩ N_S ⟨C_S^* | C_S^*⟩ ⟨C_S | C_S⟩ \\
+      & ≤ ⟨C_S^*⟩ N_S ⟨C_S^* | C_S^*⟩ \\  
+      & ≤ ⟨C_S^*⟩ |Cᵣ⟩ + ⟨C_S^*⟩ N_S ⟨C_S^* | C_S^*⟩.
+  \end{align*}
+  Therefore,
+  \begin{align*}
+    & (⟨C_S^*⟩ |Cᵣ⟩ + ⟨C_S^*⟩ N_S ⟨C_S^* | C_S^*⟩) R_M  \\
+      & \qquad ≤ ⟨C_S^*⟩ |Cᵣ⟩ + ⟨C_S^*⟩ N_S ⟨C_S^* | C_S^*⟩; \\
+    & |ŝ aⁿ bᵐ⟩ ≤ |Cᵣ⟩ \\  
+    & \qquad ≤ ⟨C_S^*⟩ |Cᵣ⟩ + ⟨C_S^*⟩ N_S ⟨C_S^* | C_S^*⟩.
+  \end{align*}
+  By induction rule, we have the desired inequality:
+  \begin{align*}
+    |ŝ aⁿ bᵐ⟩ R_M^* 
+    & ≤ ⟨C_S^*⟩ |Cᵣ⟩ + ⟨C_S^*⟩ N_S ⟨C_S^* | C_S^*⟩ \\  
+    & ≤ ⟨C_S^*⟩ |C_{S'}⟩ + ⟨C_S^*⟩ N_S ⟨C_S^* | C_S^*⟩.
+  \end{align*}
+
+  The \(⟸\) direction.
+  We will first prove a small lemma: 
+  consider a configuration \(cᵣ\) that is reachable from input \((m, n)\),
+  we will show there exists a word \(w ∈ L(⟨C_S^*⟩)\) s.t.
+  \[w |cᵣ⟩ ∈ L(|ŝ aⁿ bᵐ⟩) L(R_M)^*.\]
+  The theorem above is shown by induction on the number of steps to reach \(cᵣ\):
+  \begin{itemize}
+    \item If \(cᵣ\) is reached in 0 steps, 
+      then \[cᵣ = (ŝ, m, n).\]
+      In this case, \(w = ϵ\) and 
+      \[|cᵣ⟩ = |ŝ aⁿ bᵐ⟩ ∈ L(|ŝ aⁿ bᵐ⟩) L(R_M)^*.\]
+    \item If \(cᵣ\) is reached in \(n+1\) steps,
+      we find the configuration \(cᵣ'\) that is reached in \(n\) steps: 
+      \[(ŝ, m, n) →^* cᵣ' → cᵣ.\]
+      By induction hypothesis, there is \(w ∈ L(⟨C_S^*⟩)\), s.t.
+      \[w |cᵣ'⟩ ∈ L(|ŝ aⁿ bᵐ⟩) L(R_M)^*.\]
+      By \Cref{the: language encoding soundness of machine},
+      \[cᵣ' → cᵣ ⟹ ⟨cᵣ' | cᵣ⟩ ∈ L(R_M).\]
+      We have obtained our desired word:
+      \[w |cᵣ'⟩ ⋅ ⟨cᵣ' | cᵣ⟩ = w ⟨cᵣ'|cᵣ'⟩ | cᵣ⟩ ∈ L(|ŝ aⁿ bᵐ⟩) L(R_M)^*.\]
+  \end{itemize}
+
+  Consider \(w ∈ L(⟨C_S^*⟩)\) s.t.
+  \(w |cᵣ⟩ ∈ L(|ŝ aⁿ bᵐ⟩) L(R_M)^*,\) by definition
+  \[w |cᵣ⟩ ∉ L(⟨C_S^*⟩ N_S ⟨C_S^* | C_S^*⟩).\]
+  Because \Cref{ineq: reachability inequality} holds, 
+  we have the following language inclusion:
+  \[L(|ŝ aⁿ bᵐ⟩) L(R_M)^* ⊆ L(⟨C_S^*⟩) L(|C_{S'}⟩) + L(⟨C_S^*⟩ N_S ⟨C_S^* | C_S^*⟩).\]
+  Therefore,
+  \[w |cᵣ⟩ ∈ L(⟨C_S^*⟩) ⋅ L(|C_{S'}⟩).\]
+  Finally, by unfolding the definition of \(L(⟨C_S^*⟩) ⋅ L(|C_{S'}⟩)\),
+  we obtain \(s' ∈ S\).
+\end{proof}
+
+\begin{corollary}\label{the: reachability provability equivalence for terminating machine}
+  For a machine \(M ≜ (S, ŝ, ι)\) that always halt regardless of the input,
+  it will have finitely many reachable states from any input.
+  Therefore, for any input \((m, n)\), 
+  \(S'\) contains all the reachable state from \((ŝ, m, n)\) if and only if
+  \cref{ineq: reachability inequality} is provable.
+\end{corollary}
+
+We can then construct our diagonal argument.
+Assume that the equational theory of KA with atomic commutativity is decidable,
+there is a machine \(P(S', M, M')\) that decides whether 
+\cref{ineq: reachability inequality} is provable when given machine \(M ≜ (S, ŝ, ι)\) 
+with the encoding of \(M'\) as input, and a subset of states \(S' ⊆ S\).
+
+Fix two distinct states \(s₁, s₂\),
+we define the diagonal machine \(D(M)\) as follows: 
+let \(M ≜ (S, ŝ, ι)\) and \(S' ≜ S ∖ \{s₁\}\),
+\begin{itemize}
+  \item if \(P(S', M, M)\) returns true, 
+    then we will go to state \(s₁\) and returns true;  
+  \item if \(P(S', M, M)\) returns false,
+    then we will go to state \(s₂\) and returns false.
+\end{itemize}
+Hence, state \(s₁\) is reachable if and only if \(P(S', M, M)\) returns true. 
+
+Then we employ the standard technique to feed the diagonal machine to itself.
+since we assumed equalities in KA with atomic commutativity is decidable, 
+therefore \(D\) always terminates; hence we can enumerate all the possible 
+the output of \(D(D)\):
+\begin{itemize}
+  \item If \(D(D)\) returns true, then \(P(S', D, D)\) returns true. 
+    By \Cref{the: reachability provability equivalence for terminating machine},
+    \(S' ≜ S ∖ \{s₁\}\) contains all the reachable states of \(D(D)\).
+    However, by definition of \(D\), \(s₁\) is reachable when \(P(S', D, D)\) is true,
+    and \(s₁ ∉ S'\). Therefore, we obtain a contradiction.
+  \item  If \(D(D)\) returns false, this means that \(P(S', D, D)\) is false. 
+    By \Cref{the: reachability provability equivalence for terminating machine},
+    \(S' ≜ S ∖ \{s₁\}\) do not contain all the reachable state.
+    However, by definition of \(D\), \(s₁\) is not reachable in this case,
+    and \(S'\) contains every state other than \(s₁\).
+    Hence, \(S'\) has to contain all the reachable state of \(D(D)\).
+    We got a contradiction again.
+\end{itemize}
+Therefore, our assumption that KA with atomic commutativity is decidable has to be false.
+
+\begin{corollary}[Incompleteness]
+  There exists some commutable set \(X\) and two expression \(e₁, e₂ ∈ \KA(X)\) 
+  s.t. \(L(e₁) ⊆ L(e₂)\) but \(e₁ ≰ e₂\).
+  In other words, there exists inequalities in the language interpretation
+  that is not derivable using the theory.
+\end{corollary}
+
+\begin{proof}
+  Assume that the language interpretation is complete,
+  that is for all expression \(e₁, e₂\)
+  \[L(e₁) ⊆ L(e₂) ⟺ e₁ ≤ e₂.\]
+
+  By definition of \(\KA(X)\), 
+  \(e₁ = e₂\) if and only if it can be proven using the theory of KA 
+  plus the commutativity in \(X\),
+  therefore deciding general equality is recursively-enumerable, by enumerating the proof.
+
+  However, since word inhabitance is decidable,
+  language inclusion is co-recursively-enumerable,
+  since we can simply check whether all words in \(L(e₁)\) is in \(L(e₂)\).
+
+  If the language inclusion is equivalent to inequalities in the theory,
+  then the problem of inequalities in the theory is both recursively-enumerable
+  and co-recursively-enumerable, hence decidable.
+  This result contradicts our undecidability result for general inequality in 
+  KA with atomic commutativity hypotheses.
+  Therefore, our assumption is false, and language interpretation is incomplete.
+\end{proof} 
+
+\section{Conclusion And Open Problem}
+
+In this paper we have shown that the word inhabitance problem 
+in KA with commutativity hypotheses is decidable and complete,
+yet the general equalities are neither decidable nor complete.
+We believe this is the first known KA extension 
+where the word inhabitance problem is decidable,
+yet the general equality is not.
+
+Our method to show the decidability of word inhabitance problem
+involves using the matrix model to decompose a word into several components,
+which we believe is a novel technique in defining 
+the empty word predicate and derivative in extensions of Kleene Algebra.
+This technique also yields straight-forward proof of soundness and the fundamental theorem.
+
+However, there are still several important open problems:
+Several theorems leading to the undecidability result requires 
+introspection on each case of the instructions, 
+which leads to very long and tedious proof.
+We suspect some of these proofs, like the proof for \Cref{the: single step transition soundness}, 
+can be simplified by establishing more 
+connection between the language interpretation and the free models.
+The exact complexity of KA with atomic commutativity is still unknown.
+In particular, we do not know whether the problem of 
+deciding general equalities are RE-complete.
+
+
+\bibliographystyle{ACM-Reference-Format}
+\bibliography{refs}
+

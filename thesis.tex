@@ -8,7 +8,7 @@
 \usepackage[intlimits]{amsmath}
 \usepackage{amsfonts,amssymb}
 \DeclareSymbolFontAlphabet{\mathbb}{AMSb}
-%\usepackage{natbib}
+\usepackage{natbib}
 \usepackage{apalike}
 \usepackage{float}
 \usepackage[bf]{caption}       
@@ -63,15 +63,11 @@
 % MY PACKAGES
 %==========================================================================%
 
-% basic math
-\usepackage{amsmath}
-\usepackage{amssymb}
+% theorems
 \usepackage{amsthm}
-
 \newtheorem{corollary}{Corollary}
 \newtheorem{theorem}{Theorem}
 \newtheorem{lemma}{Lemma}
-
 \newtheorem{definition}{Definition}
 \newtheorem*{definition*}{Definition}
 \newtheorem{example}{Example}
@@ -162,19 +158,46 @@
 \endgroup
 }
 % math font, this is needed to render several math command
-\setmathfont{STIX Two Math}
+% \setmathfont{STIX Two Math}
 
 %==========================================================================%
 % Macros
 %==========================================================================%
-\newcommand{\theoryOf}[1]{\ensuremath{\mathsf{#1}}}
-\newcommand{\KA}{\theoryOf{KA}}
-\newcommand{\Word}{\theoryOf{Wrd}}
-\newcommand{\Reg}{\theoryOf{REG}}
+
+% math
+\DeclareMathOperator{\post}{\mathrm{post}}
+\DeclareMathOperator{\dom}{\mathrm{dom}}
+\DeclareMathOperator{\cod}{\mathrm{cod}}
+\DeclareMathOperator{\Img}{\mathbf{Im}}
+
+% theories
+\newcommand{\Word}{\mathsf{Wrd}}
+\newcommand{\Reg}{\mathsf{REG}}
+\newcommand{\KA}{\mathsf{KA}}
+\newcommand{\KAT}{\mathsf{KAT}}
+\newcommand{\TopKAT}{\mathsf{TopKAT}}
+\newcommand{\REL}{\mathbf{\mathrm{REL}}}
+\newcommand{\TopREL}{\mathbf{\mathrm{TopREL}}}
+\newcommand{\TopGREL}{\mathbf{\mathrm{TopGREL}}}
+
+% two-counter machine command
 \DeclareMathOperator{\Inc}{\mathtt{Inc}}
 \DeclareMathOperator{\Dec}{\mathtt{Dec}}
 \DeclareMathOperator{\If}{\mathtt{If}}
 \DeclareMathOperator{\Halt}{\mathtt{Halt}}
+% program commands 
+\newcommand{\comSkip}{\mathtt{skip}}
+\newcommand{\comError}{\mathtt{error ()}}
+\newcommand{\comAssume}[1]{\mathtt{assume}~#1}
+\newcommand{\comITE}[3]{\mathtt{if}~#1~\mathtt{then}~#2~\mathtt{else}~#3}
+\newcommand{\comWhile}[2]{\mathtt{while}~#1~\mathtt{do}~#2}
+\newcommand{\comAssign}[2]{#1:= #2}
+\newcommand{\comLoop}[1]{\mathtt{trace}~#1}
+\newcommand{\comIter}[1]{{#1}^{\star}}
+
+\newcommand{\incorTriple}[3]{[#1]~#2~[#3]}
+\newcommand{\hoareTriple}[3]{\{#1\}~#2~\{#3\}}
+
 
 %==========================================================================%
 % BEGIN
@@ -206,7 +229,7 @@
 % Bibliography
 \newpage
 \singlespace
-\bibliographystyle{apalike}
+\bibliographystyle{alpha}
 
 % each subdirectory can have its own BiBTeX file
 \bibliography{thesis}

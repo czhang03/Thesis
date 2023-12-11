@@ -1,5 +1,5 @@
-\chapter{Important Details}
-\label{chapter:details}
+\chapter{Domain Reasoning In TopKAT}
+\label{chapter:TopKAT}
 \thispagestyle{myheadings}
 
 % set this to the location of the figures for this chapter. it may
@@ -7,39 +7,504 @@
 % it has a trailing directory separator (i.e., '/')!
 \graphicspath{{3_Details/Figures/}}
 
-The use of Type 1 fonts and font embedding into the document are both dependent on a specific Latex installation and even on operating system. There is a good chance that it will work with no problem for you. However, should your thesis PDF be returned, please consider the following remedies discovered by students over many years. 
 
-\section{Type 1 fonts}
 
-All Boston University thesis and dissertation submissions must use only Type 1 fonts to assure high-quality rendering. Type 3 fonts are not acceptable.
+\section{Completeness and Decidability of TopKAT}
+\label{sec: general completeness}
 
-For some students adding the following two lines in ``thesis.tex'' preamble has worked:\\
+Our goal in this section is to construct a complete interpretation for TopKAT,
+thereby reducing its theory that of plain KAT.  In other words, any equation
+between two TopKAT terms is logically equivalent to another equation between a
+pair of corresponding KAT terms.  While this result is not
+new~\cite{Zhang_de_Amorim_Gaboardi_2022, Zhang_de_Amorim_Gaboardi_2022_POPL,
+  Pous_Wagemaker_2022}, we present a more streamlined proof that hinges on the
+universal properties of free KATs and TopKATs, without relying explicitly on
+language models.  In any case, as a consequence of this result, we obtain the
+decidability of the equational theory of TopKAT as a corollary.  Moreover, our
+technique helps us to construct complete models and interpretations simply by
+computation, as well as simplifying proofs of other results about TopKAT.
+
+% AAA: It would be nice if we could mention explicitly how this helps the next
+% section.
+
+\subsection{Reduction on free models}\label{sec: reduction on free models}
+
+We first note that any free KAT over an alphabet \(K, B\) is also a TopKAT,
+where the largest element is \((∑ K)^*\). This fact can be seen by
+straightforward induction, see \Cref{the: every free KAT is a TopKAT}.
+
+Since every free KAT is a TopKAT, every KAT interpretation
+\(I : \KAT → \mathcal{M}\) induces a sub-KAT $\Img(I) ⊆ \mathcal{M}$,
+and this sub-KAT happens to be a \emph{TopKAT}. Indeed, the image of $(∑ K)^*$
+in $\mathcal{M}$ is the largest element of $\Img(I)$, and the restriction
+$I : \KAT → \Img(I)$ is a homomorphism of TopKATs.
+
+This gives us a powerful tool to construct complete TopKAT interpretations.
+Since we already know that the KAT interpretations \(G: \KAT → 𝒢\) and
+\(h ∘ G: \KAT → \Img(h)\) are TopKAT homomorphisms and are injective, we can
+construct complete TopKAT interpretations by \emph{composition}, simply by
+constructing an injective TopKAT interpretation \(r\) of type
+\(\TopKAT(K, B) → \KAT(K_⊤, B)\):
+\[\TopKAT(K, B) \xrightarrow{r} \KAT(K_⊤, B) \xrightarrow{G} 𝒢_{K_⊤, B},\\  
+  \TopKAT(K, B) \xrightarrow{r} \KAT(K_⊤, B) \xrightarrow{G} 𝒢_{K_⊤, B}
+  \xrightarrow{h} \Img(h).\] Since an interpretation is determined by its action
+on primitives, we can define \(r\) just by specifying its behavior on \(K + B\):
+\begin{align*}
+    r   & : K + B → \KAT(K_⊤, B)             \\
+    r(p) & ≜ p                     & p ∈ K + B.
+\end{align*}
+Since this is the only such $r$ with this property, we can check that the
+homomorphism $r$ coincides with the \emph{reduction maps} of the same name in
+previous works~\cite{Zhang_de_Amorim_Gaboardi_2022, Pous_Wagemaker_2022}.  More
+concretely, we can picture $r$ as simply replacing the symbol \(⊤\) in a TopKAT
+term with \((∑ K_⊤)^*\), the largest element in \(\KAT(K_⊤, B)\).
+
+We will show that \(r\) is injective by constructing a left inverse for it.  In
+fact, the left inverse is a very principled map.
+\begin{lemma}
+  The natural map \([-]_⊤: \KAT(K_⊤, B) → \TopKAT(K, B)\), where each term is
+  mapped to its corresponding equivalence class, is a TopKAT homomorphism.
+\end{lemma}
+
+% AAA: I think it would be more elegant to define this map using the universal
+% property of \KAT :) -- that is, by mapping ⊤ to ⊤.
+
+\begin{proof}
+  First, note that this map is well-defined.  Indeed, a raw KAT term over
+  $K_⊤, B$ can be viewed as a raw TopKAT term over $K, B$.  Moreover, since the
+  theory of TopKAT extends that of KAT with an equation, any two equivalent KAT
+  terms are also equivalent when seen as KAT terms. Thus, the identity on raw
+  terms can be lifted to equivalence classes.
+
+
+  Since each term in \(\KAT(K_⊤, B)\) is mapped to its identical term in
+  \(\TopKAT(K, B)\), then it is clear that is preserves all the operations
+  except perhaps for \(⊤\).
+
+  All we need to show is that \([-]_⊤\) preserves the top element, that is
+  \([(∑ K_⊤)^*]_⊤\) is the largest element in \(\TopKAT(K, B)\), which suffices
+  to prove \((∑ K_⊤)^* ≥ ⊤\).
+    \[(∑ K_⊤)^* ≥ ∑ K_⊤ = ⊤ + ∑ K ≥ ⊤.\]
+\end{proof}
+
+\begin{lemma}[reduction]
+    \([-]_⊤\) is the right inverse of \(r\): \([-]_⊤ ∘ r  = id_{\TopKAT(K, B)}\).
+    More explicitly for all \(t ∈ \TopKAT(K, B)\): \[\TopKAT(K, B) ⊧ [r(t)]_⊤ = t.\]
+\end{lemma}
+
+\begin{proof}
+    Since \([-]_⊤ ∘ r : \TopKAT(K, B) → \TopKAT(K, B)\) is a TopKAT interpretation,
+    hence the action on the primitive uniquely determines the interpretation:
+    because both \(r\) and \([-]_⊤\) do not change the primitives,
+    therefore \([-]_⊤ ∘ r\) is the identity interpretation on \(\TopKAT(K, B)\).
+\end{proof}
+
+The above lemma matches one of the soundness condition of reductions in 
+previous works~\cite{Zhang_de_Amorim_Gaboardi_2022,Kozen_Smith_1997,Pous_Rot_Wagemaker_2021},
+which was typically proven by induction on the structure of terms.
+The induction approach involves case analysis on all operations of TopKAT~\cite{Zhang_de_Amorim_Gaboardi_2022};
+whereas our approach determines the equality simply 
+by computing the action of \([-]_⊤ ∘ r\) on primitives.
+
+Since \(r\) has a right inverse, it is a complete TopKAT interpretation:
+\[\TopKAT(K, B) ⊧ t₁ = t₂ ⟺ r(t₁) = r(t₂),\]
+With the completeness of \(r\), we can already show the complexity of TopKAT.
+
+\begin{corollary}[Complexity]\label{the: PSPACE-completeness of TopKAT}
+  Given two terms \(t₁, t₂ ∈ \TopKAT(K, B)\), deciding whether these two terms
+  are equal is PSPACE-complete.
+\end{corollary}
+
+\begin{proof}
+    Since deciding KAT equality is a sub-problem of deciding TopKAT equality,
+    and KAT equality is PSPACE-hard \cite{Cohen_Kozen_Smith_1999},
+    Thus TopKAT equality is PSPACE-hard.
+
+    To decide the equality of \(t₁, t₂\),
+    we first remove all the redundant primitive that does not appear in \(t₁, t₂\)
+    from the alphabet \(K, B\). Then we compute \(r(t₁)\) and \(r(t₂)\),
+    each taking polynomial space (of \(|t₁| + |t₂|\)) to store;
+    and we use the standard algorithm \cite{Cohen_Kozen_Smith_1999}
+    to decide whether \(r(t₁) = r(t₂)\) in \(\KAT(K_⊤, B)\),
+    this will also take polynomial space.
+    Hence, the decision procedure for TopKAT equality in PSPACE.
+
+    Thus deciding TopKAT equality is PSPACE-complete.
+\end{proof}
+
+
+\subsection{Complete Model For Free}\label{sec: complete model for free}
+
+Designing complete interpretations and models was not always easy.
+In fact, in previous works \cite{Zhang_de_Amorim_Gaboardi_2022_POPL},
+the authors made a mistake in the definition of language TopKAT,
+which was fixed later \cite{Zhang_de_Amorim_Gaboardi_2022} 
+by suggestion of Pous et al. \cite{Pous_Wagemaker_2022}.
+However, with the results in~\Cref{sec: reduction on free models},
+we can construct the complete interpretation just by composition,
+and compute the complete model by computing the range of the complete interpretation.
+
+We already know that there are two complete interpretations of TopKAT defined as follows:
+\[\TopKAT(K, B) \xrightarrow{r} \KAT(K_⊤, B) \xrightarrow{G} 𝒢_{K_⊤, B},\\  
+\TopKAT(K, B) \xrightarrow{r} \KAT(K_⊤, B) \xrightarrow{G} 𝒢_{K_⊤, B} \xrightarrow{h} \Img(h),\]
+with a complete language model \(𝒢_{K_⊤, B}\), 
+and a complete model consists of relations \(\Img(h)\).
+
+The operations in these models can be recovered by computing these maps.
+For example, the multiplication operation in the language TopKAT can be computed as follows:
+\[G ∘ r(t₁ ⋅ t₂) = G(r(t₁) ⋅ r(t₂)) = G(r(t₁)) ⋄ G(r(t₂)).\]
+Since \(r\) do not change the multiplication operation,
+the multiplication in the language TopKAT is the same as in language KAT.
+In fact, as \(r\) do not change any operation in KAT,
+most operations in language TopKAT is the same as language KAT.
+Thus, we only need to figure out the top element in language TopKAT.
+
+The top element in language TopKAT can be computed in the same fashion:
+\[G ∘ r(⊤) = G((∑ K_⊤)^*) = GS_{K_⊤, B},\]
+i.e. the top element is just the complete language.
+
+\begin{corollary}\label{the: language TopKAT for free}
+    The language TopKAT inherits all the operations in language KAT,
+    except the top element is defined as the full language.
+    And such model is complete with \(G ∘ r\) as a complete interpretation.
+\end{corollary}
+
+In the same way, we know that complete model consisting of relations (a.k.a. general relational TopKAT) 
+will have the same operations as relational KATs.
+However, in this case the characterization the computed top: \(h ∘ G ∘ r(⊤)\)
+is not as simple as the full language;
+but we know it is the largest relation in the range of \(h ∘ G ∘ r\):
+
+\begin{corollary}\label{the: general relational TopKAT for free}
+    The general relational TopKAT inherits all the operations in relational KAT,
+    except the top element is the largest relation.
+    And such model is complete with \(h ∘ G ∘ r\) as a complete interpretation.
+\end{corollary}
+
+Finally, to investigate whether we can use general relational TopKAT
+to encode incorrectness logic,
+we will provide a short proof that general relational TopKATs
+are as expressive as relational KATs~\cite{Zhang_de_Amorim_Gaboardi_2022};
+that is, every property on relations that can be encoded using general relational TopKAT,
+is already encodable in the relational  KAT.
+Hence, adding a top element do not give extra expressive power in general relational TopKAT.
+
+% AAA: We should recall what "expressible" means here, to make the paper
+% self-contained.
+
+The original proof~\cite[Lemma 2]{Zhang_de_Amorim_Gaboardi_2022} 
+encodes every TopKAT term using KAT term,
+and then use two pages to prove the soundness of such encoding.
+Here we show such encoding is simply the reduction \(r\).
+\begin{corollary}[Expressiveness of general relational TopKAT]
+    Given an alphabet \(K, B\), an n-ary predicate \(P\) on relations,
+    the predicate \(P\) over primitives \(p₁, p₂, … , pₙ ∈ K\) is expressible in
+    general relational TopKAT if and only if it is expressible in relational KAT.
+
+    Formally, it suffices to show that if there exist two terms
+    \(t₁, t₂ ∈ \TopKAT(K, B)\) s.t. for any general relational interpretation
+    \(I_⊤\):
+    \[I_⊤(t₁) = I_⊤(t₂) ⟺ P(I_⊤(p₁), I_⊤(p₂), … , I_⊤(pₙ));\]
+    then take an arbitrary relational KAT interpretation \(I\):
+    \[I(r(t₁)) = I(r(t₂)) ⟺ P(I(p₁), I(p₂), … , I(pₙ)).\]
+\end{corollary}
+
+\begin{proof}
+    Take an arbitrary relational KAT interpretation \(I\) from \(\KAT(K_⊤, B)\).
+    Notice \(\Img(I)\), the range of \(I\), is a relational KAT with a largest element
+    (\(I\) of the largest element in \(\KAT(K_⊤, B)\));
+    hence \(\Img(I)\) is a general relational TopKAT.
+    Then \(I\) is a TopKAT homomorphism from \(\KAT(K_⊤, B)\) to its range:
+    \(I\) preserves all the operation of KAT, since it is a KAT interpretation;
+    and preserves the top element, since homomorphism preserves order.
+
+    Then we can construct \(I ∘ r: \TopKAT(K, B) → \Img(I)\),
+    a general relational interpretation.
+    And since \(r\) does not modify primitives,
+    therefore \[∀ pᵢ ∈ K, I ∘ r(pᵢ) = I(r(pᵢ)) = I(pᵢ).\]
+
+    Finally,
+    \begin{align*}
+        I(r(t₁)) = I(r(t₂))
+         & ⟺ I ∘ r(t₁) = I ∘ r(t₂)                           \\
+         & ⟺ P(I ∘ r(p₁), … , I ∘ r(pₙ))
+         & \text{\(I ∘ r\) is a \(\TopGREL\) interpretation} \\
+         & ⟺ P(I(p₁), … , I(pₙ))
+         & ∀ pᵢ ∈ K, I ∘ r(pᵢ) = I(pᵢ)
+    \end{align*}
+\end{proof}
+
+Since the image of \(I\) is not necessary a relational TopKAT,
+where the top element is interpreted as the complete relation,
+The above trick do not work for relational TopKAT.
+It is also known that relational TopKAT is strictly more expressive than general relational TopKAT,
+since relational TopKAT can encode incorrectness logic,
+where general relational TopKAT cannot~\cite{Zhang_de_Amorim_Gaboardi_2022}.
+
+
+\section{Domain Completeness}\label{sec: domain completeness of TopKAT}
+
+In general, TopKAT is not complete over relational models, which are crucial for
+program-analysis applications~\cite{Zhang_de_Amorim_Gaboardi_2022}.  However, it
+was later showed that we \emph{can} obtain a complete theory for relational
+models by simply adding the axiom \(p ⊤ p ≥ p\) to the theory of
+TopKAT~\cite{Pous_Wagemaker_2022}.  We aim to investigate how much these two
+theories differ in expressive power for program reasoning.  In particular, the
+encoding of incorrectness logic in TopKAT~\cite{Zhang_de_Amorim_Gaboardi_2022}
+relies only on the ability of TopKAT to compare the domain and codomain of two
+relations.  This raises the question of whether TopKAT suffices for proving such
+properties; that is, whether the following completeness results hold: for
+\(t₁, t₂ ∈ \KAT(K, B)\) (i.e. \(⊤\) does not appear in \(t₁\) and \(t₂\))
+\begin{align*}
+    \REL ⊧ \cod(t₁) ≥ \cod(t₂) & ⟺ \TopKAT ⊧ ⊤ t₁ ≥ ⊤ t₂ & \text{codomain completeness} \\
+    \REL ⊧ \dom(t₁) ≥ \dom(t₂) & ⟺ \TopKAT ⊧ t₁ ⊤ ≥ t₂ ⊤ & \text{domain complete}
+\end{align*}
+
+In this section, we prove that these equivalences hold, even without the
+additional axiom \(p ⊤ p ≥ p\).
 %
-{\tt
-$\backslash$usepackage[T1]\{fontenc\}\\
-$\backslash$usepackage{pslatex}
-   } 
+However, they do \emph{not} hold if we allow terms that contain top: for
+example, let \(t₁ ≜ p ⊤ p\), and \(t₂ ≜ p\).  Since \(p ⊤ p ≥ p\) holds in
+relational TopKAT, thus \(\dom(p ⊤ p) ≥ \dom(p)\); but \(p ⊤ p ⊤ ≥ p ⊤\) is not
+provable in TopKAT, since the inequality is not true in the language
+interpretation: \(G ∘ r(p ⊤ p ⊤)\) gives the language which contains at least
+two \(p\) and starts with action \(p\), which does not contain \(G ∘ r(p ⊤)\),
+where only starting with action \(p\) is required.  The incompleteness of
+codomain comparison can also be shown using the same example.
+
+The core idea to prove codomain completeness for KAT terms 
+is to construct a specific relational interpretation,
+where its codomain is equivalent to the complete TopKAT interpretation \(G ∘ r\):
+\[\cod(h ∘ i ∘ G(t)) = G ∘ r(⊤ t),\] 
+where \(i\) is the natural inclusion homomorphism \(i: 𝒢_{K, B} ↪ 𝒢_{K_⊤, B}\), 
+that maps every language to itself;
+and \(h\) is the classical embedding of language KAT into relational KAT~\cite{Kozen_Smith_1997}.
+Although \(i\) will not change the outcome of \(G\),
+it will add a new primitive action \(⊤\) to the alphabet, hence changing the outcome of \(h\).
+Such addition will equate the codomain of \(h ∘ i ∘ G(t)\) 
+with the complete TopKAT interpretation \(G ∘ r\) of \(⊤ t\).
+The proof of this equality is by simply computing both sides of the equation,
+and is in the appendix as~\Cref{the: codomain completeness core lemma};
+
+With the above equality obtained, the codomain completeness can be shown as follows.
+\begin{theorem}[Codomain completeness]\label{the: codomain completeness}
+    Given two terms \(t₁, t₂ ∈ \KAT(K, B)\) (i.e. term without \(⊤\)),
+    then codomain comparison is complete:
+    \begin{align*}
+        \REL ⊧ \cod(t₁) ≥ \cod(t₂) & ⟺ \TopKAT ⊧ ⊤ t₁ ≥ ⊤ t₂.
+    \end{align*}
+\end{theorem}
+
+\begin{proof}
+    Given the natural inclusion homomorphism: \(i: \KAT(K, B) → \KAT(K_⊤, B)\),
+    we show that the following are equivalent:
+    \begin{enumerate}
+        \item \(\REL ⊧ \cod(t₁) ≥ \cod(t₂).\)
+        \item \(\cod(h ∘ i ∘ G(t₁)) ≥ \cod(h ∘ i ∘ G(t₂)).\)
+        \item \(\TopKAT ⊧ ⊤ t₁ ≥ ⊤ t₂.\)
+    \end{enumerate}
+
+    We first show that \(1 ⟹ 2\), since \(\REL ⊧ \cod(t₁) ≥ \cod(t₂)\),
+    means \(\cod(I(t₁)) ≥ \cod(I(t₂))\) for all relational KAT interpretation \(I\),
+    and \(h ∘ i ∘ G\) is a relational KAT interpretation, so this is true.
+
+    We show \(2 ⟹ 3\), which uses the equality discussed above, 
+    and proved in~\Cref{the: codomain completeness core lemma}:
+    \begin{align*}
+             & \cod(h ∘ i ∘ G(t₁)) ≥ \cod(h ∘ i ∘ G(t₂))           \\
+        ⟺ {} & G ∘ r(⊤ t₁) ≥ G ∘ r(⊤ t₂)
+             & \text{\Cref{the: codomain completeness core lemma}} \\
+        ⟺ {} & \TopKAT ⊧ ⊤ t₁ ≥ ⊤ t₂.
+             & \text{Completeness of \(G ∘ r\)}
+    \end{align*}
+
+    Finally, we show \(3 ⟹ 1\),
+    since \(\TopKAT ⊧ ⊤ t₁ ≥ ⊤ t₂ ⟹ \TopREL ⊧ ⊤ t₁ ≥ ⊤ t₂,\)
+    and because \(\TopREL ⊧ ⊤ t₁ ≥ ⊤ t₂ ⟹ \REL ⊧ \cod(t₁) ≥ \cod(t₂)\) 
+    (\Cref{the: top element represent domain}), 
+    therefore \(\TopKAT ⊧ ⊤ t₁ ≥ ⊤ t₂ ⟹ \REL ⊧ \cod(t₁) ≥ \cod(t₂)\).
+\end{proof}
 
 
-The easiest way to check if fonts are embedded well and of what type, is to use Adobe Acrobat's Preflight -- it shows exactly where the Type 3 fonts are in the thesis. You can learn more here: \url{https://community.adobe.com/t5/acrobat/figure-out-where-a-specific-font-is-used-in-a-pdf/m-p/10880057?page=1#M238035}
+The domain completeness can be obtained from
+exploring the properties of relational converse.
+Recall the definition of converse operator on relation \(R^{∨} ≜ \{(b, a) ∣ (a, b) ∈ R\}\),
+Then by unfolding the definition, we have \(\cod(R) = \dom(R^{∨}).\)
 
-If you don't have Adobe Acrobat (BU students get it for free), you can quickly check which fonts have which type by looking into Files $>>$ Properties $>>$ Fonts, but it doesn't tell where the text with a specific font type is.
+We can extend this converse operations to relational KAT interpretation.
+Given a interpretation \(I: \KAT(K, B) → X × X\), 
+we can define \(I^{∨}\) by conversing the action of \(I\) on primitives: 
+\begin{align*}
+    I^{∨} & : K + B → X × X \\
+    I^{∨} & (p) ≜ I(p)^{∨}.
+\end{align*}
+The converse operator \((-)^{∨}: (\KAT(K, B) → X × X) → (\KAT(K, B) → X × X)\) 
+is an isomorphism on relational interpretation, where it is own inverse.
+This can be verified by looking at the action of \((-)^{∨} ∘ (-)^{∨}(I)\)
+on the primitives:
+\[∀ p ∈ K + B, (I^{∨})^{∨}(p) = ((I(p))^{∨})^{∨} = I(p) ⟹
+(-)^{∨} ∘ (-)^{∨} = id_{(\KAT(K, B) → X × X)}.\]
+Therefore, for an arbitrary relational KAT interpretation \(I\),
+we can find a relational KAT interpretation \(I'\) s.t. \(I'^{∨} = I\);  
+then if \(\dom(I'^{∨}(t₁)) = \dom(I'^{∨}(t₂))\), 
+we can derive \[\cod(I(t₁)) = \dom(I'^{∨}(t₁)) = \dom(I'^{∨}(t₂)) = \cod(I(t₂)).\]
+Let \(I'\) and \(I\) ranges over all relational KAT interpretations,
+by the previous result, we have
+\[ ∀ I', \dom(I'(t₁)) = \dom(I'(t₂)) 
+    ⟹ ∀ I, \cod(I(t₁)) = \cod(I(t₂))
+    ⟹ t₁ ⊤ = t₂ ⊤. \]
+Thus, we obtained the non-trivial side of domain completeness result,
+and the other side is a direct consequence of~\cref{the: top element represent domain}.
 
-{\bf Linux/Unix}: If you are using LaTeX or Unix, the problem is that, by default, LaTeX uses Type 3 fonts. Since most users have a tendency to use the default settings, then Type 3 fonts will be used by default. You can try to change the first line in the preamble in ``thesis.tex'' to:\\
-%
-{\tt $\backslash$documentstyle[12pt,times,letterpaper]\{report\}}
+\begin{theorem}[Domain Completeness]
+    Given two terms \(t₁, t₂ ∈ \KAT(K, B)\) (i.e. term without \(⊤\)),
+    then domain comparison is complete:
+    \begin{align*}
+        \REL ⊧ \cod(t₁) ≥ \cod(t₂) ⟺ \TopKAT ⊧ ⊤ t₁ ≥ ⊤ t₂.
+    \end{align*}
+\end{theorem}
 
-\noindent
-since then Times fonts will be used (which are not Type 3). If there are mathematical formulas in the text, it is better to use:\\
-%
-{\tt $\backslash$documentstyle[12pt,times,mathptm,letterpaper]\{report\}}
 
+\section{A Coalgebraic Theory of TopKAT}
 
-\section{Font embedding}
+Coalgebraic decision procedure has shown great promise in 
+real-world applications~\cite{Foster_Kozen_Milano_Silva_Thompson_2015, Smolka_Kumar_Kahn_Foster_Hsu_Kozen_Silva_2019, Pous_2015}.
+In this section we will develop the coalgebraic theory of TopKAT;
+it should come as no surprise that such coalgebraic theory can be obtained trivially 
+using the reduction result, and produce a efficient decision procedure. 
+Further demonstrating the importance of such reduction result.
 
-All fonts must be embedded into the final PDF file. If they are not, sometimes equations may look strange or may not show up at all for several pages. This is often due to unembedded font problem. Should you have a font-embedding issue, this page may prove useful:\\
-%
-\url{https://www.karlrupp.net/2016/01/embed-all-fonts-in-pdfs-latex-pdflatex}
+Later we will show that the coalgebraic decision procedure 
+for determining reachability properties is as efficient as breath-first search.
+This demonstrate that our procedure is general enough to cover all equation of TopKAT;
+yet when specialized to domain comparison, it is as efficient as specialized algorithms.
 
-For those using Overleaf, this page might help:
-\url{https://www.overleaf.com/learn/latex/Questions/My_submission_was_rejected_by_the_journal_because_%22Font_XYZ_is_not_embedded%22._What_can_I_do%3F}
+\subsection{Kleene Coalgebra with Tests}
+
+A Kleene Coalgebra with tests (KCT) \(𝒦\) over a alphabet \((K, B)\) 
+consists of two family of operations indexed by \(α ∈ 1_{𝒢}\) and \(α p ∈ 1_{𝒢} × K\):
+\[ϵ_{α}: 𝒦 → 2, \\ δ_{α p}: 1_𝒢 × K → 𝒦 → 𝒦,\]
+where \(2 ≜ \{0, 1\}\) is the two-element set.
+By the natural isomorphism \((𝒦 → 2) × (𝒦 → 𝒦) ≅ 𝒦 → 2 × 𝒦\),
+these two operations can be combined into one, denoted as
+\(⟨ϵ_α, δ_{α p}⟩: 𝒦 → 2 × 𝒦.\)
+These operations are inspired by the structure of guarded languages,
+intuitively, \(ϵ_α\) computes whether \(α\) is contained with in a guarded language,
+and \(δ_{α p}\) computes the remaining language after \(α p\) has been removed from the front.
+
+This intuition can be made concrete by the finality of the guarded language model.
+Guarded language model \(𝒢_{K, B}\) forms a KCT when equipped with the following operations:
+\begin{align*}
+    ϵ_α & : 𝒢 → 2 &  δ_{α p} & : 𝒢 → 𝒢 \\  
+    ϵ_α & (S) ≜ (α ∈ S),  & δ_{α p} & (S) ≜ \{s ∣ α p s ∈ S\}.
+\end{align*}
+Notice that these two operation exactly corresponds to our intuitions.
+Furthermore, the guarded language over \(K, B\) is final in all KCT over \(K, B\):
+for all KCT \(𝒦\), there exists a unique homomorphism \(h: 𝒦 → 𝒢\):
+\[
+    \begin{tikzcd}
+        𝒦 \ar[dashed]{r}{h} \ar{d}[swap]{⟨ϵ_α, δ_{α p}⟩} & 𝒢 \ar{d}{⟨ϵ_α, δ_{α p}⟩} \\
+        2 × 𝒦 \ar[swap, dashed]{r}{(id, h)} & 2 × 𝒢 
+    \end{tikzcd}  
+\]
+This suggests that for all KCT \(𝒦\), we can correspond each of its element to a language,
+and the commutativity of the diagram implies that the \(ϵ_α, δ_{α p}\) in \(𝒦\) 
+will perform exactly the operation \(ϵ_α, δ_{α p}\) on their corresponding languages.
+
+In particular, the free \(\KAT(K, B)\) with the operations \(E_{α}\) and \(D_{α p}\) 
+defined by Kozen~\cite[Section 4.2]{Kozen_2008} from a KCT, 
+and the unique coalgebra homomorphism from the \(\KAT(K, B)\) to \(𝒢_{K, B}\) 
+is exactly the language interpretation:
+\begin{equation}\label{the: the final interpretation from free KAT is language interpretation}
+    \begin{tikzcd}
+        \KAT(K, B) \ar[dashed]{r}{G} \ar{d}[swap]{⟨E_α, D_{α p}⟩} & 𝒢_{K, B} \ar{d}{⟨ϵ_α, δ_{α p}⟩} \\
+        2 × \KAT(K, B) \ar[swap, dashed]{r}{(id, G)} & 2 × 𝒢_{K, B} 
+    \end{tikzcd}  
+\end{equation}
+By finality of the language interpretation, two KAT terms are bisimilar if and only if 
+they have the same guarded language interpretations~\cite[Theorem 2.2.6, Theorem 2.2.7]{Silva_2010}. 
+And by completeness of the guarded language model~\cite{Kozen_Smith_1997},
+two KAT terms are bisimilar if and only if they are equal in the free KAT.
+Finally, Kozen showed that bisimulation on the coalgebra \(\KAT(K, B)\)
+gives a PSPACE algorithm for deciding KAT equalities~\cite[Section 6]{Kozen_2008}.
+
+\subsection{Coalgebra From Reduction}
+
+Similar to the case of KCT, our definition of TopKAT coalgebra is based on 
+the structure of guarded language model for TopKATs.
+Although the guarded language model for TopKATs are also sets of guarded strings,
+the \(⊤\) symbol is always in the action alphabet, 
+which differentiates the structure of guarded languages for KATs and TopKATs.
+To handle the \(⊤\) symbol,
+we need an additional family of operations \(δ_{α ⊤}: 𝒦 → 𝒦\) to consume the \(⊤\) symbol.
+\begin{definition}[TopKAT coalgebra]
+    A TopKAT coalgebra \(𝒦\) over \(K, B\) consists of three family of operations,
+    indexed by \(α ∈ 1_𝒢\), \(α p ∈ 1_𝒢 × K\) and \(α ∈ 1_𝒢\) respectively:
+    \[ϵ_α: 𝒦 → 2, \\  δ_{α p}: 𝒦 → 𝒦, \\  δ_{α ⊤}: 𝒦 → 𝒦.\]
+    Where \(δ_{α ⊤}\) is an operation that consumes an atom \(α\) and a \(⊤\) symbol.
+\end{definition}
+
+Despite the slight differences in the definition,
+TopKAT coalgebras have strong connections to Kleene coalgebras with tests:
+\begin{corollary}
+    Because of the natural isomorphism
+    \((1_𝒢 × K → X) × (1_𝒢 → X) ≅ 1_𝒢 × (K + 1) → X ≅ 1_𝒢 × K_⊤ → X\),
+    three families of operations in TopKAT coalgebra can be combined into two families indexed by 
+    \(α ∈ 1_𝒢\) and \(α p' ∈ 1_𝒢 × (K_⊤)\):
+    \[ϵ_α: 𝒦 → 2, \\  δ_{α p'}: 𝒦 → 𝒦.\]
+    Therefore TopKAT coalgebras over \(K, B\) are exactly the KCTs over \(K_⊤, B\).
+
+    Since \(𝒢_{K_⊤, B}\) is the final KCT over \(K_⊤, B\), 
+    it is the final TopKAT coalgebra over \(K, B\).
+\end{corollary}
+
+The two families coalgebra operations on the free TopKAT is defined as follow,
+where the first operation is indexed by \(α ∈ 1_𝒢\) and the second by \(α p ∈ 1_𝒢 × K_⊤\):
+\begin{align*}
+    E_α ∘ r: & \TopKAT(K, B) \xrightarrow{r} \KAT(K_⊤, B) \xrightarrow{E_{α}} 2, \\\relax
+    [-]_⊤ ∘ D_{α p} ∘ r : &
+        \TopKAT(K, B) \xrightarrow{r} \KAT(K_⊤, B) \xrightarrow{D_{α p}} 
+        \KAT(K_⊤, B) \xrightarrow{[-]_⊤} \TopKAT(K, B).
+\end{align*}
+The connection to language interpretation of TopKAT is apparent:
+\begin{theorem}
+    The language interpretation of TopKAT is the unique 
+    coalgebra homomorphism from \(\TopKAT(K, B)\) to \(𝒢_{K_⊤, B}\):
+    \[
+    \begin{tikzcd}
+        \TopKAT(K, B) \ar[dashed]{r}{G ∘ r} \ar{d}[swap]{⟨E_α ∘ r, [-]_⊤ ∘ D_{α p} ∘ r⟩} 
+            & 𝒢_{K_⊤, B} \ar{d}{⟨ϵ_α, δ_{α p}⟩} \\
+        2 × \TopKAT(K, B) \ar[swap, dashed]{r}{(id, G ∘ r)} & 2 × 𝒢_{K_⊤, B} 
+    \end{tikzcd}  
+\]
+\end{theorem}
+\begin{proof}
+    The uniqueness is trivial by the finality of \(𝒢_{K_⊤, B}\).
+    We only need to show commutativity of the diagram,
+    i.e. \((id, G ∘ r) ∘ ⟨E_α ∘ r, D_{α p} ∘ r⟩ = ⟨ϵ_α, δ_{α p}⟩ ∘ G ∘ r,\)
+    which is equivalent to show 
+    \[E_α ∘ r = ϵ_α ∘ G ∘ r \text{ and } G ∘ r ∘ [-]_⊤ ∘ D_{α p} ∘ r = δ_{α p} ∘ G ∘ r.\]
+    
+    First by \cref{the: the final interpretation from free KAT is language interpretation},
+    \(E_α = ϵ_α ∘ G ⟹ E_α ∘ r = ϵ_α ∘ G ∘ r.\)
+
+    Then because \(r ∘ [-]_⊤ = id_{\TopKAT(K, B)}\) and 
+    \cref{the: the final interpretation from free KAT is language interpretation},
+    \(G ∘ r ∘ [-]_⊤ ∘ D_{α p} ∘ r = G ∘ D_{α p} ∘ r = δ_{α p} ∘ G ∘ r.\)
+\end{proof}
+
+Similar to the case in KAT, by finality of the guarded language interpretation of TopKAT
+two TopKAT terms are bisimilar if and only if they have 
+the same guarded language interpretations~\cite[Theorem 2.2.6, Theorem 2.2.7]{Silva_2010}.
+And by completeness of the guarded language model~\cite{Kozen_Smith_1997},
+two KAT terms are bisimilar if and only if they are equal in the free KAT.
+
+Finally, since every TopKAT coalgebra is over \(K, B\) is a KCT over \(K_⊤, B\),
+and because there is a PSPACE bisimulation algorithm for KCT~\cite[Section 6]{Kozen_2008},
+TopKAT bisimulation can also be computed in PSPACE.
+
+We summarize the above two results in the following theorem:
+\begin{theorem}[Completeness and Decidability]
+    Two TopKAT terms are equal if and only if they are bisimilar,
+    and the bisimilarity of two TopKAT term can be decided in PSPACE.
+\end{theorem}

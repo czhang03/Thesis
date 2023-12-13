@@ -8,8 +8,8 @@
 \usepackage[intlimits]{amsmath}
 \usepackage{amsfonts,amssymb}
 \DeclareSymbolFontAlphabet{\mathbb}{AMSb}
-\usepackage{natbib}
-\usepackage{apalike}
+%\usepackage{natbib}
+%\usepackage{apalike}
 \usepackage{float}
 \usepackage[bf]{caption}       
 \usepackage{fancyhdr}
@@ -54,7 +54,7 @@
 %\newcommand{\latex}{\LaTeX\xspace}
 %==========================================================================%
 \usepackage[dvipsnames]{xcolor}
-\usepackage{hyperref}
+\usepackage{hyperref} 
 \hypersetup{breaklinks=true,colorlinks=true,linkcolor=blue,urlcolor=magenta,citecolor=cyan}
 \usepackage{breakurl}
 \usepackage{algorithm}
@@ -62,6 +62,10 @@
 %==========================================================================%
 % MY PACKAGES
 %==========================================================================%
+
+% biblatex
+\usepackage[style=numeric,sorting=ynt]{biblatex}
+\addbibresource{./thesis.bib} 
 
 % theorems
 \usepackage{amsthm}
@@ -229,10 +233,9 @@
 % Bibliography
 \newpage
 \singlespace
-\bibliographystyle{plain}
 
 % each subdirectory can have its own BiBTeX file
-\bibliography{thesis}
+\printbibheading
 \cleardoublepage
 
 %==========================================================================%

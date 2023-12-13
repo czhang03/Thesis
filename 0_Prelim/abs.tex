@@ -1,5 +1,48 @@
 % ABSTRACT
 
-Have you ever wondered why this is called an \emph{abstract}? Weird thing is
-that its legal to cite the abstract of a dissertation alone, apart from the
-rest of the manuscript.
+Kleene Algebra (KA) is an equational system celebrated for its decidability 
+and completeness with respect to regular language equalities.
+Because of the nice properties of Kleene Algebra, 
+numerous extensions of it are developed to reason about
+network system~\cite{Anderson_Foster_Guha_Jeannin_Kozen_Schlesinger_Walker_2014,Foster_Kozen_Milano_Silva_Thompson_2015},
+concurrent programs~\cite{Hoare_Möller_Struth_Wehrman_2009,Kappé_Brunet_Silva_Wagemaker_Zanasi_2020,Kappé_Brunet_Silva_Zanasi_2018}, 
+probabilistic systems~\cite{McIver_Cohen_Morgan_2006, McIver_Rabehaja_Struth_2011}, 
+relational verification~\cite{Antonopoulos_Koskinen_Le_Nagasamudram_Naumann_Ngo_2022},
+and program schematology~\cite{Angus_Kozen_2001}.
+Most of the above systems has been shown to be complete and decidable.
+
+In this thesis, we focus on three variants of Kleene Algebra with real-world applications.
+
+The first system is Kleene Algebra with atomic commutativity.
+The question about the complexity of this system was raised over 25 years ago~\cite{Kozen_1996}.
+Recently, a similar system named BiKA has been shown to be effective for alignment problem 
+in relational reasoning~\cite{Antonopoulos_Koskinen_Le_Nagasamudram_Naumann_Ngo_2022}.
+However, the completeness and decidability of these systems has still alluded us
+after all these years. In this thesis we give a negative result:
+although the word inhabitance problem 
+(inequalities of the form \(w ≤ e\), where \(w\) is a word and \(e\) is a KA expression)
+is complete and decidable, the general equalities in KA with atomic commutativity is 
+neither complete nor decidable.
+
+The second system, Kleene Algebra with tests and top (TopKAT), 
+was developed to perform domain and reachablity reasoning.
+We showed the conventional extension of Kleene Algebra with tests, 
+despite able to encode Hoare logic, is inadequate for domain reasoning.
+This leads to our development of TopKAT, which is complete for domain reasoning.
+The main proof heavily relies on a technique called \emph{reduction},
+we should that the reduction from TopKAT to KAT satisfy nice properties that allows 
+us to generate complete interpretations for TopKAT for free,
+and also gives us a complete and decidable coalgebraic theory with minimal efforts.
+
+Finally, Guarded Kleene Algebra with Test and Indicator Variables (GKATI),
+was designed to verify decompilation results. 
+This system gives an efficient nearly linear time algorithm for decompilation verification.
+However, we have also showed that this system is not equationally axiomatizable, 
+since it failed to satisfy the congruence rule.
+
+Readers might realize many results in this thesis are negative.
+Although these results might be disappointing in the general development of these systems, 
+the proof of these results are technically challenging, 
+which necessitates new techniques and understandings of Kleene Algebras.
+In the future, these techniques might lead to positive results for 
+complex variants of Kleene Algebra or concise proofs for properties of existing systems.

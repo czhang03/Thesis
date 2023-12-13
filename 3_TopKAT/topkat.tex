@@ -31,7 +31,38 @@ computation, as well as simplifying proofs of other results about TopKAT.
 
 We first note that any free KAT over an alphabet \(K, B\) is also a TopKAT,
 where the largest element is \((∑ K)^*\). This fact can be seen by
-straightforward induction, see \Cref{the: every free KAT is a TopKAT}.
+straightforward induction.
+\begin{lemma}\label{the: every free KAT is a TopKAT}
+    Every free KAT over alphabet \(K, B\) form a TopKAT.
+\end{lemma}
+
+\begin{proof}
+    Since free KAT is a KAT, all we need to show is that a top element exists in any free KAT:
+    the top element of a free KAT over \(K, B\) is \((∑ K)^*\).
+    This fact straightforward to show,
+    all we need to show is that it is larger than every term in the free model,
+    some manipulation standard theorems in KA.
+    \begin{itemize}
+        \item Since \((∑ K)^* ≥ 1\) (by unfolding rule),
+              then it is larger than \(0, 1\) and any boolean terms.
+        \item Since \((∑ K)^*\) is larger than \(∑ K\),
+              which is larger than any primitive action.
+        \item Given any two term \(t₁\) and \(t₂\),
+              if \((∑ K)^*\) is larger than both,
+              then it is larger than \(t₁ + t₂\):
+              because \(t₁ + t₂\) is the \(\sup\) of \(t₁\) and \(t₂\).
+        \item Given any two term \(t₁\) and \(t₂\),
+              if \((∑ K)^*\) is larger than both,
+              then it is larger than \(t₁ ⋅ t₂\):
+              since \((∑ K)^* = (∑ K)^* ⋅ (∑ K)^*\)
+              and multiplication preserves order, therefore:
+              \[(∑ K)^* = (∑ K)^* ⋅ (∑ K)^* ≥ t₁ ⋅ t₂.\]
+        \item Given a term \(t\),
+              if \((∑ K)^* ≥ t\), then \((∑ K)^* ≥ t^*\).
+              Since \((∑ K)^* = ((∑ K)^*)^*\) and star preserves order:
+              \[(∑ K)^* = ((∑ K)^*)^* ≥ t^*\]
+    \end{itemize}
+\end{proof}
 
 Since every free KAT is a TopKAT, every KAT interpretation
 \(I : \KAT → \mathcal{M}\) induces a sub-KAT $\Img(I) ⊆ \mathcal{M}$,
@@ -45,9 +76,12 @@ Since we already know that the KAT interpretations \(G: \KAT → 𝒢\) and
 construct complete TopKAT interpretations by \emph{composition}, simply by
 constructing an injective TopKAT interpretation \(r\) of type
 \(\TopKAT(K, B) → \KAT(K_⊤, B)\):
-\[\TopKAT(K, B) \xrightarrow{r} \KAT(K_⊤, B) \xrightarrow{G} 𝒢_{K_⊤, B},\\  
-  \TopKAT(K, B) \xrightarrow{r} \KAT(K_⊤, B) \xrightarrow{G} 𝒢_{K_⊤, B}
-  \xrightarrow{h} \Img(h).\] Since an interpretation is determined by its action
+\begin{align*}
+    & \TopKAT(K, B) \xrightarrow{r} \KAT(K_⊤, B) \xrightarrow{G} 𝒢_{K_⊤, B},\\  
+    & \TopKAT(K, B) \xrightarrow{r} \KAT(K_⊤, B) \xrightarrow{G} 𝒢_{K_⊤, B}
+    \xrightarrow{h} \Img(h).
+\end{align*} 
+Since an interpretation is determined by its action
 on primitives, we can define \(r\) just by specifying its behavior on \(K + B\):
 \begin{align*}
     r   & : K + B → \KAT(K_⊤, B)             \\
@@ -145,8 +179,10 @@ we can construct the complete interpretation just by composition,
 and compute the complete model by computing the range of the complete interpretation.
 
 We already know that there are two complete interpretations of TopKAT defined as follows:
-\[\TopKAT(K, B) \xrightarrow{r} \KAT(K_⊤, B) \xrightarrow{G} 𝒢_{K_⊤, B},\\  
-\TopKAT(K, B) \xrightarrow{r} \KAT(K_⊤, B) \xrightarrow{G} 𝒢_{K_⊤, B} \xrightarrow{h} \Img(h),\]
+\begin{align*}
+    & \TopKAT(K, B) \xrightarrow{r} \KAT(K_⊤, B) \xrightarrow{G} 𝒢_{K_⊤, B},\\  
+    & \TopKAT(K, B) \xrightarrow{r} \KAT(K_⊤, B) \xrightarrow{G} 𝒢_{K_⊤, B} \xrightarrow{h} \Img(h),
+\end{align*}
 with a complete language model \(𝒢_{K_⊤, B}\), 
 and a complete model consists of relations \(\Img(h)\).
 
@@ -225,7 +261,7 @@ Here we show such encoding is simply the reduction \(r\).
 
     Finally,
     \begin{align*}
-        I(r(t₁)) = I(r(t₂))
+        & I(r(t₁)) = I(r(t₂)) \\
          & ⟺ I ∘ r(t₁) = I ∘ r(t₂)                           \\
          & ⟺ P(I ∘ r(p₁), … , I ∘ r(pₙ))
          & \text{\(I ∘ r\) is a \(\TopGREL\) interpretation} \\
@@ -283,8 +319,43 @@ Although \(i\) will not change the outcome of \(G\),
 it will add a new primitive action \(⊤\) to the alphabet, hence changing the outcome of \(h\).
 Such addition will equate the codomain of \(h ∘ i ∘ G(t)\) 
 with the complete TopKAT interpretation \(G ∘ r\) of \(⊤ t\).
-The proof of this equality is by simply computing both sides of the equation,
-and is in the appendix as~\Cref{the: codomain completeness core lemma};
+The proof of this equality is by simply computing both sides of the equation.
+\begin{lemma}\label{the: codomain completeness core lemma}
+    For any term \(t ∈ \KAT_{K, B}\),
+    \[\cod(h ∘ i ∘ G(t)) = G ∘ r(⊤ t),\]
+    where \(i\) is the nature inclusion homomorphism \(i: 𝒢_{K, B} ↪ 𝒢_{K_⊤, B}\);
+    and \(h\) is the classical homomorphism used by Pratt's trick
+    to embed language KAT into relational KAT~\cite{Kozen_1997,Pratt_1980}:
+    \begin{align*}
+        h & : 𝒢 → 𝒫(𝒢 × 𝒢)                                      \\
+        h & (S) ≜ \{(s α, s α s₁) ∣ s α ∈ GS, α s₁ ∈ S\},
+    \end{align*}
+\end{lemma}
+
+\begin{proof}
+    We explicitly write out the domain and codomain of the functions in
+    the relational KAT interpretation \(h ∘ i ∘ G\) for the ease of the reader:
+    \[\KAT_{K, B}
+        \xrightarrow{G} 𝒢_{K, B}
+        \xrightarrow{i} 𝒢_{K_⊤, B}
+        \xrightarrow{h} 𝒫(𝒢_{K_⊤, B} × 𝒢_{K_⊤, B})\]
+
+    Although \(i\) do not change its input,
+    the addition of \(⊤\) into the alphabet will change the result of \(h\).
+    In this case, \(h\) is a KAT homomorphism from \(𝒢_{K_⊤, B}\):
+    \[h(S) = \{(s, s ⋄ s₁) ∣ s ∈ GS_{K_⊤, B}, s₁ ∈ S\}.\]
+    Since the reduction \(r\) preserves terms without \(⊤\),
+    let \(t ∈ \KAT_{K, B}\) (i.e. \(t\) does not contain \(⊤\)):
+    \[G ∘ r(⊤) = GS_{K_⊤, B} \\ G ∘ r(t) = G(t).\]
+    Therefore, for any term \(t ∈ \KAT_{K, B}\)
+    \begin{align*}
+        \cod(h ∘ i ∘ G(t))
+         & = \{s α s₁ ∣ s α ∈ GS_{K_⊤, B}, α s₁ ∈ G(t)\} \\
+         & = GS_{K_⊤, B} ⋄ G(t)                          \\
+         & = (G ∘ r(⊤)) ⋄ (G ∘ r(t))                     \\
+         & = G ∘ r(⊤ t).
+    \end{align*}
+\end{proof}
 
 With the above equality obtained, the codomain completeness can be shown as follows.
 \begin{theorem}[Codomain completeness]\label{the: codomain completeness}
@@ -383,7 +454,7 @@ yet when specialized to domain comparison, it is as efficient as specialized alg
 
 A Kleene Coalgebra with tests (KCT) \(𝒦\) over a alphabet \((K, B)\) 
 consists of two family of operations indexed by \(α ∈ 1_{𝒢}\) and \(α p ∈ 1_{𝒢} × K\):
-\[ϵ_{α}: 𝒦 → 2, \\ δ_{α p}: 1_𝒢 × K → 𝒦 → 𝒦,\]
+\[ϵ_{α}: 𝒦 → 2, \\ δ_{α p}: 𝒦 → 𝒦,\]
 where \(2 ≜ \{0, 1\}\) is the two-element set.
 By the natural isomorphism \((𝒦 → 2) × (𝒦 → 𝒦) ≅ 𝒦 → 2 × 𝒦\),
 these two operations can be combined into one, denoted as

@@ -173,10 +173,10 @@
 \DeclareMathOperator{\dom}{\mathrm{dom}}
 \DeclareMathOperator{\cod}{\mathrm{cod}}
 \DeclareMathOperator{\Img}{\mathbf{Im}}
+\DeclareMathOperator{\op}{\mathrm{op}}
+\newcommand{\At}{\mathbf{At}}
 
 % theories
-\newcommand{\Word}{\mathsf{Wrd}}
-\newcommand{\Reg}{\mathsf{REG}}
 \newcommand{\KA}{\mathsf{KA}}
 \newcommand{\KAT}{\mathsf{KAT}}
 \newcommand{\TopKAT}{\mathsf{TopKAT}}
@@ -216,13 +216,13 @@
 \include{1_Intro/intro}
 \cleardoublepage
 
-\include{2_Commutativity/commutativity}
-\cleardoublepage
-
-\include{3_TopKAT/topkat}
+\include{2_TopKAT/topkat}
 \cleardoublepage 
  
-\include{4_Decompilation/decompilation}
+\include{3_CFGKAT/cf-gkat}
+\cleardoublepage
+
+\include{4_Symoblic/symbolic}
 \cleardoublepage
 
 %\appendix
@@ -232,6 +232,7 @@
 %==========================================================================%
 % Bibliography
 \newpage
+\printbibliography
 \singlespace
 
 % each subdirectory can have its own BiBTeX file

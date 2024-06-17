@@ -5,8 +5,8 @@ and completeness with respect to regular language equalities.
 Because of the desirable properties of Kleene Algebra, 
 numerous extensions were developed to reason about
 network system~\cite{Anderson_Foster_Guha_Jeannin_Kozen_Schlesinger_Walker_2014,Foster_Kozen_Milano_Silva_Thompson_2015, Smolka_Kumar_Kahn_Foster_Hsu_Kozen_Silva_2019},
-concurrent programs~\cite{Hoare_Möller_Struth_Wehrman_2009,Kappé_Brunet_Silva_Wagemaker_Zanasi_2020,Kappé_Brunet_Silva_Zanasi_2018}, 
-probabilistic systems~\cite{McIver_Cohen_Morgan_2006, McIver_Rabehaja_Struth_2011}, 
+concurrent programs~\cite{hoare_ConcurrentKleeneAlgebra_2009,Kappé_Brunet_Silva_Wagemaker_Zanasi_2020,Kappé_Brunet_Silva_Zanasi_2018}, 
+probabilistic systems~\cite{mciver_UsingProbabilisticKleene_2006, McIver_Rabehaja_Struth_2011}, 
 relational verification~\cite{Antonopoulos_Koskinen_Le_Nagasamudram_Naumann_Ngo_2022},
 and program schematology~\cite{Angus_Kozen_2001}.
 Most of the above systems has been shown to be complete and decidable.
@@ -29,7 +29,7 @@ was developed to perform domain and reachablity reasoning.
 We showed the conventional extension of Kleene Algebra with tests, 
 despite able to encode Hoare logic, is inadequate for domain reasoning.
 This leads to our development of TopKAT, which is complete for domain reasoning.
-TopKAT was able to sound and completely encode propositional incorrectness logic~\cite{O’Hearn_2020},
+TopKAT was able to sound and completely encode propositional incorrectness logic~\cite{OHearn_2020},
 offering better complexity bound than alternative implementations~\cite{Möller_O’Hearn_Hoare_2021, Sedlár_2023}.
 The main proof heavily relies on a technique called \emph{reduction},
 we showed that the reduction from TopKAT to KAT satisfy nice properties that enable

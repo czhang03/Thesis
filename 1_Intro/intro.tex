@@ -5,288 +5,318 @@
 \section{A Brief History Of Kleene Algebra}
 \label{sec:history}
 
-
 \paragraph{Our Contributions}
 
 \section{Technical Background}
 
-\subsection{Kleene Algebra and Homomorphisms}
+\subsection{Extensions of Kleene algebra And Their Models}
 
-A \emph{Kleene Algebra} (KA) is an idempotent semiring with an iteration operator \((-)^*\).
-For a KA \(𝒦\) and elements \(p, q, r ∈ 𝒦\) the complete list of axiom is listed below:
-\begin{align*}
-  p + 0 = 0 + p & = p & \text{ identity} \\
-  p + q &= q + p & \text{commutativity}\\
-  (p + q) + r & = p + (q + r) & \text{associativity} \\
-  p + p & = p & \text{idempotency} \\
-  1 p = p 1 & = p & \text{identity} \\
-  (p  q)  r & = p  (q  r) & \text{associativity}\\
-  (p + q) r & = pr + qr & \text{right distributivity} \\
-  r (p + q) & = rp + rq & \text{left distributivity} \\
-  0 p = p 0 & = 0 & \text{annihilation} \\
-  1 + p^* p = 1 + p p^* & = p^* 
-  & \text{unfolding} \\
-  q + pr ≤ r & ⟹ p^* q ≤ r & 
-  \text{induction} \\
-  q + rp ≤ r & ⟹ qp^* ≤ r & 
-  \text{induction};
-\end{align*} 
-the ordering \(≤\) in KA inherits the conventional ordering in idempotent semiring
-\[ p ≤ q ⟺ p + q = q.\]
-Notice that in every idempotent semiring, 
-the sum of a finite set of elements \(P\) compute the supremum of that set:
-\[q ≥ ∑ P ⟺ ∀ p ∈ P, q ≥ p \text{ and } ∀ p ∈ P, ∑ P ≥ p.\]
-Furthermore, the star operation in KA also satisfy several nice properties, for example:
-\[(p^*)^* = e^*, \qquad p^* ⋅ p^* = p^*, \qquad (p + q)^* = p^*(q p^*)^*.\]
+A \emph{Kleene algebra} is an idempotent semiring with a star operation, written
+$p^*$, that satisfies the following \emph{unfolding}, \emph{left induction},
+and \emph{right induction} rules:
+\[
+    p^* = 1 + p p^* = 1 + p^* p, \\
+    p r + q  \leq  r  \implies  p^* q  \leq  r, \\
+    r p + q  \leq  r  \implies  q p^*  \leq  r;
+\]
+the ordering here is the conventional ordering in idempotent semirings: \(p  \leq  q  \triangleq  p + q = q.\)
+It is known that the right-hand version of unfolding and induction rule 
+can be removed while preserving the same equational theory~\cite{Kozen_Silva_2020}.
+Yet, we will focus on the standard definition of KA in this paper.
+\begin{lemma}\label{the: well known fact about KA}
+    Following are well-known facts in Kleene algebra
+    \begin{itemize}
+        \item All the Kleene algebra operations preserve order.
+        \item The following equations are true for the star operation:
+              \[ p^*  \cdot  p^* = p^* \\ (p^*)^* = p^*.\]
+    \end{itemize}
+\end{lemma}
 
-Like every other algebraic structures, mapping between KA is an important subject of study.
-As we will show later, a lot of the known concepts in KA 
-can be defined using properties of maps between KA.
-A \emph{KA homomorphism} between two KA \(𝒦\) and \(𝒦'\) is a map \(h: 𝒦 → 𝒦'\)
-that preserves all the KA operations, namely, for all \(p, q ∈ 𝒦\) the following equations hold:
-\begin{align*}
-  h(p + q) &= h(p) + h(q) \\  
-  h(p ⋅ q) &= h(p) ⋅ h(q) \\  
-  h(p^*) &= h(p)^*.
-\end{align*}
+A Kleene algebra with tests (KAT) is a Kleene algebra with an embedded Boolean algebra,
+where the conjunction, disjunction, and identities in the Boolean algebra coincide with 
+the addition, multiplication, and the identities of Kleene algebra.  
+We refer to elements of this embedded Boolean algebra as \emph{tests}.
 
+Given an algebraic theory, we can construct its \emph{free model} 
+over a finite set \( \Sigma \), 
+called the \emph{alphabet}~\cite{burrisCourseUniversalAlgebra1981}.  
+The free model consists of all the terms formed by \( \Sigma \) modulo 
+provable equivalences of the algebra. The operations of the free model are obtained 
+by lifting the term-level operations to equivalence classes.
 
-\subsection{Free KA And Interpretations}
+The above construction can be extended to the case of KAT and TopKAT, 
+suppose that we are given two disjoint finite sets $K$ (the
+\emph{action alphabet}) and $B$ (the \emph{test alphabet}).  Elements of $K$ and
+$B$ are called \emph{primitive actions and primitive tests}, respectively. 
+KAT terms over the alphabet \(K, B\) are defined with the following grammar:
+\[t  \triangleq  b  \in  B  \mid  p  \in  K  \mid  1  \mid  0  \mid  t_{1} + t_{2}  \mid  t_{1}  \cdot  t_{2}  \mid  t^*  \mid  \overline{t_b},\]
+where \(t_b\) does not contain primitive actions.
+The \emph{free KAT} over \(K, B\), written $\KAT_{K,B}$, 
+consists of terms over \(K, B\) modulo provable KAT equivalences.  
+The tests of the free KAT are Boolean terms, i.e. terms formed by
+primitive tests and Boolean operations modulo Boolean axioms.  A similar
+construction applies to TopKAT, where an additional symbol \( \top \) was added 
+as the largest element in the theory; we denote the free TopKAT over $K,B$ as
+\(\TopKAT_{K, B}\).  We sometimes omit the alphabets \(K\) and \(B\) when they
+are irrelevant or can be inferred.
 
-In order to reason about logical properties like completeness about KA,
-it is important to define expressions and interpretations in Kleene algebra.
-A \emph{KA alphabet} \(K\) is a finite set; we call the elements \(p ∈ K\) \emph{primitives}.
-Given an alphabet \(K\), 
-we can construct all the Kleene Algebra terms over \(K\) with the following grammar:
-\[e = p ∈ K ∣ 1 ∣ 0 ∣ e₁ + e₂ ∣ e₁ ⋅ e₂ ∣ e^*.\]
-And these terms forms the free KA:
-\begin{definition}[Free KA]
-  The free KA \(\KA(K)\) over an alphabet \(K\) is a KA 
-  s.t. for all KA \(𝒦\) and a set map \(Î: K → 𝒦\),
-  there exists a unique KA homomorphism \(I: \KA(K) → 𝒦\), where the following diagram commutes:
-  \[
-  \begin{tikzcd}
-    \KA(K) \ar[dashed]{r}{I} & 𝒦 \\  
-    K \ar[swap]{ur}{Î} \ar[hookrightarrow]{u}{i}
-  \end{tikzcd}
-  \]
-  where \(i: K → \KA(K)\) is the inclusion map.
-  Since there exists a bijection between set maps \(Î: K → 𝒦\) 
-  and homomorphisms \(I: K → 𝒦\),
-  we will use \(I\) to denote both \(Î\) and \(I\) for simplicity.
-  We will also sometimes omit \(K\) and just write \(\KA\)
-  if \(K\) is irrelevant or can be inferred from context.
-  We sometimes say \(I\) is \emph{lifted} from the action on the primitives \(Î\).
+In the paper, we frequently consider terms modulo provable equalities, i.e. in the
+context of its corresponding free model.  For example, given \(t_{1}, t_{2}  \in  \KAT\),
+we will say \(t_{1} = t_{2}\) when they are provably equal using the theory of KAT.
+Although the free model seems trivial, it leads to simpler and more modular
+proofs of some properties of algebraic theories, as we will see in~\Cref{sec: general completeness}.
+
+Other important models that we will use in this paper are language (Top)KATs and
+relational (Top)KATs, which we review here.  An \emph{atom} (short for ``atomic
+test'') over a test alphabet \(B = \{b_{1}, b_{2},  \ldots , b_{n}\}\) is a sequence of the form
+\[\hat{b_{1}}  \cdot  \hat{b_{2}}  \cdot   \cdots   \cdot \hat{b_{n}} \text{ where } \hat{b_{i}}  \in  \{b_{i}, \bar{b_{i}}\}.\] 
+We denote atoms as \( \alpha ,  \beta ,  \gamma ,  \ldots \) and the set of all atoms as \(\At\).
+
+A \emph{guarded string} (or \emph{guarded word}) over \(K, B\) is an alternation 
+between atoms and primitive actions that starts and ends in atoms: 
+\[ \alpha _{0}p_{1} \alpha _{1}  \cdots  p_{n}  \alpha _{n} \text{ where } p_{i}  \in  K,  \alpha _{i}  \in  \At;\] 
+where each action is ``guarded'' by an atom.
+A guarded string is similar to a program trace, where each program state is denoted by an atom; and primitive actions will cause a transition between program states.
+We denote the set of all guarded
+strings over alphabet \(K, B\) as \(GS_{K, B}\), and we will omit the alphabet
+\(K, B\) when it is irrelevant or can be inferred from context.  The notation
+\( \alpha  s\) denotes a guarded string starting with atom \( \alpha \) with the rest of the string
+\(s\); similarly, \(s  \alpha \) denotes a guarded string that ends with atom \( \alpha \) with
+rest of the string being \(s\).
+
+\begin{definition}[Language/trace KAT~\cite{Kozen_Smith_1997}]
+  The \emph{language KAT} (also called ``\emph{trace KAT}'') over an alphabet \(K, B\) is
+  denoted as \(\mathcal{G}_{K, B}\), or simply \(\mathcal{G}\) if no confusion can arise.
+
+  The elements are sets of guarded strings (called \emph{guarded languages}), 
+  and the tests are sets of atoms.
+  The additive identity 0 is the empty set, and the multiplicative identity 1 is
+  the set of all the atoms \(\At\).  The addition operator is set union, and the
+  multiplication operator is defined as follows:
+    \[S_{1}  \diamond  S_{2}  \triangleq  \{s_{1}  \alpha  s_{2}  \mid  s_{1}  \alpha   \in  S_{1},  \alpha  s_{2}  \in  S_{2}\}.\]
+    The star operation is defined non-deterministically 
+    iterating the multiplication operator:
+    \[S^*  \triangleq   \bigcup _{i  \in  \mathbb{N}} S^i \text{ where } S^0 = \At, S^{k+1} = S  \diamond  S^k.\]
 \end{definition}
 
-The free KA over \(K\) can be constructed as all the KA terms over \(K\)
-modulo provable equalities in KA. 
-The operations in free KA is purely syntactic, 
-for example, the addition of two terms \(e₁, e₂ ∈ \KA(K)\) will 
-simply yield the term \(e₁ + e₂\).
-Furthermore, the homomorphism \(I: \KA(K) → 𝒦\) is inductively generated 
-from \(Î: K → 𝒦\) as follows:
-\begin{align*}
-  I & : \KA(K) → 𝒦 \\
-  I & (p) ≜ Î(p) & p ∈ K \\
-  I & (e₁ + e₂) ≜ I(e₁) + I(e₂) \\  
-  I & (e₁ ⋅ e₂) ≜ I(e₁) ⋅ I(e₂) \\  
-  I & (t^*) ≜ I(t)^*
-\end{align*}
-The uniqueness of \(I\) can be derived by unfolding the definition of homomorphisms.
-Homomorphisms from free KA is called \emph{KA interpretations}.
-By definition of the free KA, 
-a KA interpretation is uniquely determined by the action on the primitives, i.e.
-for two interpretations \(I, I': \KA(K) → 𝒦\):
-\[∀ p ∈ K, I(p) = I'(p) ⟺ ∀ e ∈ \KA(K), I(e) = I'(e).\]
+Another useful type of KAT are relational ones, where each element is a relation
+\(R  \subseteq  X  \times  X\) over a fixed set \(X\).  In applications, the set $X$ typically
+represents the set of all possible program states, and each relation $R$
+represents a program by relating each possible input to the corresponding
+output.
 
-\subsection{Complete KA Interpretations}\label{sec: complete KA interpretation}
+\begin{definition}[Relational KAT]
+  A relational KAT is a KAT $\mathcal{R}$ consists of relations over a fixed set \(X\) 
+  (though $\mathcal{R}$ need not contain every relation over $X$),
+  and it is closed under the following operations. 
+  The tests are all the relations that are subsets of the identity relation.  
+  The additive identity 0 is the empty set, and
+  the multiplicative identity is the identity relation:
+  \[1  \triangleq  \{(x, x)  \mid  x  \in  X\}.\] The addition operator is set union, and the
+  multiplication operation is relational composition:
+  \[R_{1} ; R_{2} = \{(x, z)  \mid   \exists  y  \in  X, (x, y)  \in  R_{1}, (y, z)  \in  R_{2}\}.\] 
+  Finally, the star operation is defined as:
+  \[R^*  \triangleq   \bigcup _{i  \in  \mathbb{N}} R^i \text{ where } R^0 = 1, R^{k+1} = R ; R^k.\] We denote the
+  class of all relational KATs as \(\REL\).
+\end{definition}
 
-One important property for interpretation is completeness.
-We say an interpretation \(I\) is \emph{complete} when the following equivalence holds:
-\[∀e₁, e₂ ∈ \KA(K), e₁ = e₂ ⟺ I(e₁) = I(e₂).\]
-If we consider \(I\) as a desirable semantics for \(\KA(K)\),
-then this means that all the semantical equalities can be derived using just the theory,
-a very desirable quality of a proof system.
+\emph{TopKAT} extends the theory of KAT with the largest element \( \top \), i.e.
+\( \top   \geq  p\) for all elements \(p\).  The \emph{language TopKAT} over an alphabet
+\(K, B\) has the same carrier and operations as \(\mathcal{G}_{K_ \top , B}\), where \(K_ \top \) is
+the set \(K\) joined with a new primitive action \( \top \); and the largest element
+is the full language \(GS_{K_ \top , B}\).
 
-It is quite easy to see from the definition, 
-a interpretation is complete if and only if it is injective.
-This realization enables us to compose injective homomorphisms 
-to obtain complete interpretations.
+The \emph{relational TopKAT} is a relational KAT that contains the complete relation:
+\[ \top   \triangleq  \{(x, y)  \mid  x, y  \in  X\};\] we denote the set of all relational TopKATs as
+\(\TopREL\).  It is known that there are equations that are valid in relational
+TopKAT, but are not derivable by the axioms of
+TopKAT~\cite{Zhang_de_Amorim_Gaboardi_2022}; however, by adding the axiom
+\(p  \top  p  \geq  p\), the theory becomes complete over relational
+TopKATs~\cite{Pous_Wagemaker_2022,Pous_Wagemaker_2023}.  
+In this paper, instead of working with a more complex theory, 
+we will show that TopKAT without any additional axiom already suffices 
+for the purpose of encoding domain comparisons. 
+Indeed, TopKAT is complete with respect to domain comparison inequalities,
+which can be used to encode both incorrectness logic and Hoare logic.
 
-One of such complete interpretation, as we have mentioned before, is the language interpretation.
-Kozen has showed that the powerset of any monoid generates a Kleene Algebra~\cite{Kozen_2002},
-and the language KA over alphabet \(K\) is generated by the free monoid over \(K\).
-We denote the free monoid over \(K\) as \(\Word(K)\), 
-and we call the elements \emph{words over \(K\)};
-finally, we denote the identity of the monoid \(ϵ\), called the \emph{empty word}.
-More explicitly, the language KA \(ℒ_{K}\) over \(K\) can be defined as follows:
-\begin{itemize}[nosep]
-  \item The carrier set is all the languages (sets of words) over the alphabet \(K\).
-  \item The additive identity \(0\) is the empty set. 
-  \item The multiplicative identity \(1\) is the singleton set with the empty string \(\{ϵ\}\).
-  \item The addition operation is set union.
-  \item The multiplication operation is element-wise concatenation:
-    \[l₁ ⋅ l₂ ≜ \{w₁ w₂ ∣ w₁ ∈ l₁, w₂ ∈ l₂\}.\]
-  \item The star operation is the closure under finite concatenation:
-    \[l^* ≜ ⋃_{i ∈ ℕ} l^{i} \text{ where } l^0 ≜ ϵ, l^{(j + 1)} ≜ l^{j} ⋅ l.\]
-\end{itemize}
-The language interpretation of KA is defined by lifting the following action on primitives \(p\):
-\[L(p) ≜ \{p\}.\]
-The completeness result of the language interpretation is a seminal result in Kleene algebra,
-proven independently by Kozen and Korb~\cite{Kozen_1994,Krob_1991}, 
-and the proof was later improved several times~\cite{Kozen_2001,Silva_2010,Kozen_Silva_2020}.
-
-
-Another important class of Kleene Algebra is relational Kleene Algebra,
-where it is typically used to model input and output relation of a program.
-A relational Kleene Algebra \(ℛ\) over a set \(X\) is defined as follows:
-\begin{itemize}
-  \item The carrier is a set of relations \(ℛ ⊆ 𝒫(X × X)\) that is closed under the following operations 
-  \item The additive identity \(0\) is the empty relation \(∅\).
-  \item The multiplicative identity \(1\) is the identity relation \(\{(x, x) ∣ x ∈ X\}\).
-  \item The addition operation is set union.
-  \item The multiplication is sequential composition:
-    \[r₁ ; r₂ ≜ \{(a, c) ∣ ∃ b ∈ X, (a, b) ∈ r₁, (b, c) ∈ r₂\}.\]
-  \item The star operation is the reflexive transitive closure:
-    \[r^* ≜ ⋃_{i ∈ ℕ} r^{i} \text{ where } r^0 ≜ 1, r^{(j + 1)} ≜ r^{j} ; r.\]
-\end{itemize}
-We denote all the relational model over all sets \(\REL\).
-We say that a equality \(e₁ = e₂\) is valid in all relational model, 
-when for all relational KA \(ℛ\) and relational interpretation \(I: \KA → ℛ\), \(I(e₁) = I(e₂)\). 
-We use \(\REL ⊧ e₁ = e₂\) to denote that \(e₁ = e₂\) is valid in all relational models.
-And in fact relational model is complete, i.e.
-\[e₁ = e₂ ⟺ \REL ⊧ e₁ = e₂.\]
-This result is obtained by the classical Pratt's trick~\cite{Pratt_1980},
-which constructs a homomorphic embedding \(h: ℒ_{K} → \Word(K) × \Word(K)\)
-from the language model to a specific relational model.
-By the injectivity of \(h\), \(h ∘ L: \KA(K) → \Word(K) × \Word(K)\) is also injective, 
-hence a complete interpretation.
-Therefore, \[\REL ⊧ e₁ = e₂ ⟹ h ∘ L(e₁) = h ∘ L(e₂) ⟹ e₁ = e₂.\]
-And the reverse implication is straightforward, because for all interpretation \(I\), 
-\[e₁ = e₂ ⟹ I(e₁) = I(e₂).\]
-
-
-\subsection{Constructing Kleene Algebras}
-
-Besides the three important class of Kleene Algebras in~\Cref{sec: complete KA interpretation},
-we also can construct Kleene Algebra from known Kleene Algebras.
-By leveraging these constructions, 
-we can produce well-structured Kleene Algebra with ease.
-
-Upper-triangular matrix model enjoys nice properties that will be crucial in later development.
-Given a KA \(𝒦\), the square upper-triangular matrices over \(𝒦\) of size \(n\), 
-denoted as \(M_{n}(𝒦)\), forms a Kleene Algebra, 
-with matrix addition, matrix multiplication, 
-and a star operation inductively defined as follows~\cite{Kozen_1994}:
+In this paper, 
+we will use \(\dom\) and \(\cod\) to denote the 
+conventional (co)domain operators on relations, namely, for any relation \(R\):
 \[
-  \begin{bmatrix}
-    A & B \\
-    0 & D
-  \end{bmatrix}^* ≜
-  \begin{bmatrix}
-    A^* & A^* B D^* \\  
-    0 & D^*
-  \end{bmatrix},
+    \dom(R)  \triangleq  \{x  \mid   \exists  y, (x, y)  \in  R\} \\
+    \cod(R)  \triangleq  \{y  \mid   \exists  x, (x, y  \in  R)\}.
 \]
-where \(A, D\) are square block matrices, and \(B\) is a block matrix.
+To demonstrate how TopKAT models (co)domain comparisons,
+we take any relational TopKAT \(\mathcal{R}\) and two relations \(R_{1}, R_{2}  \in  \mathcal{R}\),
+and we denote the complete relation as \( \top \):
+\begin{lemma}[TopKAT encodes (co)domain comparison]\label{the: TopKAT encodes domain PRIMITIVE}
+    \[
+        R_{1}  \top   \supseteq  R_{2}  \top   \iff  \dom(R_{1})  \supseteq  \dom(R_{2}) \\
+         \top  R_{1}  \supseteq   \top  R_{2}  \iff  \cod(R_{1})  \supseteq  \cod(R_{2})
+    \]
+\end{lemma}
+If we regard \(R_{1}\) and \(R_{2}\) as the input output relation of two programs,
+which is typically encoded by KAT terms,
+we can see that \(R_{1}  \top   \supseteq  R_{2}  \top \) reflects that  
+the domain of \(R_{1}\) is larger than the domain of \(R_{2}\);
+and similarly for the inequality \( \top  R_{1}  \supseteq   \top  R_{2}\).
+Thus, given two KAT terms \(t_{1}, t_{2}  \in  \KAT_{K, B}\), we call inequalities like
+\(t_{1}  \top   \geq  t_{2}  \top \) \emph{domain comparison inequalities},
+and \( \top  t_{1}  \geq   \top  t_{2}\) \emph{codomain comparison inequalities}.
+Notice that the term \( \top  t_{1}\) is a shorthand for \( \top   \cdot  i(t_{1})\),
+where \(i\) is the inclusion function \(\KAT_{K, B}  \hookrightarrow  \TopKAT_{K, B}\).
+In the rest of the paper, we will sometimes leave this inclusion function implicit.
+These two forms of inequalities will be the focus of 
+our completeness results in~\Cref{sec: domain completeness of TopKAT}.
 
-\begin{corollary}\label{the: diagonal projection is homomorphism}
-  Projections of the diagonal element of upper-triangular matrices 
-  are homomorphisms:
-  \[π_{n, n}: M_{m}(𝒦) → 𝒦 \text{ where } n ≤ m.\]
-\end{corollary}
+We also know another class of TopKATs named \emph{general relational TopKATs},
+which is denoted as \(\TopGREL\).
+The top element of general relational TopKAT is not necessarily the complete relation,
+but the largest relation in the model.
+All equations in the general relational TopKAT can be derived using the theory of TopKAT.
 
-\begin{proof}
-  By induction on the size of the matrix.
-  TODO
-\end{proof}
+However, the completeness of \(\TopGREL\) came at the cost of expressive power:
+every predicate that is expressible using general relational TopKAT 
+is already expressible using relational KAT~\cite{Zhang_de_Amorim_Gaboardi_2022},
+so the extension with top, in the case of general relational TopKAT, 
+does not grant any extra expressive power.
+In~\Cref{the: TopGREL expressive power}, 
+we show that this result is a simple corollary of our new reduction result.
 
-\begin{corollary}\label{the: diagonal image of free model is closed under sub KA}
-  Given an interpretation into a matrix model \(I: \KA(X) → M_m(𝒦)\)
-  and a Kleene subalgebra \(𝒦' ⊆ 𝒦\), 
-  any diagonal projection \(π_{n, n}\) satisfy the following equivalences:
-  \[∀ a ∈ X, π_{n, n}(I(a)) ⊆ 𝒦' ⟺ ∀ e ∈ \KA(X), π_{n, n}(I(e)) ⊆ 𝒦'.\]
-\end{corollary}
-
-\begin{proof}
-  Direct consequence of \Cref*{the: diagonal projection is homomorphism}.
-\end{proof}
-
-Another important class of models are models bounded by a single element:
-\begin{theorem}
-  Given a KA \(𝒦\), and an element \(p ∈ 𝒦\), 
-  if \(p ≥ 1\) and \(p ⋅ p ≤ p\), then all the element in \(𝒦\) that is smaller than \(p\)
-  forms a Kleene Algebra.
-\end{theorem}
-
-\begin{proof}
-  We need to show that \(\{q ∣ q ≤ p\}\) is closed under all operation of KA.
-  We will show the star case as an example.
-  Given an element \(q ≤ p\), we need to show \(q^* ≤ p\).
-  By induction rule \[q p ≤ p p ≤ p ⟹ q^* p ≤ p ⟹ q^* ≤ q^* p ≤ p.\qedhere\]
-\end{proof}
-We denote the Kleene algebra formed by all the elements in \(𝒦\) 
-that is less than \(p\) as \(𝒦ₚ\).
-
-
-
-\subsection{Kleene Algebra With Tests}
-
-A classical extension of KA is Kleene Algebra with Tests (KAT)~\cite{Kozen_Smith_1997}, 
-which is a two-sorted algebra \((ℬ, 𝒦)\), s.t. 
-\(ℬ\) is a boolean algebra where the elements are called \emph{tests}; 
-\(𝒦\) is a Kleene algebra where the elements in \(𝒦 ∖ ℬ\) are called \emph{actions}; 
-and \(ℬ\) is a subalgebra of \(𝒦\) where the disjunction and conjunction operator in \(ℬ\)
-respectively coincide with the addition and multiplication in \(𝒦\).
-
-A \emph{KAT alphabet} consists of two disjoint finite set \(K, B\);  
-the elements in \(K\) are called \emph{primitive actions} 
-and the elements in \(B\) are called \emph{primitive tests}.
-Given a KAT alphabet \(K, B\), we can define KAT terms as follows:
-\[t = p ∈ K ∣ b ∈ B ∣ \overline{t_b} ∣ 1 ∣ 0 ∣ t₁ + t₂ ∣ t₁ ⋅ t₂ ∣ t^*,\]
-where \(t_b\) do not contain any primitive actions.
-Notice boolean terms like \(t₁ ∨ t₂\) are not presented here, 
-this is because the disjunction operator coincide with addition, 
-hence by definition \(t₁ ∨ t₂\) is the same as \(t₁ + t₂\).
-
-Indeed most of the results and definitions from Kleene Algebra 
-carry over to Kleene Algebra with tests.
-A \emph{KAT homomorphism} \(h\) is a map that preserves the sort and all the operations.
-Concretely it is a KA homomorphism on \(𝒦\), 
-and a boolean homomorphism when restricted to \(ℬ\).
-A \emph{free KAT over \(K, B\)} is a KAT that satisfy the same universality as free KA:
-for all KAT \(𝒦\) and a set map \(K + B → 𝒦\),
-there exists a unique homomorphism, s.t. the following diagram commutes,
-\[
-  \begin{tikzcd}
-    \KAT(K,B) \ar[dashed]{r}{I} & 𝒦 \\  
-    K+B \ar[swap]{ur}{Î} \ar[hookrightarrow]{u}{i}
-  \end{tikzcd}
-\]
-and \(i\) is the inclusion function.
-The free KAT over \(K, B\) can be explicitly constructed as 
-the set of KAT terms over \(K, B\) modulo the provable equalities of KAT.
-Finally KAT is complete over guarded string interpretation \(G\) 
-and relational models~\cite{Kozen_Smith_1997}.
-
-It is not a coincidence that all of the constructions in KAT and KA are similar;
-in fact, concepts like terms, homomorphisms, 
-and free models are standard concepts in universal algebra~\cite{Burris_Sankappanavar_1981}.
-Because our work have limited use of universal algebra 
-and we do not make much contributions in that subject, 
-we will not have a detailed introduction to universal algebra
-nor will we seek to generalize our results to the generality of universal algebra.
-
-The importance of KAT arises from modeling program behavior by using 
-actions to represent basic components, tests to represent guards, 
-multiplication to represent sequential composition, 
-addition to represent random choice, and star to represent iteration. 
-Concretely, KATs can be used to model while programs using the following encoding~\cite{Kozen_1997}:
+We are also interested in maps between models:
+A \emph{KAT homomorphism} \(f\) is a map between two KATs \(\mathcal{K}\) and \(\mathcal{K}'\)
+s.t. it preserves the sorts and operations:
+given a test \(b\) in \(\mathcal{K}\) then \(f(b)\) is a test in \(\mathcal{K}'\);
+and all the KAT operations (complement, identities, addition, multiplication, and star) are preserved:
 \begin{align*}
-    \comITE{b}{p}{q} & ≜ b p + b̄ q; \\
-    \comWhile{b}{p} & ≜ (b p)^* b̄.
+    f & : \mathcal{K}  \to  \mathcal{K}'\\
+    f(\bar{b}) & = \overline{f(b)} \\  
+    f(1) & = 1 \\  
+    f(0) & = 0 \\
+    f(p + q) & = f(p) + f(q) \\  
+    f(p  \cdot  q) & = f(p)  \cdot  f(q) \\  
+    f(p^*) & = f(p)^*.
 \end{align*}
-Furthermore, a Hoare triple \(\{b\}~p~\{c\}\) can be encoded using the following two 
-equivalent encodings~\cite{Kozen_2000, Manes_Arbib_1986}:
-\[b p = b p c, \qquad b p c̄ = 0.\]
+Similarly, a \emph{TopKAT homomorphism} is a KAT homomorphism that preserves the
+largest element.
+
+\subsection{Interpretation, Completeness, and Injectivity}\label{sec: completeness background}
+
+Consider a KAT equation such as \(p  \cdot  b  \cdot  \bar{b} = 0\). To determine its
+validity in a particular KAT \(\mathcal{K}\), we need to assign meaning to it by
+interpreting each primitive as an element in \(\mathcal{K}\); that is, by defining a map
+\(\hat{I}\) of type \(K + B  \to  \mathcal{K}\).  Such a map \(\hat{I}: K + B  \to  \mathcal{K}\) induces a
+unique KAT homomorphism \(I : \KAT_{K,B}  \to  \mathcal{K}\) inductively defined on the term 
+as follows:
+\begin{equation}
+    \begin{aligned}
+        I(p)       &  \triangleq  \hat{I}(p)    & \text{ where } p  \in  K + B \\
+        I(\overline{t_b}) &  \triangleq  \overline{I(t_b)} 
+            & \text{\(t_b\) does not contain primitive actions} \\
+        I(t_{1} + t_{2}) &  \triangleq  I(t_{1}) + I(t_{2})                     \\
+        I(t_{1}  \cdot  t_{2}) &  \triangleq  I(t_{1})  \cdot  I(t_{2})                     \\
+        I(t^*)     &  \triangleq  I(t)^*
+    \end{aligned}
+\end{equation}
+In fact, every KAT homomorphism from a free model arises this way: there is a
+bijection between functions of type \(K + B  \to  \mathcal{K}\) and KAT homomorphisms of type
+\(\KAT_{K, B}  \to  \mathcal{K}\), for any KAT \(\mathcal{K}\).  
+Because the homomorphism \(I\) and the function \(\hat{I}\) are equivalent, 
+we will refer to them interchangeably as \emph{KAT interpretations} 
+and denote both of them as \(I\).
+
+The above result enables us to define a homomorphism from the free KAT just by
+defining its action on the primitives; saving us time to check the equations
+that a homomorphism must satisfy.  It also allows us to prove that two
+interpretations are equal by arguing that they map the primitives to
+equal values.
+
+Given a KAT \(\mathcal{K}\), and two terms \(t_{1}, t_{2}  \in  \KAT_{K, B}\) we say that \(\mathcal{K}  \models  t_{1} = t_{2}\) if
+\[ \forall  I : \KAT_{K, B}  \to  \mathcal{K}, I(t_{1}) = I(t_{2}).\] In particular, 
+for two terms in the free model \(t_{1}, t_{2}  \in  \KAT_{K, B}\),
+\(\KAT_{K, B}  \models  t_{1} = t_{2}\) is equivalent to \(t_{1} = t_{2}\).  
+For a collection of models \(\mathsf{K}\), 
+we say that \(\mathsf{K}  \models  t_{1} = t_{2}\) if for all \(\mathcal{K}  \in  \mathsf{K}\),
+\(\mathcal{K}  \models  t_{1} = t_{2}\).  For example, \(\REL  \models  t_{1} = t_{2}\) means that \(t_{1} = t_{2}\) is
+valid in all relational KATs.  All the above notations and terminologies can be
+similarly extended to TopKAT.
+
+Theories like KAT and TopKAT are designed to model practical
+programs, so it is important to know if they can model all the desirable
+equations between programs. If the theory of KAT can derive all the equalities
+for a particular interpretation \(I\), namely:
+\[\KAT_{K, B}  \models  t_{1} = t_{2}  \iff  I(t_{1}) = I(t_{2}),\]
+we say that the theory of KAT is \emph{complete} with respect to \(I\).
+Recall that \(\KAT_{K, B}  \models  t_{1} = t_{2}\) is equivalent to \(t_{1} = t_{2}\);  
+thus, by definition, an interpretation \(I\) is complete if and only if it is injective.
+One of such interpretation is the guarded string interpretation
+\(G: \KAT_{K, B}  \to  \mathcal{G}_{K, B}\)~\cite{Kozen_Smith_1997},
+defined by lifting the following action on the primitives:
+\[
+    G(b) = \{ \alpha   \mid  \text{\(b\) appears positively in \( \alpha \)}\}, \\
+    G(p) = \{ \alpha  p  \beta   \mid   \alpha ,  \beta   \in  \At\}.
+\]
+
+% AAA: What is this a corollary of?
+% CZ: I changed it to a lemma. I originally named it corollary, because it can be easily observed.
+
+% AAA: The previous discussion is a bit confusing. We begin by talking about a
+% specific complete interpretation G, but right after that we say "when it
+% holds", giving the impression that G may or may not be complete.  It would be
+% useful to split the previous discussion into some material about general
+% interpretations (that we would like to be complete), and interpretations that
+% are similar to G, and that we know are complete.
+
+In several previous works, the term ``free model'' refers to the range (set of
+reachable elements) of a complete interpretation.  Since a complete
+interpretation is an injective homomorphism, 
+such interpretation induces an isomorphism on its range, 
+thus our definition of free model is equivalent to these definitions.
+
+Many previous proofs can also be explained by seeing complete interpretations as
+injective homomorphisms: the proof for completeness of relational KATs
+constructs an injective homomorphism $h$ from a language KAT into a relational
+KAT~\cite{Kozen_Smith_1997}.  Since both \(G\) and \(h\) are injective
+homomorphisms, \(h  \circ  G\) is also an injective homomorphism, hence a complete
+interpretation.  Since \(h  \circ  G\) is a relational interpretation:
+\[\KAT_{K, B}  \models  t_{1} = t_{2}  \implies  \REL  \models  t_{1} = t_{2}  \implies  h  \circ  G(t_{1}) = h  \circ  G(t_{2});\]
+then the completeness of \(h  \circ  G\) implies
+\((h  \circ  G)(t_{1}) = (h  \circ  G)(t_{2})  \iff  \KAT_{K, B}  \models  t_{1} = t_{2}\). Hence,
+\[\KAT_{K, B}  \models  t_{1} = t_{2}  \iff  \REL  \models  t_{1} = t_{2},\]
+i.e. the theory of KAT is complete with respect to relational KAT.
+
+% Function/homomorphism composition will be used frequently in this paper,
+% but sometimes simply writing \(f  \circ  g\) will be confusing without knowing
+% the domain and codomain of function \(f\) and \(g\).
+% Therefore, we will use the notation \(X \xrightarrow{g} Y \xrightarrow{f} Z\)
+% to denote the composition of \(f: Y  \to  Z\) and \(g: X  \to  Y\) when it is desirable.
+
+% AAA: I think the above notation is standard enough; we don't have to explain
+% what it means.
+% CZ: Removed
+
+Besides using composition of injective homomorphisms, another technique commonly
+used to prove injectivity is to construct a left inverse: 
+if a (Top)KAT homomorphism \(f: \mathcal{K}  \to  \mathcal{K}'\) has a left inverse homomorphism \(g: \mathcal{K}'  \to  \mathcal{K}\) 
+i.e. \(g  \circ  f = id_{\mathcal{K}}\), then \(f\) is injective.  
+Notice that \(g\) does not need to be a homomorphism for \(f\) to be injective,
+however, in the case where \(f\) is an interpretation, 
+\(g\) being a homomorphism makes the equality \(g  \circ  f = id_{\mathcal{K}}\) easier to check.
+Because both \(g  \circ  f\) and \(id_{\mathcal{K}}\) are all interpretations,
+they are equal if and only if they have the same action on all the primitives.
+% AAA: This is only true because
+
+Finally, we provide a shorthand for domain reasoning. 
+For two terms \(t_{1}, t_{2}  \in  \KAT\), we write
+\[\REL  \models  \dom(t_{1})  \geq  \dom(t_{2}),\] when 
+\(\dom(I(t_{1}))  \supseteq  \dom(I(t_{1}))\) for all relational KAT interpretations \(I\);  
+and similarly for relational TopKAT and general relational TopKAT.  
+Then \Cref{the: TopKAT encodes domain PRIMITIVE} implies the following:
+\begin{lemma}\label{the: top element represent domain}
+    For two KAT terms \(t_{1}, t_{2}  \in  \KAT_{K, B}\):
+    \begin{align*}
+        \TopREL  \models  t_{1}  \top   \geq  t_{2}  \top  &  \iff  \REL  \models  \dom(t_{1})  \geq  \dom(t_{2}) \\
+        \TopREL  \models   \top  t_{1}  \geq   \top  t_{2} &  \iff  \REL  \models  \cod(t_{1})  \geq  \cod(t_{2})
+    \end{align*}
+\end{lemma}
+

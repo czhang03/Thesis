@@ -66,6 +66,7 @@
 % biblatex
 \usepackage[style=numeric,sorting=ynt]{biblatex}
 \addbibresource{./thesis.bib} 
+\newcommand{\citet}[1]{\Citeauthor{#1}~\cite{#1}}
 
 % theorems
 \usepackage{amsthm}
@@ -177,12 +178,16 @@
 \newcommand{\At}{\mathbf{At}}
 
 % theories
-\newcommand{\KA}{\mathsf{KA}}
-\newcommand{\KAT}{\mathsf{KAT}}
-\newcommand{\TopKAT}{\mathsf{TopKAT}}
-\newcommand{\REL}{\mathbf{\mathrm{REL}}}
-\newcommand{\TopREL}{\mathbf{\mathrm{TopREL}}}
-\newcommand{\TopGREL}{\mathbf{\mathrm{TopGREL}}}
+\newcommand{\KA}{\ensuremath{\mathsf{KA}}}
+\newcommand{\KAT}{\ensuremath{\mathsf{KAT}}}
+\newcommand{\TopKAT}{\ensuremath{\mathsf{TopKAT}}}
+\newcommand{\REL}{\ensuremath{\mathbf{\mathrm{REL}}}}
+\newcommand{\TopREL}{\ensuremath{\mathbf{\mathrm{TopREL}}}}
+\newcommand{\TopGREL}{\ensuremath{\mathbf{\mathrm{TopGREL}}}}
+\newcommand{\FailTopREL}{\ensuremath{\mathsf{FailTopREL}}}
+\newcommand{\fail}{\mathtt{fail}}
+\newcommand{\okState}{\mathinner{ok}}
+\newcommand{\errState}{\mathinner{er}}
 
 % two-counter machine command
 \DeclareMathOperator{\Inc}{\mathtt{Inc}}

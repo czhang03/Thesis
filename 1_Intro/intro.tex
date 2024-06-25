@@ -142,18 +142,18 @@ which can be used to encode both incorrectness logic and Hoare logic.
 In this paper, 
 we will use \(\dom\) and \(\cod\) to denote the 
 conventional (co)domain operators on relations, namely, for any relation \(R\):
-\[
+\begin{align*}
     \dom(R)  \triangleq  \{x  \mid   \exists  y, (x, y)  \in  R\} \\
     \cod(R)  \triangleq  \{y  \mid   \exists  x, (x, y  \in  R)\}.
-\]
+\end{align*}
 To demonstrate how TopKAT models (co)domain comparisons,
 we take any relational TopKAT \(\mathcal{R}\) and two relations \(R_{1}, R_{2}  \in  \mathcal{R}\),
 and we denote the complete relation as \( \top \):
 \begin{lemma}[TopKAT encodes (co)domain comparison]\label{the: TopKAT encodes domain PRIMITIVE}
-    \[
+    \begin{align*}
         R_{1}  \top   \supseteq  R_{2}  \top   \iff  \dom(R_{1})  \supseteq  \dom(R_{2}) \\
          \top  R_{1}  \supseteq   \top  R_{2}  \iff  \cod(R_{1})  \supseteq  \cod(R_{2})
-    \]
+    \end{align*}
 \end{lemma}
 If we regard \(R_{1}\) and \(R_{2}\) as the input output relation of two programs,
 which is typically encoded by KAT terms,

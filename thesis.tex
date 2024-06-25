@@ -7,6 +7,7 @@
 %\documentclass[12pt,twoside]{report} % Double-sided printing
 \usepackage[intlimits]{amsmath}
 \usepackage{amsfonts,amssymb}
+\usepackage{mathtools}
 \DeclareSymbolFontAlphabet{\mathbb}{AMSb}
 %\usepackage{natbib}
 %\usepackage{apalike}
@@ -109,6 +110,9 @@
 \creflabelformat{ineq}{#2{\upshape(#1)}#3} 
 \crefname{equiv}{equivalence}{equivalences}
 \creflabelformat{equiv}{#2{\upshape(#1)}#3} 
+\crefname{prog}{program}{programs}
+\Crefname{prog}{Program}{Programs}
+
 
 % item spacing
 \usepackage{enumitem}
@@ -175,11 +179,17 @@
 \DeclareMathOperator{\cod}{\mathrm{cod}}
 \DeclareMathOperator{\Img}{\mathbf{Im}}
 \DeclareMathOperator{\op}{\mathrm{op}}
+\newcommand{\injL}{\mathrm{inj}ₗ}
+\newcommand{\injR}{\mathrm{inj}ᵣ}
 \newcommand{\At}{\mathbf{At}}
+\newcommand{\true}{\mathrm{true}}
+\newcommand{\false}{\mathrm{false}}
 
 % theories
+\newcommand{\BExp}{\mathbf{\mathrm{BExp}}}
 \newcommand{\KA}{\ensuremath{\mathsf{KA}}}
 \newcommand{\KAT}{\ensuremath{\mathsf{KAT}}}
+\newcommand{\CFGKAT}{\ensuremath{\mathsf{CFKAT}}}
 \newcommand{\TopKAT}{\ensuremath{\mathsf{TopKAT}}}
 \newcommand{\REL}{\ensuremath{\mathbf{\mathrm{REL}}}}
 \newcommand{\TopREL}{\ensuremath{\mathbf{\mathrm{TopREL}}}}
@@ -195,14 +205,18 @@
 \DeclareMathOperator{\If}{\mathtt{If}}
 \DeclareMathOperator{\Halt}{\mathtt{Halt}}
 % program commands 
+\newcommand{\command}[1]{\texttt{#1}}
 \newcommand{\comSkip}{\mathtt{skip}}
 \newcommand{\comError}{\mathtt{error ()}}
-\newcommand{\comAssume}[1]{\mathtt{assume}~#1}
+\newcommand{\comAssert}[1]{\mathtt{assert}~#1}
 \newcommand{\comITE}[3]{\mathtt{if}~#1~\mathtt{then}~#2~\mathtt{else}~#3}
 \newcommand{\comWhile}[2]{\mathtt{while}~#1~\mathtt{do}~#2}
 \newcommand{\comAssign}[2]{#1:= #2}
-\newcommand{\comLoop}[1]{\mathtt{trace}~#1}
-\newcommand{\comIter}[1]{{#1}^{\star}}
+\newcommand{\comIT}[2]{\command{if}~#1~\command{then}~#2}
+\newcommand{\comLabel}[1]{\command{label}~#1}
+\newcommand{\comBrk}{\command{break}}
+\newcommand{\comRet}{\command{return}}
+\newcommand{\comGoto}[1]{\command{goto}~#1}
 
 \newcommand{\incorTriple}[3]{[#1]~#2~[#3]}
 \newcommand{\hoareTriple}[3]{\{#1\}~#2~\{#3\}}

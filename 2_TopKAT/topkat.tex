@@ -182,7 +182,7 @@ Summarizing, our contributions are:
 \end{itemize}
 
 
-\section{Background}
+\section{Program Logics}
 
 \subsection{Hoare Logic}\label{sec:incorrectness-and-hoare}
 
@@ -269,17 +269,17 @@ to be reachable from \(b\) by executing \(p\).
 \begin{figure}
     \begin{mathpar}
         \inferrule[Empty]
-        {\\}{\incorTriple{b}{p}{\epsilon: ⊥}}
+        {\\}{\incorTriple{b}{p}{\gamma: ⊥}}
 
         \and
         \inferrule[Consequence]
-        {b → b' \\ \incorTriple{b}{p}{\epsilon: c} \\ c' → c}
-        {\incorTriple{b'}{p}{\epsilon: c'}}
+        {b → b' \\ \incorTriple{b}{p}{\gamma: c} \\ c' → c}
+        {\incorTriple{b'}{p}{\gamma: c'}}
 
         \and
         \inferrule[Disjunction]
-        {\incorTriple{b_1}{p}{\epsilon: c_1} \\ \incorTriple{b_2}{p}{\epsilon: c_2}}
-        {\incorTriple{b_1 \lor b_2}{p}{\epsilon: (c_1 \lor c_2)}}
+        {\incorTriple{b_1}{p}{\gamma: c_1} \\ \incorTriple{b_2}{p}{\gamma: c_2}}
+        {\incorTriple{b_1 \lor b_2}{p}{\gamma: (c_1 \lor c_2)}}
 
         \and
         \inferrule[Identity]
@@ -292,23 +292,23 @@ to be reachable from \(b\) by executing \(p\).
 
         \and
         \inferrule[Composition-Normal]
-        {\incorTriple{a}{p}{\okState: b} \\ \incorTriple{b}{p}{\epsilon: c}}
-        {\incorTriple{a}{p;q}{\epsilon: c}}
+        {\incorTriple{a}{p}{\okState: b} \\ \incorTriple{b}{p}{\gamma: c}}
+        {\incorTriple{a}{p;q}{\gamma: c}}
 
         \and
         \inferrule[Choice-Left]
-        {\incorTriple{b}{p}{\epsilon: c}}
-        {\incorTriple{b}{p + q}{\epsilon: c}}
+        {\incorTriple{b}{p}{\gamma: c}}
+        {\incorTriple{b}{p + q}{\gamma: c}}
 
         \and
         \inferrule[Choice-Right]
-        {\incorTriple{b}{q}{\epsilon: c}}
-        {\incorTriple{b}{p + q}{\epsilon: c}}
+        {\incorTriple{b}{q}{\gamma: c}}
+        {\incorTriple{b}{p + q}{\gamma: c}}
 
         \and
         \inferrule[Assume]
         {\\}
-        {\incorTriple{a}{\comAssume{b}}{\okState: a \land b, \errState: 0}}
+        {\incorTriple{a}{\comAssert{b}}{\okState: a \land b, \errState: 0}}
 
         \and
         \inferrule[Error]
@@ -320,8 +320,8 @@ to be reachable from \(b\) by executing \(p\).
 
         \and
         \inferrule[Iter-NonZero]
-        {\incorTriple{b}{{p}^*;p}{\epsilon: c}}
-        {\incorTriple{b}{{p}^*}{\epsilon: c}}
+        {\incorTriple{b}{{p}^*;p}{\gamma: c}}
+        {\incorTriple{b}{{p}^*}{\gamma: c}}
 
         \and
         \inferrule[Iter-Dependent]
@@ -352,13 +352,13 @@ Since incorrect programs often lead to explicit errors,
 \citet{OHearn_2020} also considered incorrectness triples
 \(\incorTriple{b}{p}{\errState: c}\), which mean that, in addition to satisfying
 $c$, we require that the final states of $p$ lead to an error.  More generally,
-we use the notation $\incorTriple{b}{p}{\epsilon: c}$, where the \emph{error
-  code} \(\epsilon \in \{\okState, \errState\}\) signals whether the program
+we use the notation $\incorTriple{b}{p}{\gamma: c}$, where the \emph{error
+  code} \(\gamma \in \{\okState, \errState\}\) signals whether the program
 terminated normally or not; hence, the unqualified notation
 \(\incorTriple{b}{p}{c}\) is simply a shorthand for
 \(\incorTriple{b}{p}{\okState: c}\), when abnormal termination is not a
 concern. Informally, such general triples mean that
-\[\incorTriple{b}{p}{\epsilon: c} ≜ \cod(b p) \supseteq \cod((\epsilon: c)).\]
+\[\incorTriple{b}{p}{\gamma: c} ≜ \cod(b p) \supseteq \cod((\gamma: c)).\]
 In \Cref{sec: failkat and error}, we will give a more concrete definition of
 this semantics in an extension of KAT\@.
 
@@ -370,8 +370,8 @@ the same of KAT terms. Conditionals and loops can be encoded with an
 encoding that is similar to the one given by
 \citet{Kozen_1997}.
 \begin{align*}
-    \comITE{b}{p}{q} & ≜  (\comAssume{b};p) + (\comAssume{\overline{b}}; q) \\
-    \comWhile{b}{p} & ≜ {(\comAssume{b}^*; p)} ;\comAssume{\overline{b}}
+    \comITE{b}{p}{q} & ≜  (\comAssert{b};p) + (\comAssert{\overline{b}}; q) \\
+    \comWhile{b}{p} & ≜ {(\comAssert{b}^*; p)} ;\comAssert{\overline{b}}
 \end{align*}
 Following \citet{OHearn_2020}
 we also use
@@ -506,7 +506,7 @@ Interpretation \(I\):
 \end{figure}
 
 One strategy for exploiting the symmetry between Hoare and incorrectness logic
-is to extend KAT with a codomain operator.  Similar ideas have been explored in prior work~\cite{fitzgerald_modal_2016,Fahrenberg_Johansen_Struth_Ziemiánski_2021,desharnais_modal_2004}. However,
+is to extend KAT with a codomain operator.  Similar ideas have been explored in prior work~\cite{Möller_O’Hearn_Hoare_2021}. However,
 rather than adopting a full-fledged codomain operator, it suffices for our
 purposes to consider a equational theory that only extends KAT with a top
 element.  Such an algebraic structure has also been considered in prior
@@ -592,7 +592,6 @@ We show that these conditions are equivalent in all TopKATs.
 \end{proof}
 
 A similar encoding involving \(\top\) was also mentioned by \citet{OHearn_2020}.
-
 We want to show that this abstraction is enough to capture all the rules of
 incorrectness logic.  Indeed most of the the rules are formulated using program
 operations expressible in \(\KAT\) ~\cite{OHearn_2020}.  We
@@ -641,16 +640,16 @@ further investigate the rules with error in \Cref{sec: failkat and error}.
     
         \and 
         \inferrule[Iter-Zero]
-        {\\}{\incorTriple{b}{\comIter{p}}{b}}
+        {\\}{\incorTriple{b}{p^*}{b}}
     
         \and 
         \inferrule[Iter-NonZero]
-        {\incorTriple{b}{\comIter{p}p}{c}}{\incorTriple{b}{\comIter{p}}{c}}
+        {\incorTriple{b}{p^* p}{c}}{\incorTriple{b}{{p}^*}{c}}
     
         \and
         \inferrule[Iter-Dependent]
         {\forall n \in ℕ, \incorTriple{b_n}{p}{b_{n + 1}}}
-        {\incorTriple{b_0}{\comIter{p}}{\sup_{n \in ℕ} b_{n}}}
+        {\incorTriple{b_0}{{p}^*}{\sup_{n \in ℕ} b_{n}}}
     \end{mathpar}
     \caption{Incorrectness logic with normal termination}\label{fig: normal terminating Inc rule}
 \end{figure}
@@ -1338,6 +1337,533 @@ for all expressions \(e₁, e₂ ∈ \TopKAT\),
     instead of the alternative proof.
 \end{remark}
 
+
+\section{Modeling Errors in Incorrectness Logic}\label{sec: failkat and error}
+
+One of the advantages of algebraic methods is the ease of extension.
+In this section, we show how extending TopKAT with failure can naturally give 
+rise to incorrectness triples that express abnormal termination.  
+The main difference arises from the short-circuiting behavior of sequencing with errors.
+This can be seen in the following rule for sequential composition, which states
+that if an error already occurred in \(p\), \(q\) will not be executed.
+\[
+\inferrule[Composition-Fail]
+{ \incorTriple{b}{p}{\errState: c}}
+{ \incorTriple{b}{pq}{\errState: c}}.
+\]
+
+To capture this type of control flow, we adapt the ideas from
+\citet{Mamouras_2017}, who investigated similar issues
+in the setting of KAT\@.
+\begin{definition}[FailTopKAT]
+  A FailTopKAT is a tuple \((\mathcal{F},\mathcal{K},\mathcal{B},\fail)\), where
+  \((\mathcal{K}, \mathcal{B})\) is a TopKAT, \(\fail \in \mathcal{F}\), and
+  \(\mathcal{K} \subsetneq \mathcal{F}\). The set \(\mathcal{F}\) has the
+  structure of a KAT that extends that of \(\mathcal{K}\), except that the right
+  annihilation rule \(p \cdot 0 = 0\) need not hold.  Instead,
+  \[\fail \cdot p = \fail,\] where \(p\) is any element of \(\mathcal{F}\).
+  (Crucially, we do \emph{not} assume \(\top \geq \fail\).) We call
+  \((\mathcal{K},\mathcal{B})\) the \emph{fail-free subalgebras}, 
+  which model programs that do not fail.  
+  We will omit some of \(\mathcal{K},\mathcal{B},\fail\),
+  if they are not used or can be inferred from the context.
+
+  The class of all FailTopKATs is denoted \(FailTopKAT\).
+\end{definition}
+Note that the original definition of \citet{Mamouras_2017} allows for
+try-catch statements and different types of errors.  We omit these features for
+simplicity, since they are not needed in incorrectness
+logic~\cite{OHearn_2020}. For a more explicit definition
+of \(FailTopKAT\) with all the rules, please refer to the
+\hyperref[def: explicit fail top kat]{definition} on page~\pageref{def: explicit fail top kat}. 
+
+There exists a canonical procedure for extending a TopKAT \(\mathcal{K}\) with
+failures.  The idea, which we adapt from Construction
+F~\cite[Definition~4]{Mamouras_2017} is to consider elements of the
+form \((p,p') ∈ 𝒦 × 𝒦\), where \(p\) represents
+executions that terminate normally, and \(p'\) represents executions that fail.
+\begin{definition}[Construction F for \(FailTopKAT\)]
+  Given a TopKAT \((\mathcal{K}, \mathcal{B})\), we construct a FailTopKAT
+  \((\mathcal{F}, \mathcal{K'}, \mathcal{B'})\).  The carrier sets are defined
+  as 
+  \begin{align*}
+    ℱ & ≜ 𝒦 × 𝒦 &
+    𝒦' & ≜ 𝒦 × \{0_{𝒦}\} &
+    \mathcal{B'} & ≜ ℬ × \{0_{𝒦}\},
+  \end{align*}
+  where \(0_{\mathcal{K}}\) is the additive identity in \(\mathcal{K}\).  The
+  operations of \(\mathcal{F}\) are defined as follows
+  \begin{align*}
+      0_{\mathcal{F}} & ≜ (0_{𝒦}, 0_{𝒦}) \\
+      1_{ℱ} & ≜ (1_{𝒦}, 0_{𝒦}) \\
+      ⊤_{ℱ} & ≜ (⊤_{𝒦}, 0_{𝒦}) \\
+    (p, p') (q, q') & = (p q, p' + pq') \\
+    (p, p') + (q, q') & = (p + q, p' + q') \\
+    {(p, p')}^* & = ({p}^*, ({p}^*) p') \\
+    \fail & = (0_{\mathcal{K}}, 1_{\mathcal{K}}) \\
+    \overline{(b, 0_{\mathcal{K}})} & = (\overline{b}, 0_{\mathcal{K}}).
+  \end{align*}
+\end{definition}
+To develop some intuition for this construction, suppose that \(\mathcal{K}\) is a
+relational TopKAT over \(X\).  There exists a canonical embedding
+of \(\mathcal{F}\) in \(𝒫(X \times X \times \{\okState,\errState\})\) that identifies
+\((p,p') ∈ \mathcal{F}\) with the relation
+\(r = p × \{\okState\} ∪ p' × \{\errState\} ⊆ X × X × \{\okState,\errState\}\).
+Intuitively, \((x,y,\gamma) ∈ r\) means that a program took the input state \(x\) to
+the output state \(y\), and the bit \(\gamma ∈ \{\okState,\errState\}\) signals whether an error has
+occurred.  By looking at the definition of sequential composition under this
+reading, it says that we get an error either by getting an error when running
+the first command (\(p'\)), or if we successfully run the first command, but get
+an error when running the second (\(pq'\));
+and we terminates normally only we sequentially execute \(p\) and then \(q\).
+
+The semantics of~\citet{OHearn_2020} follows the same pattern, except that he considered the cases \(\okState\) and \(\errState\) in
+separate relations.  We can merge them back into a tuple, for example the
+semantics of \(\comSkip\)
+\[(\{(x, x) ∣ x ∈ X\}, \emptyset)\] 
+coincides with the multiplicative identity \(1\) of 
+applying construction F to a relational TopKAT \(\mathcal{K}\): 
+\[(1_{\mathcal{K}}, 0).\]
+In the same way, the sequential composition is multiplication,
+the choice operator is addition, the star operator is the Kleene star,
+and the \(\comError\) command is \(\fail\).
+Thus applying F construction on a relational TopKAT will
+capture the semantics of programs with abnormal termination:
+
+\begin{definition}[Relational FailTopKAT]\label{def:relational-failtopkat}
+  A relational FailTopKAT is a FailTopKAT constructed by applying construction F
+  to a relational TopKAT\@. The class of all relational FailTopKATs is denoted
+  \(\FailTopREL\).
+\end{definition}
+
+To better understand how to encode an incorrectness triple using FailTopKAT, we
+propose a definition of incorrectness triple equivalent to the original one
+\cite[Definition 1 and 4]{OHearn_2020}:
+\begin{definition}\label{def: relational validity of incor triple with fail}
+  Given a relational FailTopKAT \((\mathcal{F}, \mathcal{B})\),
+  \(p \in \mathcal{F}\), and \(b, c \in \mathcal{B}\), for an error code
+  \(\gamma \in \{\okState, \errState\}\) an incorrectness triple
+  \(\incorTriple{b}{p}{\gamma: c}\) is valid if
+    \[\cod(b p) ⊇ \cod(c ⋅ \hat{\gamma)}\] 
+    where
+    \[ \hat{\gamma} ≜
+      \begin{cases}
+        1 & \text{if \(\gamma = \okState\)} \\
+        \fail & \text{if \(\gamma = \errState\).}
+      \end{cases}\]
+    and the function \(\cod(-)\) is extended entry-wise:
+    \begin{align*}
+        \cod((r, q)) & ≜ (\cod(r), \cod(q)).
+    \end{align*}
+\end{definition}
+
+Following the development of \Cref{sec: formulating incorrectness logic}, we can
+obtain a formulation of incorrectness triple with abnormal termination.
+
+\begin{theorem}[Relational Validity]
+  For all relational FailTopKATs \((\mathcal{F}, \mathcal{B})\), and \(p, q \in \mathcal{F}\),
+  we have
+\begin{align*}
+    \top p = \top q & \iff \cod(p) = \cod(q) \\
+    \top p \leq \top q & \iff \cod(p) \subseteq \cod(q),
+\end{align*}
+\end{theorem}
+
+\begin{proof}
+  Write \(p = (p_1,p_2)\) and \(q = (q_1,q_2)\).  Then, by definition,
+  \(\top p = (\top p_1, \top p_2)\) and \(\top q = (\top q_1, \top q_2)\).  Thus,
+  \(\top p \leq \top q\) is equivalent to \(\top p_1 \leq \top q_1\) and
+  \(\top p_2 \leq \top q_2\), which allows us to conclude.
+\end{proof}
+
+\begin{corollary}\label{the: FailTopKAT can express incorrectness logic}
+  For all relational FailTopKATs \(\mathcal{F}\), for all \(p \in \mathcal{F}\)
+  and for all tests \(b, c \in \mathcal{B}\), and for all
+  \(\gamma \in \{\okState,\errState\}\), the following holds
+    \[\incorTriple{b}{p}{\gamma: c} \iff \top b p \geq (c \cdot \hat{\gamma}).\]
+  where \(\hat{\gamma}\) is defined in \Cref{def: relational validity of incor triple with fail}
+\end{corollary}
+
+Thus, we can generalize incorrectness logic with errors to an arbitrary
+FailTopKAT\@.
+
+\begin{definition}[Abstract Incorrectness Triple With Failure]
+  Given a \(FailTopKAT\) \((\mathcal{F}, \mathcal{K}, \mathcal{B})\),
+  \(b, c \in \mathcal{B}\), \(p \in \mathcal{F}\) and
+  \(\gamma \in \{\okState, \errState\}\), we define
+  \[\incorTriple{b}{p}{\gamma: c} ≜ \top b p \geq c \cdot
+    \hat{\gamma}, \] where \(\hat{\gamma}\) is defined as in 
+    \Cref{def: relational validity of incor triple with fail}.
+\end{definition}
+
+\begin{figure}
+    \begin{mathpar}
+        \inferrule[Empty]
+        {\\}{\incorTriple{b}{p}{\gamma: 0}}
+
+        \and
+        \inferrule[Consequence]
+        {b \leq b' \\ \incorTriple{b}{p}{\gamma: c} \\ c' \leq c}
+        {\incorTriple{b'}{p}{\gamma: c'}}
+
+        \and
+        \inferrule[Disjunction]
+        {\incorTriple{b_1}{p}{\gamma: c_1} \\ \incorTriple{b_2}{p}{\gamma: c_2}}
+        {\incorTriple{b_1 + b_2}{p}{\gamma: (c_1 + c_2)}}
+
+        \and
+        \inferrule[Identity]
+        {\\} {\incorTriple{b}{1}{\okState: b, \errState: 0}}
+
+        \and
+        \inferrule[Composition-Fail]
+        {\incorTriple{a}{p}{\errState: b}}
+        {\incorTriple{a}{p q}{\errState: b}}
+
+        \and
+        \inferrule[Composition-Normal]
+        {\incorTriple{a}{p}{\okState: b} \\ \incorTriple{b}{p}{\gamma: c}}
+        {\incorTriple{a}{pq}{\gamma: c}}
+
+        \and
+        \inferrule[Choice-Left]
+        {\incorTriple{b}{p}{\gamma: c}}
+        {\incorTriple{b}{p + q}{\gamma: c}}
+
+        \and
+        \inferrule[Choice-Right]
+        {\incorTriple{b}{q}{\gamma: c}}
+        {\incorTriple{b}{p + q}{\gamma: c}}
+
+        \and
+        \inferrule[Assume]
+        {\\}
+        {\incorTriple{a}{b}{\okState: ab, \errState: 0}}
+
+        \and
+        \inferrule[Error]
+        {\\}{\incorTriple{b}{\fail}{\errState: b}}
+
+        \and
+        \inferrule[Iter-Zero]
+        {\\}{\incorTriple{b}{{p}^*}{\okState: b}}
+
+        \and
+        \inferrule[Iter-NonZero]
+        {\incorTriple{b}{{p}^*p}{\gamma: c}}
+        {\incorTriple{b}{{p}^*}{\gamma: c}}
+
+        \and
+        \inferrule[Iter-Dependent]
+        {\forall n \in ℕ,~ \incorTriple{b_{n}}{p}{\okState: b_{n+1}}}
+        {\incorTriple{b_{0}}{{p}^*}{\okState: \sup_{n \in ℕ}b_n}}
+    \end{mathpar}
+    \caption{Complete set of incorrectness logic proof rule with both normal and
+      abnormal termination}\label{fig: all proof rules of inc logic}
+\end{figure}
+
+\begin{theorem}[Soundness of Incorrectness Logic Rules in FailTopKAT]\label{the: incorrectness logic fail rule sound}
+  The rules in \Cref{fig: all proof rules of inc logic} are valid for any
+  FailTopKAT \((\mathcal{F}, \mathcal{K}, \mathcal{B})\),
+  \(a, b, c \in \mathcal{B}\) and \(p, q \in \mathcal{F}\).
+\end{theorem}
+
+\begin{proof}
+    All of the \(\okState\) cases is proved in~\Cref{the: incor logic rule sound ok},
+    therefore we just prove all the \(\errState\) case.
+
+    We list all the failure cases of these rules
+    and remove all the rules without failure cases here,
+    for convenience of the reader:
+    \begin{mathpar}
+        \inferrule[Empty]
+        {\\}{\incorTriple{b}{p}{\errState: 0}}
+
+        \and
+        \inferrule[Consequence]
+        {b \leq b' \\ \incorTriple{b}{p}{\errState: c} \\ c' \leq c}
+        {\incorTriple{b'}{p}{\errState: c'}}
+
+        \and
+        \inferrule[Disjunction]
+        {\incorTriple{b_1}{p}{\errState: c_1} \\ \incorTriple{b_2}{p}{\errState: c_2}}
+        {\incorTriple{b_1 + b_2}{p}{\errState: (c_1 + c_2)}}
+
+        \and
+        \inferrule[Identity]
+        {\\} {\incorTriple{b}{1}{\errState: 0}}
+
+        \and
+        \inferrule[Composition-Fail]
+        {\incorTriple{a}{p}{\errState: b}}
+        {\incorTriple{a}{p q}{\errState: b}}
+
+        \and
+        \inferrule[Composition-Normal]
+        {\incorTriple{a}{p}{\okState: b} \\ \incorTriple{b}{p}{\errState: c}}
+        {\incorTriple{a}{p}{\errState: c}}
+
+        \and
+        \inferrule[Choice-Left]
+        {\incorTriple{b}{p}{\errState: c}}
+        {\incorTriple{b}{p + q}{\errState: c}}
+
+        \and
+        \inferrule[Choice-Right]
+        {\incorTriple{b}{q}{\errState: c}}
+        {\incorTriple{b}{p + q}{\errState: c}}
+
+        \and
+        \inferrule[Assume]
+        {\\}
+        {\incorTriple{a}{b}{\errState: 0}}
+
+        \and
+        \inferrule[Error]
+        {\\}{\incorTriple{b}{\fail}{\errState: b}}
+
+        \and
+        \inferrule[Iter-NonZero]
+        {\incorTriple{b}{{p}^*p}{\errState: c}}
+        {\incorTriple{b}{{p}^*}{\errState: c}}
+    \end{mathpar}
+
+    The proof are basically the same as~\Cref{the: incor logic rule sound ok},
+    since \(FailTopKAT\) share most of the properties of \(\TopKAT\):
+    \begin{itemize}
+        \item \textbf{Empty:}
+            By left-annihilation and \(0\) is the least element (additive identity):
+            \[\top b p \geq 0 = 0 \fail\]
+        \item \textbf{Consequence Rule:}
+            because multiplication preserves order
+            and \(b' \geq b\), therefore \(\top b' p \geq \top b p\);
+            and because \(c' \leq c\), then \(c' \fail \leq c \fail\).
+            Therefore
+            \[\top b' p \geq \top b p \geq c \fail \geq c' \fail\]
+        \item \textbf{Disjunction Rule:}
+            because addition preserves order, therefore
+            \[\top b_1 p + \top b_2 p \geq c_1 \fail + c_2 \fail\]
+            and by distributivity, we have
+            \[\top (b_1 + b_2) p \geq (c_1 + c_2) \fail\]
+        \item \textbf{Identity Rule:}
+            By left-annihilation and \(0\) is the least element (additive identity):
+            \[\top b 1 \geq 0 = 0 \fail\]
+        \item \textbf{Composition-Fail Rule:}
+            Given \(\top a p \geq b \fail\),
+            then by order preserving and associativity of multiplication,
+            we have
+            \[\top a p q \geq b \fail q = b \fail\]
+        \item \textbf{Composition-Normal Rule:}
+            first, by idempotency of \(\top\)
+            and associativity of multiplication, we have
+            \[\top a (p q) = \top \top a p q\]
+            By order preserving of multiplication,
+            and the two premises \(\top a p \geq b\), \(\top b p \geq c \fail\),
+            we have \[\top a (p q) = \top \top a p q \geq \top b q \geq c \fail\]
+        \item \textbf{Choice-Left and Choice-Right Rule:}
+            by distributivity, we have
+            \[\top b (p + q)
+            = \top b p + \top b q
+            \geq \top b p \geq c \fail\]
+            and
+            \[\top b (p + q)
+            = \top b p + \top b q
+            \geq \top b q \geq c \fail\]
+        \item \textbf{Error:}
+            because \(\top \geq 1\), by order preserving of multiplication
+            \[\top b \fail \geq b \fail\]
+        \item \textbf{Iter-NonZero Rule:}
+            since \({p}^* = p {p}^* + 1\),
+            we have
+            \[\top b {p}^*
+            = \top b (p {p}^* + 1)
+            \geq \top b p {p}^* \geq c \fail\]
+    \end{itemize}
+
+    Note from the proof we can see all the rules with failure case \(\errState: 0\),
+    like Assume and Identity rule,
+    are redundant, since the failure case rule can be derived from the failure case of empty rule.
+\end{proof}
+
+
+\section{Examples: Reasoning Using TopKAT and FailTopKAT}
+
+In this section, we show some concrete examples of algebraic program reasoning.
+We take the assignment language of \citet{OHearn_2020},
+and regard assignments as primitive actions and assume statements as primitive tests.
+The relational semantics of this language forms a relational FailTopKAT,
+and it also forms a relational TopKAT if we do not consider the \(\comError\) command and
+the \(\errState\) post-condition.
+
+\begin{example}[Incorrect Absolute Value Procedure]\label{exp: incorrect absolute value}
+    Here is an incorrect procedure for finding the absolute value of \(x\):
+    \[\comITE{x < 0}{\comSkip}{\comAssign{x}{-x}},\]
+    To have a correct procedure for computing the absolute value the condition of the if statement should be \(x > 0\).
+    We can use TopKAT to show that every negative number is reachable by using 
+    the following incorrectness triple: 
+    \[\incorTriple{x < 0}{\comITE{x < 0}{\comSkip}{\comAssign{x}{-x}}}{x < 0}\]
+
+This triple can be proven using just the theory of TopKAT. 
+First, we can unfold the if statement:
+\[\incorTriple{x < 0}{ (x < 0) 1 + \overline{(x < 0)} (\comAssign{x}{-x})}{x < 0}\]
+Then convert the triple to TopKAT encoding: 
+\[\top(x < 0) ((x < 0) 1 + \overline{(x < 0)} (\comAssign{x}{-x})) \geq (x < 0)\]
+Finally, we prove the above inequality:
+\begin{align*}
+    & \top(x < 0) ((x < 0) 1 + \overline{(x < 0)} (\comAssign{x}{-x}))\\
+    & \geq \top (x < 0) (x < 0) 1 
+        & (p + q) \geq p\\
+    & = \top (x < 0) 
+        & \text{idempotency of test} \\
+    & \geq (x < 0)  & \top \geq 1
+\end{align*}
+Thus we have shown that 
+\[\incorTriple{x < 0}{ (x < 0) 1 + \overline{(x < 0)} (\comAssign{x}{-x})}{x < 0}\]
+is valid, and the non-desirable results in \(x < 0\) can be reached.
+As this triple can be shown just using the equational theory of TopKAT, 
+this triple can be automatically decided using the algorithm in \Cref{the: PSPACE for TopKAT equalities}.
+\end{example}     
+
+\citeauthor{OHearn_2020} motivated the under-approximate triple 
+as a way to reason about incorrect programs. 
+However the under-approximation logic can have other use cases.
+For example, we can mix under-approximation and over-approximation triples to
+prove a certain post condition is the strongest
+(as in Hoare logic) without a relational semantics. We show this next.
+
+\begin{example}[Reasoning With Hoare And Incorrectness Logic]\label{exp: hoare and incorrect together}
+    The assertion \(x \geq 0\) is the strongest post condition of program 
+    \(\comWhile{x < 0}{\comAssign{x}{x + 1}}\) with precondition \(\true\).
+
+    We can show this by the following two triples:
+\begin{align*}
+    & \incorTriple{\true}{\comWhile{x < 0}{\comAssign{x}{x + 1}}}{x \geq 0}; \\
+    & \hoareTriple{\true}{\comWhile{x < 0}{\comAssign{x}{x + 1}}}{x \geq 0}.
+\end{align*}
+
+Because for all \(p\) in some TopKAT, \({p}^* \geq 1\),
+the incorrectness triple can be shown as follows
+\[\top 1 {((x < 0) (\comAssign{x}^*{x + 1}))}\overline{(x < 0)}
+≥ ⊤ 1 1 \overline{(x < 0)}
+≥ (x ≥ 0).\]
+And because \(⊤ ≥ 1 {((x < 0) (\comAssign{x}^*{x + 1}))}\),
+then the Hoare triple can be shown
+\[
+    1 {((x < 0) (\comAssign{x}^*{x + 1}))}\overline{(x < 0)}
+    ≤ ⊤ \overline{(x < 0)}
+    = ⊤ (x ≥ 0)
+  \]
+  \end{example}
+
+
+\begin{example}[Theorem Proving In Hoare And Incorrectness Logic]
+    For all TopKATs \((\mathcal{K}, \mathcal{B})\), and \(b, c \in \mathcal{B}\), \(p \in \mathcal{K}\),
+    if \(c \geq \overline{b}\), then following incorrectness and Hoare triples are valid
+    \[\incorTriple{c}{\comWhile{b}{p}}{\overline{b}} 
+    \text{ and }
+    \hoareTriple{c}{\comWhile{b}{p}}{\overline{b}}\]
+
+  This example is a generalization of \Cref{exp: hoare and incorrect together}.
+If we have a while loop with condition \(b\),
+and the precondition \(c\) is larger than \(\overline{b}\),
+then \(\overline{b}\) is the strongest post-condition (in the sense of Hoare logic).
+
+We first show a proof in a relational setting, as a comparison to the algebraic proof.
+\begin{itemize}
+    \item \(\cod(c {(b p))^* \overline{b}} \supseteq \cod(\overline{b})\):
+        because on the left hand side, every output needs to go through the final check 
+        of \(\overline{b}\), it will also be in \(\cod(\overline{b})\);
+    \item \(\cod(c {(b p)}^* \overline{b}) \subseteq \cod(\overline{b})\):
+        if the input of the left hand side is in \(\cod(\overline{b})\), 
+        it will not be filtered out by \(c\), will not go into loop \({(b p)}^*\),
+        will not be filtered out by \(\overline{b}\), and will be outputted unchanged. 
+        thus everything in \(\cod(\overline{b})\) will 
+        be a output of \( {(b p)}^* \overline{b}\),
+        hence in \(\cod(c {(b p)}^* \overline{b})\).
+\end{itemize}
+
+Alternatively, we prove this example algebraically.
+Because \({(bp)}^* \geq 1\) and \(c \geq \overline{b}\): 
+\[\top c {(b p)}^* \overline{b} \geq \top c 1 \overline{b} = \top \overline{b} \geq \overline{b},\]
+and because \(\top \geq \top c {(b p)}^*\):
+\[\overline{b} \leq \top \overline{b} \geq \top c {(b p)}^* \overline{b}.\]
+We can also show that the Hoare triple is also valid with Kozen's encoding:
+\[c {(bp)}^* \overline{b} (\overline{\overline{b}}) = c {(bp)}^* \overline{b} b = c {(bp)}^* 0 = 0.\]
+The fact that we can also use Kozen's encoding to reach the same conclusion is not surprising,
+as we have shown that Kozen's encoding is equivalent to our encoding in all TopKAT.
+ \end{example}
+
+\begin{example}[Error In Loop]
+    This example simulates a while loop where the body will encounter an error when \(x \leq 0\),
+    and it will do some useful computation \(p\) if it does not encounter the error:
+    \[
+        \incorTriple{\true}
+        {\comWhile{x \geq 0}{\comITE{x \leq 0}{\comError}{p}}}
+        {\errState: x = 0}
+    \]
+    the incorrect loop condition will trigger the possible error in the loop body,
+    which is undesirable.
+
+
+To show this triple, we need to show the following FailTopKAT inequalities:
+\[
+    \top 1 {((x \geq 0) ((x \leq 0) (\fail) + (\overline{x \leq 0}^*) (p)))} (\overline{x \geq 0}) \geq 
+    (x = 0) \fail
+\]
+The proof is as follow: 
+\begin{align*}
+    & \top 1 {((x \geq 0) ((x \leq 0) (\fail) + (\overline{x \leq 0}^*) (p)))} (\overline{x \geq 0})\\
+    & \geq \top 1 {((x \geq 0) (x \leq 0) (\fail))}^* (\overline{x \geq 0})
+        & q + r \geq q\\
+    & = \top 1 (x \geq 0) (x \leq 0) (\fail) (\overline{x \geq 0})
+        & {q}^* \geq q \\
+    & = \top 1 (x \geq 0) (x \leq 0) (\fail) 
+        & \fail p = \fail \\
+    & = \top (x = 0) \fail 
+        & (x \geq 0 \land x \leq 0) = (x = 0)\\
+    & \geq (x = 0) \fail & \top \geq 1
+\end{align*}
+
+Notice that in the second last step we used the fact 
+\[(x \geq 0 \land x \leq 0) = (x = 0).\]
+We invoked the logical meaning of \(x \geq 0\), \(x \leq 0\), and \(x = 0\).
+Thus we are \emph{not} purely using the theory of TopKAT.
+\end{example}
+
+We can use more than just logical implications.
+Since our encoding of incorrectness logic is conservative (relationally valid), 
+all the proof rules of incorrectness logic will play nicely with algebraic reasoning.
+The next example demonstrates the mix of equational reasoning and assignment rule.
+
+\begin{example}[Assignment]
+    We have the same program as \Cref{exp: incorrect absolute value}
+    with the precondition changed to \(x \geq 0\):
+    \[\incorTriple{x > 0}{\comITE{x < 0}{\comSkip}{\comAssign{x}{-x}}}{x < 0}.\]
+
+    Even though the assignment rule from Incorrectness Logic is not propositional, 
+    in the sense we use in this paper,  
+    we can use specific inequalities to represent specific instances of these rules. 
+    For example, we can use an instance represented by the following incorrectness triple:
+\[\incorTriple{x > 0}{\comAssign{x}{-x}}{x < 0},\]
+This triple corresponds to the following TopKAT inequality:
+\[\top (x > 0) (\comAssign{x}{-x}) \geq (x < 0).\]
+With the above inequality, we can derive the incorrectness triple in the example as follow:
+\begin{align*}
+    & \top (x > 0) ((x < 0) 1 + \overline{(x < 0)} (\comAssign{x}{-x})) \\
+    & \geq \top (x > 0) (\overline{(x < 0)} (\comAssign{x}{-x})) 
+        & p + q \geq q\\
+    & \geq \top (x > 0) (\comAssign{x}{-x}) 
+        & (x > 0) \leq \overline{(x < 0)}\\
+    & \geq (x < 0) 
+        & \text{above inequality}
+\end{align*}
+\end{example}
+
+Thus, as we can see, even though TopKAT does not contain an assignment axiom,
+we can still reason about programs with assignments.
+
+\section{Related Works}
+
 \textbf{Extensions of Kleene algebra and reduction:}
 soon after the completeness of Kleene algebra was proven~\cite{Kozen_1994},
 it was realized that adding an embedded Boolean algebra can help reasoning
@@ -1396,34 +1922,3 @@ However, although the free relational model of these theories has been character
 the search for general complete interpretation remains unfruitful.
 The complexity of these theories was recently shown to be EXPTIME-complete~\cite{Sedlár_2023},
 a worse complexity class than PSPACE-complete for TopKAT.
-
-
-
-\section{Conclusion And Open Problems}
-
-In this paper, we exploit the homomorphic structure of reduction
-to simplify the proof of various previous results~\cite{Zhang_de_Amorim_Gaboardi_2022}.
-We have also showed that TopKAT is complete with respect to (co)domain comparison
-in the relational models,
-which lays a solid foundation for the use of TopKAT in (co)domain reasoning.
-
-However, there are still several interesting unsolved problems about TopKAT.
-Most of the incorrectness logic rules are written using hypotheses,
-for example, the sequencing rule:
-\[
-    \frac{[a]~p~[b] \qquad [b]~q~[c]}{[a]~p ⋅ q~[c]}
-\]
-corresponds to the implication \(⊤ a p ≤ ⊤ b ∧ ⊤ b p ≤ ⊤ c ⟹ ⊤ a p q ≤ ⊤ c\).
-Although each individual inequality in the implication fits the desired form \(⊤ e₁ ≥ ⊤ e₂\).
-it is unclear whether implications of the form
-\[⊤ e₁₁ ≤ ⊤ e₁₂ ∧ ⊤ e₂₁ ≤ ⊤ e₂₂ ∧ ⋯ ∧ ⊤ tₙ₁ ≤ ⊤ tₙ₂ ⟹ ⊤ e₁ ≤ ⊤ e₂\]
-are complete with relational TopKAT or decidable.
-
-Recently, there is an efficient fragment of KAT proposed, named 
-\emph{Guarded Kleene algebra with tests}~\cite{Smolka_Foster_Hsu_Kappé_Kozen_Silva_2020}
-or \emph{GKAT}.
-This fragment not only enjoys nearly-linear time equality checking,
-but also soundly models probabilistic computations as well. 
-It would be interesting to see whether the completeness and decidability result of TopKAT
-can be extended to GKAT, and whether the efficiency of GKAT will persist with the addition of top.
-

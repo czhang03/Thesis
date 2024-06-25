@@ -251,7 +251,7 @@ This set will be regarded as the semantics of \(b\).
  In contrast, $⟦ x = 1 ∧ x = 3⟧ = ∅$, which is to say that this test does not hold in any execution context, because the indicator variable \(x\) cannot be both 1 and 3 at the same time.
 \end{example}
 
-\subsection{Guarded languages with continuations}
+\subsection{Guarded languages with continuations}\label{sec:continuation-semantics}
 
 We can now turn our attention to the semantics of CF-GKAT\@.
 Like (G)KAT, the semantics of CF-GKAT is given in terms of \emph{guarded languages}~\cite{Schmid_Kappé_Kozen_Silva_2021,Kozen_1997}, which are best thought of as sets of symbolic traces of the program.
@@ -269,14 +269,14 @@ Because the value of the indicator variable matters only for control flow, we do
 \end{example}
 
 Our semantics of a CF-GKAT expression will ultimately be a guarded language.
-To get there, however, we will need an intermediate semantics that can account for the indicator variables as well as the non-local flow control statements.
-The remainder of this subsection is dedicated to explaining the domain of this intermediate semantics, based on \emph{guarded words with continuations}.
+To get there, however, we will need continuation semantics, a semantics that can account for the indicator variables as well as the non-local flow control statements.
+The remainder of this subsection is dedicated to explaining the domain of this continuation semantics, based on \emph{guarded words with continuations}.
 Intuitively, these are guarded words equipped with a piece of information called a \emph{continuation}, which contains relevant information about how flow control continues after the program ends.
 This could, for instance, tell us that the execution will continue at a location marked by a label.
 
 The possibility of including continuation information at the end of a trace allows us to define a semantics of CF-GKAT expressions inductively.
 This is especially necessary in the case of non-local control flow, because the label may occur in an entirely different part of the program whose traces have not yet been computed.
-Once the intermediate semantics of a CF-GKAT program in terms of guarded languages with continuations is known, we can flatten it into a guarded language.
+Once the continuation semantics of a CF-GKAT program is known, we can flatten it into a guarded language.
 
 \begin{definition}
  A \emph{guarded word with continuation} is a pair $w ⋅ c$,
@@ -307,7 +307,7 @@ Intuitively, the different types of continuation may be interpreted as follows:
     In this case, the indicator value does not matter any more.
     \item
     Finally, the continuation $\jmp{(\ell, i)}$ is put on traces that will continue executing from label $\ell$, with indicator value $i$.
-    Like $\brk{i}$ and $\ret$, these traces do not compose on the right, but unlike $\brk{i}$ this continuation does not change, as jump resolution happens only at the end, when the intermediate semantics is known for the entire program.
+    Like $\brk{i}$ and $\ret$, these traces do not compose on the right, but unlike $\brk{i}$ this continuation does not change, as jump resolution happens only at the end, when the semantics is known for the entire program.
 \end{itemize}
 
 \begin{example}
@@ -320,7 +320,7 @@ Intuitively, the different types of continuation may be interpreted as follows:
 %FIXME: change L to G to avoid conflict with sets of labels
 
 \subsection{Indexed families and sequencing}
-The intermediate semantics of a CF-GKAT expression takes a starting indicator value, and produces a guarded language with continuations representing the traces of that program when started with this indicator value.
+The continuation semantics of a CF-GKAT expression takes a starting indicator value, and produces a guarded language with continuations representing the traces of that program when started with this indicator value.
 This semantics is modeled by the following.
 \begin{definition}
 An \emph{indexed family} of guarded languages (with continuations), or ``indexed family'' for the sake of brevity, is function from $I$ to guarded languages (with continuations).
@@ -329,7 +329,7 @@ To lighten notation, we write \(Gᵢ\) to denote \(G(i)\).
 \end{definition}
 
 Similar to guarded languages, indexed families can be composed in several ways.
-In particular, we are interested in the sequencing operation and the Kleene star operation of indexed families, because these will turn out to be useful when defining the intermediate semantics of CF-GKAT\@.
+In particular, we are interested in the sequencing operation and the Kleene star operation of indexed families, because these will turn out to be useful when defining the continuation semantics of CF-GKAT\@.
 
 When sequencing two families \(G\) and \(H\), the traces in \(G_i\) with a continuation of the form $\acc{j}$ will be composed with traces in \(H_j\); traces with different continuations are copied over in full, because they do not compose on the right.
 Formally, this operation is defined as follows.
@@ -378,11 +378,11 @@ The last rule ensures that traces that encountered non-local control flow within
  The set $(G \diamond H)_2$ is empty, because despite the fact that $αqβ \cdot \acc{1} \cdot \acc{1} \in G_2$, there is no trace in $H_2$ that starts with $\beta$, and so neither rule can apply.
 \end{example}
 
-\subsection{Intermediate semantics}
-With the theory of indexed families in place, we can now define the intermediate semantics $⟦e⟧^♯$ of a CF-GKAT program $e$ in terms of an indexed family.
+\subsection{continuation semantics}
+With the theory of indexed families in place, we can now define the continuation semantics $⟦e⟧^♯$ of a CF-GKAT program $e$ in terms of an indexed family.
 We start with the base cases.
 
-\begin{definition}[Intermediate semantics, base]
+\begin{definition}[continuation semantics, base]
  For all $i, j ∈ I$, we define the following sets:
  \begin{align*}
   ⟦\comAssert{b}⟧ᵢ^♯ & ≜ \{ α ⋅ \acc{i} ∣ (α, i) ∈ ⟦ b ⟧ \}
@@ -411,7 +411,7 @@ We now turn our attention to the program composition operators.
 These are generalizations of the guarded language semantics of GKAT~\cite{Schmid_Kappé_Kozen_Silva_2021}.
 First of all, the $\comITE{b}{e}{f}$ filters out traces in the semantics of the $e$ that satisfy the guard $b$, as well as the traces in $f$ that invalidate it.
 
- \begin{definition}[Intermediate semantics, branching]
+ \begin{definition}[continuation semantics, branching]
  Let $e, f \in \CFGKAT$.
  We define $⟦ \comITE{b}{e}{f} ⟧^♯$ as the least indexed family that satisfies the following rules for all $i \in I$:
  \begin{mathpar}
@@ -434,7 +434,7 @@ First of all, the $\comITE{b}{e}{f}$ filters out traces in the semantics of the 
  The semantics of the sequencing operator is easy: it just composes the semantics of the operands with the sequencing operator we have for indexed families.
  For loops, some more care is needed because traces can be iterated, and we need to account for early termination.
 
- \begin{definition}[Intermediate semantics, sequencing and loops]%
+ \begin{definition}[continuation semantics, sequencing and loops]%
  \label{def:intermediate-sequencing-loops}
  Let $e, f \in \CFGKAT$.
  We define
@@ -472,7 +472,7 @@ However, a CF-GKAT program can be started from any label.
 To obtain these traces for a given label $\ell$, we must descend into the program until we encounter the corresponding label statement.
 For the base cases, this is relatively simple to accomplish: just check if we start at the label.
 
-\begin{definition}[Intermediate semantics starting from a label, base]
+\begin{definition}[continuation semantics starting from a label, base]
  Let $e ∈ \CFGKAT$.
  For each $ℓ ∈ L$, we define the following guarded languages with continuations:
  \begin{align*}
@@ -488,7 +488,7 @@ For the base cases, this is relatively simple to accomplish: just check if we st
 Note how none of these cases has a trace, except the one for $⟦ \comLabel{ℓ'} ⟧ᵢ^ℓ$ when $\ell' = \ell$, which accepts immediately.
 With these cases covered, we can then treat the inductive step.
 
-\begin{definition}[Intermediate semantics starting from a label, sequencing and branching]
+\begin{definition}[continuation semantics starting from a label, sequencing and branching]
 Let $e, f \in \CFGKAT$, $b \in \BExp$ and $\ell \in L$.
 We define the following indexed families to cover the traces of CF-GKAT programs starting from the label $\ell$ when composed using branching or sequencing:
 \begin{mathpar}
@@ -504,7 +504,7 @@ The only remaining case to cover is the loop.
 In this case, if we start execution from a label somewhere in the body, we may need to start the loop again after completing the loop body.
 On the other hand, early termination in the loop body still needs to be turned into an accepting trace.
 
-\begin{definition}[Intermediate semantics starting from a label, loops]
+\begin{definition}[continuation semantics starting from a label, loops]
 Let $e \in \CFGKAT$ and $b \in \BExp$.
 We define the indexed family $⟦\comWhile{b}{e}⟧^ℓ$ below, where $\lfloor - \rfloor$ is as in \Cref{def:intermediate-sequencing-loops}:
 \[
@@ -514,7 +514,7 @@ We define the indexed family $⟦\comWhile{b}{e}⟧^ℓ$ below, where $\lfloor -
 
 \subsection{Guarded language semantics}
 
-The intermediate semantics of a CF-GKAT program $e$ in terms of indexed families $⟦ e ⟧^♯$ uses continuations to record how a trace ends.
+The continuation semantics of a CF-GKAT program $e$ in terms of indexed families $⟦ e ⟧^♯$ uses continuations to record how a trace ends.
 In particular, some traces may end with the continuation of the form $\jmp{(i, \ell)}$, signaling that computation needs to continue from the label $\ell$.
 But we have just seen that we can also obtain the traces of $e$ starting from $\ell$, in the form of the indexed family $⟦ e ⟧^ℓ$.
 This means that we have the information we need to resolve the jumping continuations, if we just put together the right traces.
@@ -533,7 +533,7 @@ To formalize our approach, we need a way to refer to the intermediate CF-GKAT se
  Note that under this convention, $L^ℓ$ is an indexed family, which means that we may further unravel by writing $L^ℓ_i$ to obtain the guarded language with continuations $L(ℓ, i)$.
 \end{definition}
 
-Crucially, we can retrofit the intermediate semantics $⟦ e ⟧$ as a labeled family; after all, $⟦ e ⟧^\sharp$ is an indexed family, and so is $⟦ e ⟧^\ell$ for each $\ell \in L$.
+Crucially, we can retrofit the continuation semantics $⟦ e ⟧$ as a labeled family; after all, $⟦ e ⟧^\sharp$ is an indexed family, and so is $⟦ e ⟧^\ell$ for each $\ell \in L$.
 We will thus treat $⟦ e ⟧$ as such from this point on.
 
 \smallskip
@@ -861,9 +861,7 @@ We elide the definition of the semantics for CF-GKAT automata with start dynamic
 Suffice it to say that they can be easily converted to a plain CF-GKAT automata by adding a start state \(\hat{s}\) that takes the start dynamics:
 \begin{equation}\label{cons: CF-GKAT pseudo start to CF-GKAT automata}
  ⟨S, δ, ι, λ⟩ ↦ ⟨S + \hat{s}, δ_ι, \hat{s}, λ⟩,
- \qquad
- \text{where}
- \qquad
+ \text{ where }
  δ_ι(i, s, α) ≜
  \begin{cases}
   ι(i, α)    & \text{if } s = \hat{s} \\

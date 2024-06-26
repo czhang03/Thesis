@@ -12,7 +12,7 @@
 \newcommand{\iter}{\mathrm{iter}}
 
 
-\chapter{CF-GKAT, Fast control-flow verification}
+\chapter{CF-GKAT, fast control-flow verification}
 \label{chapter:Conclusions}
 \thispagestyle{myheadings}
 
@@ -21,22 +21,20 @@
 % it has a trailing directory separator (i.e., '/')!
 \graphicspath{{4_Conclusion/Figures/}}
 
-\section{Overview}
+\section{Motivation and Overview}
 
-The usual baseline to reason about correctness of control-flow manipulation is \emph{trace semantics}: where semantics abstracts the meaning of the primitive tests and actions that occur in a program, and instead focus on how tests determine which actions are performed, and in what order.
+The usual baseline to reason about correctness of control-flow manipulation is \emph{trace semantics}. Intuitively, trace semantics abstracts the meaning of the primitive tests and actions that occur in a program, and instead focus on how tests determine which actions are performed, and in what order.
 \emph{Guarded Kleene Algebra with Tests}~\cite{kozen_BohmJacopiniTheorem_2008a,Schmid_Kappé_Kozen_Silva_2021},
-provides a nice (co)algebraic framework to reason about trace semantics. Specifically, both algebra and coalgebra theory are GKAT are sound and complete with respect to trace semantics.
+provides a nice (co)algebraic framework to reason about trace semantics.
 
-%FIXME: CZ: I think we can make the previous sentence better...
-For example, the two programs above are equivalent in GKAT:\@ they both execute $p$ when $b$ holds, and $q$ when it does not.
-GKAT is also able to verify nontrivial equivalences like
+For example, GKAT is also able to verify nontrivial  program equivalences like
 \[
  \{\ \comWhile{b}{p}\ \};\ \comWhile{s}{\{\ q;\ \comWhile{b}{p}\ \}} ≡
  \comWhile{b ∨ c}{\{\ \comITE{b}{p}{q}\ \}}
 \]
-Yet, unlike KAT, GKAT equivalence is decidable in nearly-linear time (assuming the set of test variables is fixed)~\cite{Schmid_Kappé_Kozen_Silva_2021}, making GKAT a reasonable compromise between complexity and granularity.
+Furthermore, unlike KAT, GKAT equivalence is decidable in nearly-linear time (assuming the set of primitive tests is fixed)~\cite{Schmid_Kappé_Kozen_Silva_2021}, making GKAT an practical framework to reason about trace semantics for simple \command{while}-programs.
 
-Nevertheless, GKAT still lacks important constructs that are ubiquitous among control flow manipulation algorithms.
+Nevertheless, GKAT still lacks important constructs that are ubiquitous among control-flow transformation algorithms.
 First, as mentioned, GKAT disregards the meaning of primitive programs and tests.
 For instance, when given a program like
 \begin{equation}
@@ -68,7 +66,7 @@ These programs happen to be trace equivalent (i.e., they always execute the same
       & \comLabel{ℓ₀};\ \comIT{\neg b}{\comGoto{ℓ₁}};\ p;\ \comIT{b}{\comGoto{ℓ₁}};\ q;\ \comGoto{ℓ₀};\ \comLabel{ℓ₁}
     \end{aligned}\label[prog]{prog: goto version two state automaton}
  \\[3pt]
-  & \comWhile{t}{\{\ p;\ \comITE{¬ t}{q}{\comBrk}\ \}}
+  & \comWhile{b}{\{\ p;\ \comITE{¬ b}{q}{\comBrk}\ \}}
  \label[prog]{prog: break version two state automaton}
 \end{align}
 
@@ -77,13 +75,11 @@ Specifically, consider the control flow structuring phase of a decompiler~\cite{
 \Cref{prog: goto version two state automaton} can be thought of as pseudo-assembly that models the input of this process, and \Cref{prog: break version two state automaton} is a plausible outcome.
 Thus the control-flow structuring process is correct when \Cref{prog: goto version two state automaton,prog: break version two state automaton} are equivalent.
 
-To overcome these limitations of GKAT, we propose control flow GKAT (CF-GKAT), a extension of GKAT that is capable of equating some interesting real-world programs.
-Concretely, we extend GKAT by two sets of structures, each solving a limitation discussed before.
+To overcome these limitations of GKAT, we propose control flow GKAT (CF-GKAT), a extension of GKAT that is capable of equating programs making use of non-local control flow and indicator variables.
 
-First, we add \emph{indicator variables}, which can be assigned and tested against hardcoded values, and do not appear in other primitive actions and tests.
+First, \emph{indicator variables} can be assigned and tested against hardcoded values, and do not appear in other primitive actions and tests.
 Thus, assignments like $x := 42$ are allowed, but assignments like $x := y + 1$ are not.
-This addition strikes a delicate balance: it is weak enough to still exclude general computation (keeping program equivalence decidable), yet strong enough to model the equivalence of \Cref{prog: assignment inside branches,prog: assignment outside branches}.
-Furthermore, indicator variables are widely used in real-world control-flow manipulation algorithms~\cite{yakdan_NoMoreGotos_2015,erosa-hendren-1994}, and this addition empowers CF-GKAT to verify them. 
+This addition strikes a delicate balance: it is strong enough to verify well-known control-flow transformation algorithms~\cite{yakdan_NoMoreGotos_2015,erosa-hendren-1994}, yet weak enough to still exclude general computation (keeping program equivalence decidable).
 
 Second, we extend GKAT with non-local control-flow constructs, including \(\comGoto{\!}\), \(\comBrk\) and \(\comRet\).
 However, the non-local nature of these commands prevents a compositional semantics --- after all, the precise meaning of a statement like \(\comBrk\) depends on its context.
@@ -94,7 +90,7 @@ Then, the trace semantics of the program can be obtained by resolving these cont
 %FIXME: CZ: This paragraph is still bit out of place to me
 Inspired by the triangular correspondence between deterministic trace semantics, GKAT, and GKAT automaton, we were able to design an automaton model for CF-GKAT, where every CF-GKAT expression can be unfolded into an CF-GKAT automaton through thompson's construction (\Cref{tab: thompson's construction}), while preserving the continuation semantic (\Cref{the:thompson-correctness}). 
 Furthermore, CF-GKAT automata and continuation semantics can be lowered into GKAT automata and trace semantics respectively, while preserving their semantical correspondence (\Cref{the:cf-gkat-automaton-lowering-correctness}). 
-With the Thompson's construction and the lowering, we are able to reduce the problem of deciding trace equivalence of programs into deciding the bisimulation of two GKAT automata, which is known to be efficient. 
+With the Thompson's construction and the lowering, we are able to reduce the problem of deciding trace equivalence of programs into deciding the bisimulation of two GKAT automata, which is known to be efficient~\cite{Smolka_Foster_Hsu_Kappé_Kozen_Silva_2020}. 
 
 \smallskip
 As a result of these extensions, CF-GKAT is able to soundly and completely verify trace equivalence of a larger class of programs, while preserving the nearly-linear efficiency of GKAT.
@@ -102,17 +98,14 @@ For instance, it can automatically check that \Cref{prog: break version two stat
 \begin{align}
  \begin{aligned}
    & x := 1;\ \comWhile{x \neq 0}{\{ \\
-   & \qquad \comITE{x = 1 ∧ t}{\{\ p;\ x := 2\ \} \\
-   & \qquad\qquad}{\comITE{x = 2 ∧ ¬ t} {\{\ q;\ x := 1\ \} \\
+   & \qquad \comITE{x = 1 ∧ b}{\{\ p;\ x := 2\ \} \\
+   & \qquad\qquad}{\comITE{x = 2 ∧ ¬ b} {\{\ q;\ x := 1\ \} \\
    & \qquad\qquad}{x := 0} }\ \}}                                 \\
  \end{aligned} \label[prog]{prog: indicator version two state automaton}
 \end{align}
 
 To put this theory to work, we implemented an proof-of-concept equivalence checker for CF-GKAT\@.
-This checker is able to validate highly non-trivial program transformations, such as the aforementioned Böhm-Jacopini conversion.
-We also implemented a front end to the equivalence checker that can convert C code to CF-GKAT expressions by leveraging Clang's parser.
-The resulting tool is able to automatically validate the outcome of Erosa and Hendren's classic \command{goto} elimination procedure~\cite{erosa-hendren-1994}, as well as the the control flow structuring pass of several decompilers.
-
+This checker is able to validate highly non-trivial program transformations, such as the aforementioned Böhm-Jacopini conversion~\cite{DBLP:journals/cacm/BohmJ66}.
 
 
 \section{CF-GKAT Expression and Semantics}
@@ -120,7 +113,7 @@ The resulting tool is able to automatically validate the outcome of Erosa and He
 
 In this section, we introduce the language of CF-GKAT, and gradually develop its semantics.
 We begin by explaining the syntax of CF-GKAT;\@ after that, we delve into the semantics of its tests.
-We then introduce the intermediate semantic model of \emph{(labeled and indexed families of) guarded languages with continuations}, which is flattened into to a model based on \emph{guarded languages}.
+We then introduce the model of \emph{(labeled and indexed families of) guarded languages with continuations}, which is flattened into to a model based on \emph{guarded languages}.
 Having defined these tools, we then conclude by giving a semantics to CF-GKAT programs in this model.
 Along the way, we will single out and explain some of the finer points using examples.
 
@@ -133,22 +126,22 @@ At the bottom level, there are \emph{tests}; these are Boolean assertions that c
 To model them, we fix a finite set of primitive tests $B$, which represent uninterpreted expressions that may or may not hold.
 The full syntax is as follows.
 \[
- \BExp ∋ e_{b}, e_{c} ::=
+ \BExp_I ∋ e_{b}, e_{c} ::=
  \false ∣ \true ∣ b ∈ B ∣ {\color{blue}x = i\ (i ∈ I)}
  ∣ e_{b} ∨ e_{c} ∣ e_{b} ∧ e_{c} ∣ \overline{e_{b}}
 \]
-Compared to GKAT, tests in CF-GKAT include the \emph{indicator variable test} $x = i$ (highlighted in \textcolor{blue}{blue}) for each \emph{indicator value} $i$ drawn from a finite but fixed set of possible indicator values $I$.
+Compared to GKAT and KAT, tests in CF-GKAT include the \emph{indicator variable test} $x = i$ (highlighted in \textcolor{blue}{blue}) for each \emph{indicator value} $i$ drawn from a finite but fixed set of possible indicator values $I$.
 As the notation suggests, this test holds when the indicator variable $x$ currently has the value $i$.
 % Since the set \(I\) is finite, any complex predicate \(P\) on \(I\) can be encoded as a disjunction that enumerates all the values in \(P\)\ : \[⋁ \{(x = i) ∣ P(i)\}.\]
 
-The top level syntax of GKAT is built using a finite set of uninterpreted commands \(K\) (the \emph{primitive actions}), as well as \emph{assertions} of the form $\comAssert{b}$, where $e_b \in \BExp$ is a test.
+The top level syntax of GKAT is built using a finite set of uninterpreted commands \(K\) (the \emph{primitive actions}) reader might recall this is also one component of the KAT alphabet; as well as \emph{assertions} of the form $\comAssert{e_b}$, where $e_b \in \BExp_I$ is a boolean expression.
 Expressions are composed using sequencing, \texttt{if} statements, and \texttt{while} loops.
 CF-GKAT extends the base elements of the syntax with indicator variable assignments \(x := i\) (for each $i \in I$), which changes the value of the indicator variable \(x\) to \(i\).
 In addition, it adds the non-local control flow commands $\comBrk$ and $\comRet$, as well as $\comGoto{\ell}$ and $\comLabel{\ell}$, where $\ell$ is taken from a fixed but finite set of labels $L$.
 The full syntax is given below; constructs new compared to GKAT are highlighted in \textcolor{blue}{blue} again.
 \begin{align*}
  \CFGKAT ∋ e, f ::= {}&
- \comAssert{b}
+ \comAssert{e_b}
  ∣ p ∈ K
  ∣ {\color{blue}x := i\ (i ∈ I)}
  ∣ e; f
@@ -160,13 +153,6 @@ The full syntax is given below; constructs new compared to GKAT are highlighted 
  ∣ {\color{blue} \comGoto{ℓ}\ (ℓ ∈ L)}
  ∣ {\color{blue} \comLabel{ℓ}\ (ℓ ∈ L)}
 \end{align*}
-
-\begin{remark}
-We do not specify the sets $T$, $K$, $I$ and $L$ of (respectively) primitive tests, primitive actions, indicator values, and labels in more detail on purpose.
-When comparing CF-GKAT expressions, it is more practical to gather the symbols that appear in the corresponding positions, and construct the relevant set from them.
-For example, when we compare \Cref{prog: assignment inside branches} to \Cref{prog: assignment outside branches}, we infer that $B = ∅$, $K = \{ p, q \}$, $I = \{ 0, 42 \}$, and $L = ∅$; similarly, when comparing \Cref{prog: goto version two state automaton} to \Cref{prog: break version two state automaton}, we set $B = \{ b \}$, $K = \{ p, q \}$, $I = ∅$ and $L = \{ ℓ_0, ℓ_1 \}$.
-This is sound, because including more symbols in these sets does change whether or not the two programs are actually equivalent.
-\end{remark}
 
 A \emph{valid program}, or \emph{program} for short, is an expression without (1)~duplicate labels, (2)~$\command{goto}$ commands with an undefined label, or (3)~$\comBrk$ statements that occur outside a loop.
 For the sake of simplicity, we assume that the reader does not require a more formal definition of this notion.
@@ -200,22 +186,21 @@ Similar to GKAT~\cite{Smolka_Foster_Hsu_Kappé_Kozen_Silva_2020}, the semantics 
 The difference however is that we not only need to keep track of which primitive tests are satisfied under the boolean expression (represented by atoms), but also need to record the indicator variables that satisfy the boolean expression.
 
 Thus the semantics of a boolean expression is a set of atom-indicator pairs.
-Formally, we can calculate the set of execution contexts that satisfy a given Boolean expression \(e_b ∈ \BExp\) by induction.
-This set will be regarded as the semantics of \(b\).
-
+Formally, we can calculate the semantics of a given Boolean expression \(e_b ∈ \BExp_I\) by induction.
 \begin{definition}
- We define the \emph{Boolean semantics} function $C(-): \BExp → 2^{\At × I}$ inductively,
+ We define the \emph{Boolean semantics} function $C(-): \BExp_I → 2^{\At × I}$ inductively,
  as follows.
  \begin{align*}
   C( \false ) & ≜ ∅
     & C( t )& ≜ \{ (α, i) ∣ t ∈ α, i ∈ I \}
-    & C( e_{b1} ∨ e_{b2} ) & ≜ C( e_{b1} ) ∪ C( e_{b2} ) \\
+    & C( e_{b} ∨ e_{c} ) & ≜ C( e_{b} ) ∪ C( e_{c} ) \\
   C( \true )  & ≜ \At × I
     & C( x = i ) & ≜ \{ (α, i) ∣ α ∈ \At \}
-    & C( e_{b1} ∧ e_{b2} ) & ≜ C( e_{b1} ) ∩ C( e_{b2} ) \\
+    & C( e_{b} ∧ e_{c} ) & ≜ C( e_{b} ) ∩ C( e_{c} ) \\
   & & & & C( ¬ e_{b} ) & ≜ \At × I \setminus C( e_b )
  \end{align*}
 \end{definition}
+We will overload the notation \(C\) later for continuation semantics/interpretation, because the boolean semantics is a restriction of the continuation semantics to assertions.
 
 \begin{example}
  Take $B = \{ b_1, b_2 \}$ and $I = \{ 1, 2, 3 \}$; then we can calculate that
@@ -234,19 +219,6 @@ This set will be regarded as the semantics of \(b\).
 
 We can now turn our attention to the semantics of CF-GKAT\@.
 Like (G)KAT, the semantics of CF-GKAT is given in terms of \emph{guarded languages}~\cite{Schmid_Kappé_Kozen_Silva_2021,Kozen_1997}, which are best thought of as sets of symbolic traces of the program.
-These traces record the initial, intermediate and final machine states observed during execution, as well as the actions that occurred between those states. % chktex 36
-Because the value of the indicator variable matters only for control flow, we do not consider indicators to be part of the machine state; hence, machine states in a guarded word are drawn from $\At$.
-\begin{definition}
- A \emph{guarded word} is a sequence of the form $α₁ p₁ α₂ p₂ ⋯ α_{n-1} pₙ αₙ$, where \(αᵢ ∈ \At\) and \(pᵢ ∈ K\); that is to say, guarded words are elements of the regular language $\At ⋅ (K ⋅ \At)^*$.
- We refer to sets of guarded words as \emph{guarded languages}; the set of guarded languages is denoted $𝒢$.
-\end{definition}
-\begin{example} 
- Let $B = \{ b₁, b₂ \}$ and $K = \{ p₁, p₂ \}$.
- Now the guarded word \[b₁ \overline{b₂} ⋅ p₁ ⋅ \overline{b₁} b₂ ⋅ p₂ ⋅ \overline{b₁} \overline{b₂}\] represents a program trace that starts out in a machine state where $b₁$ is true (but $b₂$ is not).
- The program then executes the action $p₁$, after which $b₂$ is true (but $b₁$ is not).
- Finally, the program goes on to execute the action $p₂$, and halts in a state where neither $b₁$ nor $b₂$ is true.
-\end{example}
-
 Our semantics of a CF-GKAT expression will ultimately be a guarded language.
 To get there, however, we will need continuation semantics, a semantics that can account for the indicator variables as well as the non-local flow control statements.
 The remainder of this subsection is dedicated to explaining the domain of this continuation semantics, based on \emph{guarded words with continuations}.
@@ -303,61 +275,61 @@ The continuation semantics of a CF-GKAT expression takes a starting indicator va
 This semantics is modeled by the following.
 \begin{definition}
 An \emph{indexed family} of guarded languages (with continuations), or ``indexed family'' for the sake of brevity, is function from $I$ to guarded languages (with continuations).
-Typically, we use \(G\) and \(H\) to denote an indexed family.
-To lighten notation, we write \(Gᵢ\) to denote \(G(i)\).
+Similar to guarded languages, we use \(W, V\) to denote a family of languages.
+To lighten notation, we write \(Wᵢ\) to denote \(W(i)\).
 \end{definition}
 
 Similar to guarded languages, indexed families can be composed in several ways.
 In particular, we are interested in the sequencing operation and the Kleene star operation of indexed families, because these will turn out to be useful when defining the continuation semantics of CF-GKAT\@.
 
-When sequencing two families \(G\) and \(H\), the traces in \(G_i\) with a continuation of the form $\acc{j}$ will be composed with traces in \(H_j\); traces with different continuations are copied over in full, because they do not compose on the right.
+When sequencing two families \(W\) and \(V\), the traces in \(W_i\) with a continuation of the form $\acc{j}$ will be composed with traces in \(V_j\); traces with different continuations are copied over in full, because they do not compose on the right.
 Formally, this operation is defined as follows.
 
 \begin{definition}%
 \label{def:sequencing}
- Let $G, H: I \to 𝒞$.
- We write $G ⋄ H$ for the \emph{sequencing} (or \emph{concatenation}) operation of \(G\) and \(H\), which is defined as the smallest family of guarded languages with continuations (in the pointwise order) satisfying the following rules for all $i,j ∈ I$ as well as all $ℓ ∈ L$:
+ Let $W, V: I \to 𝒞$.
+ We write $W ⋄ V$ for the \emph{sequencing} (or \emph{concatenation}) operation of \(W\) and \(V\), which is defined as the smallest family of guarded languages with continuations (in the pointwise order) satisfying the following rules for all $i,j ∈ I$ as well as all $ℓ ∈ L$:
  \begin{mathpar}
   \inferrule{%
-   wα ⋅ \acc{j} ∈ Gᵢ \\
-   αx ⋅ c ∈ Hⱼ
+   wα ⋅ \acc{j} ∈ Wᵢ \\
+   αx ⋅ c ∈ Vⱼ
   }{%
-   wαx ⋅ c ∈ (G ⋄ H)ᵢ
+   wαx ⋅ c ∈ (W ⋄ V)ᵢ
   }
   \and
   \inferrule{%
-   w ⋅ c ∈ Gⱼ \\
+   w ⋅ c ∈ Wⱼ \\
    c \in \{ \brk{i}, \acc{i}, \jmp{(\ell, i)} \}
   }{%
-   w ⋅ c ∈ (G ⋄ H)ⱼ
+   w ⋅ c ∈ (W ⋄ V)ⱼ
   }
  \end{mathpar}
 \end{definition}
-The first rule composes accepting traces in $G$ with traces in $H$, picking up with the indicator value where the first trace left off.
+The first rule composes accepting traces in $W$ with traces in $V$, picking up with the indicator value where the first trace left off.
 Note also that this rule requires the last atom in the trace on the left to match the first atom in the trace on the right, because we want the second trace to start from the machine state computed in the first trace.
-This mirrors the \emph{fusion product} used to define the sequential composition of guarded languages (without continuations)~\cite{Kozen_1997}.
-The last rule ensures that traces that encountered non-local control flow within $G$ are preserved in $G ⋄ H$.
+This mirrors the \emph{coalesced product} used to define the sequential composition of guarded languages (without continuations).
+The last rule ensures that traces that encountered non-local control flow within $W$ are preserved in $W ⋄ V$.
 
 \begin{example}%
 \label{example:sequencing}
- Let $I = \{1,2\}$, and let $G$ and $H$ be indexed families given by:
+ Let $I = \{1,2\}$, and let $W$ and $V$ be indexed families given by:
  \begin{align*}
-  G₁ & = \{ αpβ ⋅ \brk{1},\; βpα ⋅ \acc{2} \}
-    & G₂& = \{ αqβ \cdot \acc{1} \} \\
-  H₁ & = \{ γqβ ⋅ \ret \}
-    & H₂ & = \{ αrβ ⋅ \jmp{(ℓ₁, 1)} \}
+  W₁ & = \{ αpβ ⋅ \brk{1},\; βpα ⋅ \acc{2} \}
+    & W₂& = \{ αqβ \cdot \acc{1} \} \\
+  V₁ & = \{ γqβ ⋅ \ret \}
+    & V₂ & = \{ αrβ ⋅ \jmp{(ℓ₁, 1)} \}
   \intertext{
-   Then we can compute that the sequencing $G ⋄ H$ is the following indexed family:
+   Then we can compute that the sequencing $W ⋄ V$ is the following indexed family:
   }
-  (G ⋄ H)₁ & = \{ αpβ ⋅ \brk{1},\; βpαrβ ⋅ \jmp{(ℓ₁, 1)} \}
-           & (G ⋄ H)₂ & = ∅
+  (W ⋄ V)₁ & = \{ αpβ ⋅ \brk{1},\; βpαrβ ⋅ \jmp{(ℓ₁, 1)} \}
+           & (W ⋄ V)₂ & = ∅
  \end{align*}
- Here, we find that $(G \diamond H)_1$ contains $\alpha p \beta \cdot \brk{1}$ by the second rule, because $G_1$ does.
- Furthermore, the trace $\beta p \alpha \cdot \acc{2}$ in $G_1$ is composed with $\alpha r \beta \cdot \jmp{(\ell_1, 1)}$ from $H_2$ to form $\beta p \alpha r \beta \cdot \jmp {(\ell_1, 1)}$ in $(G \diamond H)_1$, by the first rule.
- The set $(G \diamond H)_2$ is empty, because despite the fact that $αqβ \cdot \acc{1} \cdot \acc{1} \in G_2$, there is no trace in $H_2$ that starts with $\beta$, and so neither rule can apply.
+ Here, we find that $(W ⋄ V)_1$ contains $α p β ⋅ \brk{1}$ by the second rule, because $W_1$ does.
+ Furthermore, the trace $β p α ⋅ \acc{2}$ in $W_1$ is composed with $α r β ⋅ \jmp{(\ell_1, 1)}$ from $V_2$ to form $β p α r β ⋅ \jmp {(\ell_1, 1)}$ in $(W ⋄ V)_1$, by the first rule.
+ The set $(W ⋄ V)_2$ is empty, because despite the fact that $αqβ ⋅ \acc{1} ⋅ \acc{1} ∈ W_2$, there is no trace in $V_2$ that starts with $β$, and so neither rule can apply.
 \end{example}
 
-\subsection{continuation semantics}
+\subsection{continuation semantics, from the start}
 With the theory of indexed families in place, we can now define the continuation semantics $C(e)^♯$ of a CF-GKAT program $e$ in terms of an indexed family.
 We start with the base cases.
 
@@ -383,7 +355,7 @@ A primitive action $p$ yields traces of the form $\alpha p \beta \cdot \acc{i}$ 
 The only information retained is the value of the indicator variable, because primitive actions cannot interact with indicators.
 In contrast with primitive actions, an assignment like $x := j$ has traces that accept immediately, without changing the machine state; however, each trace ends with the indicator value $j$ --- regardless of the initial indicator value $i$.
 
-Finally, labels are encoded as no-operations, which makes them neutral for sequencing operator, i.e., we have $C( \comLabel{ℓ} )^♯ ⋄ G = G = C( \comLabel{ℓ} )^♯ ⋄ G$ for all indexed families $G$.
+Finally, labels are encoded as no-operations, which makes them neutral for sequencing operator, i.e., we have $C( \comLabel{ℓ} )^♯ ⋄ W = W = C( \comLabel{ℓ} )^♯ ⋄ W$ for all indexed families $W$.
 This is because labels serve only as potential starting points of execution; we will leverage them in the next subsection.
 
 We now turn our attention to the program composition operators.
@@ -420,7 +392,7 @@ First of all, the $\comITE{b}{e}{f}$ filters out traces in the semantics of the 
  \(
     C(e; f)^♯ ≜ C( e )^♯ ⋄ C( f )^♯
  \).
- Also, for all $e_b ∈ \BExp$, we define $C(\comWhile{e_b}{e})^♯$ as the least indexed family satisfying:
+ Also, for all $e_b ∈ \BExp_I$, we define $C(\comWhile{e_b}{e})^♯$ as the least indexed family satisfying:
  \begin{mathpar}
     \inferrule{%
         i ∈ I \\
@@ -468,7 +440,7 @@ Note how none of these cases has a trace, except the one for $C( \comLabel{ℓ'}
 With these cases covered, we can then treat the inductive step.
 
 \begin{definition}[continuation semantics starting from a label, sequencing and branching]
-Let $e, f \in \CFGKAT$, $e_b \in \BExp$ and $\ell \in L$.
+Let $e, f \in \CFGKAT$, $e_b \in \BExp_I$ and $\ell \in L$.
 We define the following indexed families to cover the traces of CF-GKAT programs starting from the label $\ell$ when composed using branching or sequencing:
 \begin{mathpar}
     C(\comITE{e_b}{e}{f})^ℓᵢ ≜ C( e )^ℓᵢ \cup C( f )^ℓᵢ
@@ -484,14 +456,14 @@ In this case, if we start execution from a label somewhere in the body, we may n
 On the other hand, early termination in the loop body still needs to be turned into an accepting trace.
 
 \begin{definition}[continuation semantics starting from a label, loops]
-Let $e \in \CFGKAT$ and $e_b \in \BExp$.
+Let $e \in \CFGKAT$ and $e_b \in \BExp_I$.
 We define the indexed family $C(\comWhile{b}{e})^ℓ$ below, where $\lfloor - \rfloor$ is as in \Cref{def:intermediate-sequencing-loops}:
 \[
     C(\comWhile{e_b}{e})^ℓ_i = \{ w \cdot \lfloor c \rfloor \mid w \cdot c \in (C( e )^ℓ ⋄ C(\comWhile{e_b}{e})^♯)ᵢ \}
 \]
 \end{definition}
 
-\subsection{Continuation semantics}
+\subsection{trace semantics}
 
 The continuation semantics of a CF-GKAT program $e$ in terms of indexed families $C( e )^♯$ uses continuations to record how a trace ends.
 In particular, some traces may end with the continuation of the form $\jmp{(\ell, i)}$, signaling that computation needs to continue from the label $\ell$.
@@ -499,7 +471,7 @@ But we have just seen that we can also obtain the traces of $e$ starting from $\
 This means that we have the information we need to resolve the jumping continuations, if we just put together the right traces.
 We will end this section by doing just that.
 
-To formalize our approach, we need a way to refer to the intermediate CF-GKAT semantics of a program as a whole, i.e., for all indicator values, starting from either the beginning or some label.
+To formalize our approach, we need a way to refer to the continuation semantics of a program as a whole, i.e., for all indicator values, starting from either the beginning or some label.
 
 % FIXME: I don't think using super script here is not a good idea,
 % as it doesn't align with the notation later used for λ.
@@ -507,9 +479,9 @@ To formalize our approach, we need a way to refer to the intermediate CF-GKAT se
 % TK: Does the above still apply? I don't see how superscripts clash with a different notation..?
 
 \begin{definition}
- A \emph{labeled family of guarded languages (with continuations)}, or \emph{labeled family} for short, is a function $G$ from $L + ♯$ to indexed families of guarded languages (with continuations), e.g., $G: L + ♯ → I → 𝒞$.
- We often use superscripts to denote the value at a given label $ℓ$, writing $G^ℓ$ for $G(ℓ)$.
- Note that under this convention, $G^ℓ$ is an indexed family, which means that we may further unravel by writing $G^ℓ_i$ to obtain the guarded language with continuations $G(ℓ, i)$.
+ A \emph{labeled family of guarded languages (with continuations)}, or \emph{labeled family} for short, is a function $W$ from $L + ♯$ to indexed families of guarded languages (with continuations), e.g., $W: L + ♯ → I → 𝒞$.
+ We often use superscripts to denote the value at a given label $ℓ$, writing $W^ℓ$ for $G(ℓ)$.
+ Note that under this convention, $W^ℓ$ is an indexed family, which means that we may further unravel by writing $W^ℓ_i$ to obtain the guarded language with continuations $G(ℓ, i)$.
 \end{definition}
 
 Crucially, we can retrofit the continuation semantics $C( e )$ as a labeled family; after all, $C( e )^♯$ is an indexed family, and so is $C( e )^ℓ$ for each $ℓ ∈ L$.
@@ -518,30 +490,30 @@ We will thus treat $C( e )$ as such from this point on.
 \smallskip
 To resolve the jumps in a labeled family of guarded languages with continuations, we resolve the traces ending in $\jmp{(ℓ, i)}$ by looking up the traces that originate from label $ℓ$ with indicator value $i$.
 We also remove the continuations $\acc{i}$ and $\ret$, because those come with traces that either reached the end of the program, or encountered a $\comRet$ statement respectively.
-Continuations of the form $\brk{i}$ should not occur at the top level when computing the semantics of a program, so we can ignore them.
+Continuations of the form $\brk{i}$ should not occur at the top level when computing the semantics of a program, as they will be resolved when computing the semantics of a loop; so we can ignore them.
 The result is a labeled family of guarded languages (without continuations).
 
 \begin{definition}
- Let $G: L + ♯ → I → 𝒞$ be a labeled family of guarded languages with continuations.
- We write $L\!↓$ for the (point-wise) least labeled family of guarded languages $G\!\downarrow$ such that the following rules are satisfied for all $k ∈ L + ♯$, $ℓ ∈ L$, and $i, j ∈ I$:
+ Let $W: L + ♯ → I → 𝒞$ be a labeled family of guarded languages with continuations.
+ We write $W\!↓$ for the (point-wise) least labeled family of guarded languages, such that the following rules are satisfied for all $k ∈ L + ♯$, $ℓ ∈ L$, and $i, j ∈ I$:
  \begin{mathpar}
   \inferrule{%
-   w ⋅ \acc{i} ∈ Gᵢᵏ
+   w ⋅ \acc{i} ∈ Wᵢᵏ
   }{%
-   w ∈ G\!↓ᵢᵏ
+   w ∈ W\!↓ᵢᵏ
   }
   \and
   \inferrule{%
-   w ⋅ \ret ∈ Gᵢᵏ
+   w ⋅ \ret ∈ Wᵢᵏ
   }{%
-   w ∈ G\!↓ᵢᵏ
+   w ∈ W\!↓ᵢᵏ
   }
   \and
   \inferrule{%
-   wα ⋅ \jmp{(ℓ, j)} ∈ Gᵢᵏ \\
-   αx ∈ G\!↓ⱼ^ℓ
+   wα ⋅ \jmp{(ℓ, j)} ∈ Wᵢᵏ \\
+   αx ∈ W\!↓ⱼ^ℓ
   }{%
-   wαx ∈ G\!↓ᵢᵏ
+   wαx ∈ W\!↓ᵢᵏ
   }
  \end{mathpar}
 \end{definition}
@@ -549,19 +521,19 @@ The first two rules take care of flattening guarded words with continuations tha
 while the third rule strings together guarded words continuations that jump to a different label.
 
 \begin{example}
- Let $G$ be the labeled family of guarded languages with continuations defined by
+ Let $W$ be the labeled family of guarded languages with continuations defined by
  \begin{align*}
-  G₁^♯ & = \{ α ⋅ \jmp{(ℓ, 1)} \}
-    & G₂^♯ & = ∅ \\
-  G₁^{ℓ} & = \{ α p α ⋅ \jmp{(ℓ', 1)}, β ⋅ \acc{1} \}
-    & G₂^{ℓ} & = \{ α ⋅ \jmp{(ℓ', 2)} \} \\
-  G₁^{ℓ'} & = \{ α q α ⋅ \jmp{(ℓ, 1)}, α r β ⋅ \jmp{(ℓ, 1)} \}
-    & G₂^{ℓ'} & = \{ α ⋅ \jmp{(ℓ, 1)}\}
+  W₁^♯ & = \{ α ⋅ \jmp{(ℓ, 1)} \}
+    & W₂^♯ & = ∅ \\
+  W₁^{ℓ} & = \{ α p α ⋅ \jmp{(ℓ', 1)}, β ⋅ \acc{1} \}
+    & W₂^{ℓ} & = \{ α ⋅ \jmp{(ℓ', 2)} \} \\
+  W₁^{ℓ'} & = \{ α q α ⋅ \jmp{(ℓ, 1)}, α r β ⋅ \jmp{(ℓ, 1)} \}
+    & W₂^{ℓ'} & = \{ α ⋅ \jmp{(ℓ, 1)}\}
  \end{align*}
- Now $G\!↓₁^♯$ contains, among other things,
+ Now $W\!↓₁^♯$ contains, among other things,
  the guarded word $α p α q α p α r β$.
 
- Note furthermore that $G\!↓₂^{ℓ}$ is empty, despite $G₂^{\ell}$ containing a guarded word with a continuation that has a mutual jump with another guarded word with continuation in $G₂^{\ell'}$, as these can never be concatenated into one guarded word with continuation of the form $\acc{i}$ or $\ret$.
+ Note furthermore that $W\!↓₂^{ℓ}$ is empty, despite $W₂^{\ell}$ containing a guarded word with a continuation that has a mutual jump with another guarded word with continuation in $W₂^{\ell'}$, as these can never be concatenated into one guarded word with continuation of the form $\acc{i}$ or $\ret$.
 \end{example}
 
 In total, we can then obtain the semantics of a CF-GKAT term as $C( e )\!\downarrow$, in the form of a labeled family of guarded languages.
@@ -585,23 +557,22 @@ Indeed, there exist two programs with the same trace semantics but different con
   x := 1 \and \comAssert{\true}.
 \end{mathpar} 
 The first program sets the indicator variable to 1, and the second program simply skips. 
-The trace semantics of the above two programs are the same, as both indicator assignment and skip are ``unproductive'', i.e. they will terminate immediately regardless of the input atoms and indicator variable.
+The trace semantics of the above two programs are the same: both indicator assignment and skip are ``unproductive'', i.e. they will terminate immediately without executing any action.
 Yet, their continuation semantics are different: \(C(x := 1)ᵢ^♯\) will constantly emit the continuation \(\acc{1}\) regardless of \(i\), but \(C(\comAssert{\true})ᵢ^♯\) will preserve starting indicator by outputting the continuation \(\acc{i}\).
 
-Thus, our decision procedure does not rely on bisimulation between CF-GKAT automaton; instead, we lower the CF-GKAT automata into GKAT automata. This process allows us to reuse the nearly-linear decision algorithm for GKAT automata equivalences.
-Finally, the soundness and completeness of our decision procedure can be derived from a sequence of correctness results: first the correctness of Thompson's construction (\Cref{the:thompson-correctness}), second the correctness of the lowering (\Cref{the:cf-gkat-automaton-lowering-correctness}), and finally the soundness and completeness of GKAT automata equivalence~\cite{Schmid_Kappé_Kozen_Silva_2021}.
+Thus, our decision procedure cannot rely on bisimulation between CF-GKAT automaton; instead, we lower the CF-GKAT automata into GKAT automata. This process allows us to reuse the nearly-linear decision algorithm for GKAT automata equivalences.
+Finally, the soundness and completeness of our decision procedure can be derived from a sequence of correctness results: first the correctness of Thompson's construction (\Cref{the:thompson-correctness}), then the correctness of the lowering (\Cref{the:cf-gkat-automaton-lowering-correctness}), and finally the soundness and completeness of GKAT automata equivalence~\cite{Schmid_Kappé_Kozen_Silva_2021}.
 
 \subsection{CF-GKAT automata}
 
-To leverage the efficient decision algorithm for GKAT automaton, we will need to convert each CF-GKAT expression $e$ into a GKAT automaton $A$ that implements $C( e )\!↓$.
-As we have discussed before, this process is separated into two steps, where we use CF-GKAT automaton as an intermediate between CF-GKAT expressions and GKAT automata. In this section, we will formally define CF-GKAT automata and their continuation semantics.
+To leverage the efficient decision algorithm for GKAT automata, we will need to convert each CF-GKAT expression $e$ into a GKAT automaton that implements $C( e )\!↓$.
+As we have discussed before, this process is separated into two steps, and CF-GKAT automaton serves as an crucial intermediate between CF-GKAT expressions and GKAT automata. 
+In this section, we will formally define CF-GKAT automata and their continuation semantics.
 
-Like GKAT automaton, CF-GKAT automaton is defined by a dynamics, people familiar with universal coalgebra~\cite{rutten_UniversalCoalgebraTheory_2000,jacobs_IntroductionCoalgebraMathematics_2016} might recall that dynamics are also called the \emph{signature} of a coalgebra.
-%FIXME: Do we want to keep using the name dynamics? I am not sure others use this name?
+Like GKAT automaton, CF-GKAT automaton is defined by a dynamics/signature~\cite{rutten_UniversalCoalgebraTheory_2000,jacobs_IntroductionCoalgebraMathematics_2016}
 \begin{definition}[CF-GKAT dynamics]
  Given a set $X$, we write $G(X)$ for the set
  \[G(X) ≜ I × \At → \reject + C + K × X × I.\]
- %FIXME: I think we need to fix the code to follow this type
 \end{definition}
 
 Intuitively, the elements of \(G(S)\) represent possible transition behaviors in a CF-GKAT automaton over a state set $S$.
@@ -621,8 +592,7 @@ Then the definition of CF-GKAT automaton is similar to GKAT automaton, except we
  a \emph{start state} \(\hat{s} ∈ S\), and a \emph{jump map} \(λ: L → G(S)\).
 \end{definition}
 
-Intuitively, the transition map \(δ\) assigns every state in $S$ a dynamics from $G(S)$; the jump map $λ$, on the other hand, assign a dynamics for each label $ℓ ∈ L$, indicating how to resume the computation after a \(\jmp{ℓ, i}\) continuation is reached.
-Dynamics in \(G(S)\) can then be assigned a continuation semantics in the CF-GKAT automaton \(A ≜ ⟨S, δ, ŝ, λ⟩\), as follows.
+Intuitively, the transition map \(δ\) assigns every state in $S$ a dynamics from $G(S)$. The jump map $λ$, on the other hand, assign a dynamics for each label $ℓ ∈ L$, indicating how to resume the computation after a \(\jmp{ℓ, i}\) continuation is reached.
 
 \begin{example}[A simple CF-GKAT automaton]
   Consider the following program \[\comITE{b}{\{\comLabel{ℓ}; p\}}{\comGoto{ℓ}},\] then we can construct the following automaton that have the same behavior as the program 
@@ -632,11 +602,11 @@ Dynamics in \(G(S)\) can then be assigned a continuation semantics in the CF-GKA
     & {} & {}
     \arrow[shorten <=8pt, from=1-1, to=1-2]
     \arrow["{b/p}", from=1-2, to=1-3]
-    \arrow["\overline{b}"'{pos=1}, Rightarrow, from=1-2, to=2-2]
-    \arrow["b"{pos=0.5}, shorten >=15pt, Rightarrow, from=1-3, to=1-4]
-    \arrow["\overline{b}"'{pos=1}, Rightarrow, from=1-3, to=2-3]
+    \arrow["\overline{b}/\jmp{ℓ}"'{pos=1}, Rightarrow, from=1-2, to=2-2]
+    \arrow["b/\acc{i}"{pos=0.5}, shorten >=15pt, Rightarrow, from=1-3, to=1-4]
+    \arrow["\overline{b}/\acc{i}"{pos=1}, Rightarrow, from=1-3, to=2-3]
   \end{tikzcd}\]
-  where \(ŝ \xrightarrow{b/p} s\) means that \(δ(ŝ, i, b) = (s, p)\) and \(ŝ ⇒^{\overline{b}}\) means that \(δ(ŝ, i, \overline{b}) = \acc{i}\).
+  where \(ŝ \xrightarrow{b/p} s\) means that \(δ(ŝ, i, b) = (s, p)\) and \(ŝ ⇒^{\overline{b}/\acc{i}}\) means that \(δ(ŝ, i, \overline{b}) = \acc{i}\).
   In the above automaton, where the start state is \(ŝ\), 
   \begin{itemize}
     \item If the input atom is \(b\), then it will transition to the state \(s\), while executing \(p\);
@@ -650,7 +620,8 @@ Dynamics in \(G(S)\) can then be assigned a continuation semantics in the CF-GKA
   Thus, the behavior of \(λ(ℓ)\) matches the behavior of the program when executing starting from the label \(ℓ\).
 \end{example}
 
-To formalize the intuition of ``behaviors'' in the previous example. We can assign a continuation semantics to each CF-GKAT automaton.
+To formalize the intuition of ``behaviors'' in the previous example. We can assign a continuation semantics to each CF-GKAT automaton \(A ≜ ⟨S, δ, ŝ, λ⟩\).
+Before that, it is convenient to first define the semantics for each dynamics in \(G(S)\).
 
 \begin{definition}[continuation semantics]
  Given an automaton \(A ≜ ⟨S, δ, \hat{s}, λ⟩\),
@@ -955,7 +926,7 @@ Even worse, when starting with an indicator variable that is not in \(\{0, 1, 2\
 
 Fortunately, these difficulties can be resolved by the \(\iter\) function (\cref{def: iteration lifting}). We will iterate the loop body until we encounter a primitive action or non-local control.
 \begin{definition}[Iterated Start Dynamics]
-  Let $S$ be a set, let $h ∈ G(S)$, and $e_b ∈ \BExp$.
+  Let $S$ be a set, let $h ∈ G(S)$, and $e_b ∈ \BExp_I$.
   We can use the \(\iter\) function to define $hᵇ: G(S)$, as follows:
   \begin{align*}
    h^{e_b} & : G(S)\\

@@ -49,20 +49,20 @@ suppose that we are given two disjoint finite sets $K$ (the
 \emph{action alphabet}) and $B$ (the \emph{test alphabet}).  Elements of $K$ and
 $B$ are called \emph{primitive actions and primitive tests}, respectively. 
 KAT terms over the alphabet \(K, B\) are defined with the following grammar:
-\[t  \triangleq  b  \in  B  \mid  p  \in  K  \mid  1  \mid  0  \mid  t_{1} + t_{2}  \mid  t_{1}  \cdot  t_{2}  \mid  t^*  \mid  \overline{t_b},\]
-where \(t_b\) does not contain primitive actions.
+\[e  ≜  b  ∈  B  ∣  p  ∈  K  ∣  1  ∣  0  ∣  e_1 + e_2  ∣  e_1  ⋅  e_2  ∣  e^*  ∣  \overline{e_b},\]
+where \(e_b\) does not contain primitive actions.
 The \emph{free KAT} over \(K, B\), written $\KAT_{K,B}$, 
 consists of terms over \(K, B\) modulo provable KAT equivalences.  
 The tests of the free KAT are Boolean terms, i.e. terms formed by
 primitive tests and Boolean operations modulo Boolean axioms.  A similar
-construction applies to TopKAT, where an additional symbol \( \top \) was added 
+construction applies to TopKAT, where an additional symbol \( ⊤ \) was added 
 as the largest element in the theory; we denote the free TopKAT over $K,B$ as
 \(\TopKAT_{K, B}\).  We sometimes omit the alphabets \(K\) and \(B\) when they
 are irrelevant or can be inferred.
 
 In the paper, we frequently consider terms modulo provable equalities, i.e. in the
-context of its corresponding free model.  For example, given \(t_{1}, t_{2}  \in  \KAT\),
-we will say \(t_{1} = t_{2}\) when they are provably equal using the theory of KAT.
+context of its corresponding free model.  For example, given \(e_1, e_2  \in  \KAT\),
+we will say \(e_1 = e_2\) when they are provably equal using the theory of KAT.
 Although the free model seems trivial, it leads to simpler and more modular
 proofs of some properties of algebraic theories, as we will see in~\Cref{chapter:TopKAT}.
 
@@ -160,10 +160,10 @@ which is typically encoded by KAT terms,
 we can see that \(R_{1}  \top   \supseteq  R_{2}  \top \) reflects that  
 the domain of \(R_{1}\) is larger than the domain of \(R_{2}\);
 and similarly for the inequality \( \top  R_{1}  \supseteq   \top  R_{2}\).
-Thus, given two KAT terms \(t_{1}, t_{2}  \in  \KAT_{K, B}\), we call inequalities like
-\(t_{1}  \top   \geq  t_{2}  \top \) \emph{domain comparison inequalities},
-and \( \top  t_{1}  \geq   \top  t_{2}\) \emph{codomain comparison inequalities}.
-Notice that the term \( \top  t_{1}\) is a shorthand for \( \top   \cdot  i(t_{1})\),
+Thus, given two KAT terms \(e_1, e_2  \in  \KAT_{K, B}\), we call inequalities like
+\(e_1  \top   \geq  e_2  \top \) \emph{domain comparison inequalities},
+and \( \top  e_1  \geq   \top  e_2\) \emph{codomain comparison inequalities}.
+Notice that the term \( \top  e_1\) is a shorthand for \( \top   \cdot  i(e_1)\),
 where \(i\) is the inclusion function \(\KAT_{K, B}  \hookrightarrow  \TopKAT_{K, B}\).
 In the rest of the paper, we will sometimes leave this inclusion function implicit.
 These two forms of inequalities will be the focus of 
@@ -211,11 +211,11 @@ as follows:
 \begin{equation}
     \begin{aligned}
         I(p)       &  \triangleq  \hat{I}(p)    & \text{ where } p  \in  K + B \\
-        I(\overline{t_b}) &  \triangleq  \overline{I(t_b)} 
-            & \text{\(t_b\) does not contain primitive actions} \\
-        I(t_{1} + t_{2}) &  \triangleq  I(t_{1}) + I(t_{2})                     \\
-        I(t_{1}  \cdot  t_{2}) &  \triangleq  I(t_{1})  \cdot  I(t_{2})                     \\
-        I(t^*)     &  \triangleq  I(t)^*
+        I(\overline{e_b}) &  \triangleq  \overline{I(e_b)} 
+            & \text{\(e_b\) does not contain primitive actions} \\
+        I(e_1 + e_2) &  \triangleq  I(e_1) + I(e_2)                     \\
+        I(e_1  \cdot  e_2) &  \triangleq  I(e_1)  \cdot  I(e_2)                     \\
+        I(e^*)     &  \triangleq  I(t)^*
     \end{aligned}
 \end{equation}
 In fact, every KAT homomorphism from a free model arises this way: there is a
@@ -231,13 +231,13 @@ that a homomorphism must satisfy.  It also allows us to prove that two
 interpretations are equal by arguing that they map the primitives to
 equal values.
 
-Given a KAT \(\mathcal{K}\), and two terms \(t_{1}, t_{2}  \in  \KAT_{K, B}\) we say that \(\mathcal{K}  \models  t_{1} = t_{2}\) if
-\[ \forall  I : \KAT_{K, B}  \to  \mathcal{K}, I(t_{1}) = I(t_{2}).\] In particular, 
-for two terms in the free model \(t_{1}, t_{2}  \in  \KAT_{K, B}\),
-\(\KAT_{K, B}  \models  t_{1} = t_{2}\) is equivalent to \(t_{1} = t_{2}\).  
+Given a KAT \(\mathcal{K}\), and two terms \(e_1, e_2  \in  \KAT_{K, B}\) we say that \(\mathcal{K}  \models  e_1 = e_2\) if
+\[ \forall  I : \KAT_{K, B}  \to  \mathcal{K}, I(e_1) = I(e_2).\] In particular, 
+for two terms in the free model \(e_1, e_2  \in  \KAT_{K, B}\),
+\(\KAT_{K, B}  \models  e_1 = e_2\) is equivalent to \(e_1 = e_2\).  
 For a collection of models \(\mathsf{K}\), 
-we say that \(\mathsf{K}  \models  t_{1} = t_{2}\) if for all \(\mathcal{K}  \in  \mathsf{K}\),
-\(\mathcal{K}  \models  t_{1} = t_{2}\).  For example, \(\REL  \models  t_{1} = t_{2}\) means that \(t_{1} = t_{2}\) is
+we say that \(\mathsf{K}  \models  e_1 = e_2\) if for all \(\mathcal{K}  \in  \mathsf{K}\),
+\(\mathcal{K}  \models  e_1 = e_2\).  For example, \(\REL  \models  e_1 = e_2\) means that \(e_1 = e_2\) is
 valid in all relational KATs.  All the above notations and terminologies can be
 similarly extended to TopKAT.
 
@@ -245,9 +245,9 @@ Theories like KAT and TopKAT are designed to model practical
 programs, so it is important to know if they can model all the desirable
 equations between programs. If the theory of KAT can derive all the equalities
 for a particular interpretation \(I\), namely:
-\[\KAT_{K, B}  \models  t_{1} = t_{2}  \iff  I(t_{1}) = I(t_{2}),\]
+\[\KAT_{K, B}  \models  e_1 = e_2  \iff  I(e_1) = I(e_2),\]
 we say that the theory of KAT is \emph{complete} with respect to \(I\).
-Recall that \(\KAT_{K, B}  \models  t_{1} = t_{2}\) is equivalent to \(t_{1} = t_{2}\);  
+Recall that \(\KAT_{K, B}  \models  e_1 = e_2\) is equivalent to \(e_1 = e_2\);  
 thus, by definition, an interpretation \(I\) is complete if and only if it is injective.
 One of such interpretation is the guarded string interpretation
 \(G: \KAT_{K, B}  \to  \mathcal{G}_{K, B}\)~\cite{Kozen_Smith_1997},
@@ -279,10 +279,10 @@ constructs an injective homomorphism $h$ from a language KAT into a relational
 KAT~\cite{Kozen_Smith_1997}.  Since both \(G\) and \(h\) are injective
 homomorphisms, \(h  \circ  G\) is also an injective homomorphism, hence a complete
 interpretation.  Since \(h  \circ  G\) is a relational interpretation:
-\[\KAT_{K, B}  \models  t_{1} = t_{2}  \implies  \REL  \models  t_{1} = t_{2}  \implies  h  \circ  G(t_{1}) = h  \circ  G(t_{2});\]
+\[\KAT_{K, B}  \models  e_1 = e_2  \implies  \REL  \models  e_1 = e_2  \implies  h  \circ  G(e_1) = h  \circ  G(e_2);\]
 then the completeness of \(h  \circ  G\) implies
-\((h  \circ  G)(t_{1}) = (h  \circ  G)(t_{2})  \iff  \KAT_{K, B}  \models  t_{1} = t_{2}\). Hence,
-\[\KAT_{K, B}  \models  t_{1} = t_{2}  \iff  \REL  \models  t_{1} = t_{2},\]
+\((h  \circ  G)(e_1) = (h  \circ  G)(e_2)  \iff  \KAT_{K, B}  \models  e_1 = e_2\). Hence,
+\[\KAT_{K, B}  \models  e_1 = e_2  \iff  \REL  \models  e_1 = e_2,\]
 i.e. the theory of KAT is complete with respect to relational KAT.
 
 % Function/homomorphism composition will be used frequently in this paper,
@@ -307,16 +307,16 @@ they are equal if and only if they have the same action on all the primitives.
 % AAA: This is only true because
 
 Finally, we provide a shorthand for domain reasoning. 
-For two terms \(t_{1}, t_{2}  \in  \KAT\), we write
-\[\REL  \models  \dom(t_{1})  \geq  \dom(t_{2}),\] when 
-\(\dom(I(t_{1}))  \supseteq  \dom(I(t_{1}))\) for all relational KAT interpretations \(I\);  
+For two terms \(e_1, e_2  \in  \KAT\), we write
+\[\REL  \models  \dom(e_1)  \geq  \dom(e_2),\] when 
+\(\dom(I(e_1))  \supseteq  \dom(I(e_1))\) for all relational KAT interpretations \(I\);  
 and similarly for relational TopKAT and general relational TopKAT.  
 Then \Cref{the: TopKAT encodes domain PRIMITIVE} implies the following:
 \begin{lemma}\label{the: top element represent domain}
-    For two KAT terms \(t_{1}, t_{2}  \in  \KAT_{K, B}\):
+    For two KAT terms \(e_1, e_2  \in  \KAT_{K, B}\):
     \begin{align*}
-        \TopREL  \models  t_{1}  \top   \geq  t_{2}  \top  &  \iff  \REL  \models  \dom(t_{1})  \geq  \dom(t_{2}) \\
-        \TopREL  \models   \top  t_{1}  \geq   \top  t_{2} &  \iff  \REL  \models  \cod(t_{1})  \geq  \cod(t_{2})
+        \TopREL  \models  e_1  \top   \geq  e_2  \top  &  \iff  \REL  \models  \dom(e_1)  \geq  \dom(e_2) \\
+        \TopREL  \models   \top  e_1  \geq   \top  e_2 &  \iff  \REL  \models  \cod(e_1)  \geq  \cod(e_2)
     \end{align*}
 \end{lemma}
 

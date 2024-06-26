@@ -10,21 +10,9 @@ probabilistic systems~\cite{mciver_UsingProbabilisticKleene_2006, McIver_Rabehaj
 relational verification~\cite{Antonopoulos_Koskinen_Le_Nagasamudram_Naumann_Ngo_2022},
 and program schematology~\cite{Angus_Kozen_2001}.
 Most of the above systems has been shown to be complete and decidable.
-
 In this thesis, we focus on three variants of Kleene Algebra with real-world applications.
 
-The first system is Kleene Algebra with atomic commutativity.
-\textcite{Kozen_1996} raised the question about its complexity over 25 years ago.
-Recently, a similar system, BiKA, was introduced to reason 
-about alignment problem in relational reasoning~\cite{Antonopoulos_Koskinen_Le_Nagasamudram_Naumann_Ngo_2022}.
-Yet, the completeness and decidability of these systems continue to alluded us. 
-In this thesis, we give a negative result:
-although the word inhabitance problem 
-(inequalities of the form \(w ≤ e\), where \(w\) is a word and \(e\) is a KA expression)
-is complete and decidable, the general equalities in KA with atomic commutativity is 
-neither complete nor decidable; even in the case of BiKA.
-
-The second system, Kleene Algebra with tests and top (TopKAT), 
+The first system, Kleene Algebra with tests and top (TopKAT), 
 was developed to perform domain and reachablity reasoning.
 We showed the conventional extension of Kleene Algebra with tests, 
 despite able to encode Hoare logic, is inadequate for domain reasoning.
@@ -35,9 +23,3 @@ The main proof heavily relies on a technique called \emph{reduction},
 we showed that the reduction from TopKAT to KAT satisfy nice properties that enable
 us to generate complete interpretations for TopKAT for free,
 and also gives us a complete and decidable coalgebraic theory with minimal efforts.
-
-Finally, Guarded Kleene Algebra with Test and Indicator Variables (GKATI),
-was designed to verify decompilation results. 
-This system gives an efficient nearly linear time algorithm for decompilation verification.
-However, we have also showed that this system is not equationally axiomatizable, 
-since it failed to satisfy the congruence rule.

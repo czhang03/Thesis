@@ -199,18 +199,13 @@
 \newcommand{\okState}{\mathinner{ok}}
 \newcommand{\errState}{\mathinner{er}}
 
-% two-counter machine command
-\DeclareMathOperator{\Inc}{\mathtt{Inc}}
-\DeclareMathOperator{\Dec}{\mathtt{Dec}}
-\DeclareMathOperator{\If}{\mathtt{If}}
-\DeclareMathOperator{\Halt}{\mathtt{Halt}}
 % program commands 
-\newcommand{\command}[1]{\texttt{#1}}
-\newcommand{\comSkip}{\mathtt{skip}}
-\newcommand{\comError}{\mathtt{error ()}}
-\newcommand{\comAssert}[1]{\mathtt{assert}~#1}
-\newcommand{\comITE}[3]{\mathtt{if}~#1~\mathtt{then}~#2~\mathtt{else}~#3}
-\newcommand{\comWhile}[2]{\mathtt{while}~#1~\mathtt{do}~#2}
+\newcommand{\command}[1]{\ensuremath{\mathtt{#1}}}
+\newcommand{\comSkip}{\command{skip}}
+\newcommand{\comError}{\command{error ()}}
+\newcommand{\comAssert}[1]{\command{assert}~#1}
+\newcommand{\comITE}[3]{\command{if}~#1~\command{then}~#2~\command{else}~#3}
+\newcommand{\comWhile}[2]{\command{while}~#1~\command{do}~#2}
 \newcommand{\comAssign}[2]{#1:= #2}
 \newcommand{\comIT}[2]{\command{if}~#1~\command{then}~#2}
 \newcommand{\comLabel}[1]{\command{label}~#1}

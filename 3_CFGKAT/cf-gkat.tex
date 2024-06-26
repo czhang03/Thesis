@@ -12,7 +12,7 @@
 \newcommand{\iter}{\mathrm{iter}}
 
 
-\chapter{Decompilation Verification With GKAT}
+\chapter{CF-GKAT, Fast control-flow verification}
 \label{chapter:Conclusions}
 \thispagestyle{myheadings}
 
@@ -23,30 +23,18 @@
 
 \section{Overview}
 
+The usual baseline to reason about correctness of control-flow manipulation is \emph{trace semantics}: where semantics abstracts the meaning of the primitive tests and actions that occur in a program, and instead focus on how tests determine which actions are performed, and in what order.
+\emph{Guarded Kleene Algebra with Tests}~\cite{kozen_BohmJacopiniTheorem_2008a,Schmid_Kappé_Kozen_Silva_2021},
+provides a nice (co)algebraic framework to reason about trace semantics. Specifically, both algebra and coalgebra theory are GKAT are sound and complete with respect to trace semantics.
 
-\section{Introduction}
-
-There are many different notions of program equivalence, each with its own properties in terms of granularity and computational complexity.
-At one end of the spectrum, syntactical equality compares two program solely based on its syntax tree. Although decidable, this technique will not equate ``intuitively equivalent'' programs like the following:
-\begin{mathpar}
- \comITE{t}{p}{q}
- \and
- \comITE{¬ t}{q}{p}
-\end{mathpar}
-Conversely, input-output equivalence relates all programs that will yield the same output when given the same input.
-While this kind of equivalence closely captures the intuition of program equivalence, it is also well-known to be undecidable.
-
-Situated between these two extremes, \emph{Guarded Kleene Algebra with Tests}~\cite{kozen_BohmJacopiniTheorem_2008a,Schmid_Kappé_Kozen_Silva_2021},
-or \emph{GKAT} for short, reasons about \emph{trace equivalence} between simple \command{while}-programs:
-it abstracts the meaning of the primitive tests and actions that occur in a program, and instead focus on how tests determine which actions are performed, and in what order.
 %FIXME: CZ: I think we can make the previous sentence better...
-For example, the two programs above are equivalent in GKAT:\@ they both execute $p$ when $t$ holds, and $q$ when it does not.
+For example, the two programs above are equivalent in GKAT:\@ they both execute $p$ when $b$ holds, and $q$ when it does not.
 GKAT is also able to verify nontrivial equivalences like
 \[
- \{\ \comWhile{t}{p}\ \};\ \comWhile{s}{\{\ q;\ \comWhile{t}{p}\ \}} ≡
- \comWhile{t ∨ s}{\{\ \comITE{t}{p}{q}\ \}}
+ \{\ \comWhile{b}{p}\ \};\ \comWhile{s}{\{\ q;\ \comWhile{b}{p}\ \}} ≡
+ \comWhile{b ∨ c}{\{\ \comITE{b}{p}{q}\ \}}
 \]
-Despite its robust equational theory, GKAT equivalence is decidable in nearly-linear time (assuming the set of test variables is fixed)~\cite{Schmid_Kappé_Kozen_Silva_2021}, making GKAT a reasonable compromise between complexity and granularity.
+Yet, unlike KAT, GKAT equivalence is decidable in nearly-linear time (assuming the set of test variables is fixed)~\cite{Schmid_Kappé_Kozen_Silva_2021}, making GKAT a reasonable compromise between complexity and granularity.
 
 Nevertheless, GKAT still lacks important constructs that are ubiquitous among control flow manipulation algorithms.
 First, as mentioned, GKAT disregards the meaning of primitive programs and tests.
@@ -77,7 +65,7 @@ Meanwhile, \Cref{prog: break version two state automaton} is structured as a loo
 These programs happen to be trace equivalent (i.e., they always execute the same actions in the same order) but represent behavior not expressible in plain GKAT~\cite{kozen_BohmJacopiniTheorem_2008a,schmid_GuardedKleeneAlgebra_2021}.
 \begin{align}
   & \begin{aligned}
-      & \comLabel{ℓ₀};\ \comIT{\neg t}{\comGoto{ℓ₁}};\ p;\ \comIT{t}{\comGoto{ℓ₁}};\ q;\ \comGoto{ℓ₀};\ \comLabel{ℓ₁}
+      & \comLabel{ℓ₀};\ \comIT{\neg b}{\comGoto{ℓ₁}};\ p;\ \comIT{b}{\comGoto{ℓ₁}};\ q;\ \comGoto{ℓ₀};\ \comLabel{ℓ₁}
     \end{aligned}\label[prog]{prog: goto version two state automaton}
  \\[3pt]
   & \comWhile{t}{\{\ p;\ \comITE{¬ t}{q}{\comBrk}\ \}}
@@ -120,7 +108,7 @@ For instance, it can automatically check that \Cref{prog: break version two stat
  \end{aligned} \label[prog]{prog: indicator version two state automaton}
 \end{align}
 
-To put this theory to work, we implemented an equivalence checker for CF-GKAT\@.
+To put this theory to work, we implemented an proof-of-concept equivalence checker for CF-GKAT\@.
 This checker is able to validate highly non-trivial program transformations, such as the aforementioned Böhm-Jacopini conversion.
 We also implemented a front end to the equivalence checker that can convert C code to CF-GKAT expressions by leveraging Clang's parser.
 The resulting tool is able to automatically validate the outcome of Erosa and Hendren's classic \command{goto} elimination procedure~\cite{erosa-hendren-1994}, as well as the the control flow structuring pass of several decompilers.
@@ -142,23 +130,18 @@ Along the way, we will single out and explain some of the finer points using exa
 
 The syntax of CF-GKAT consists of two levels, similar to GKAT\@.
 At the bottom level, there are \emph{tests}; these are Boolean assertions that can occur as guards inside conditional statements, or within assertions that occur in the program text.
-To model them, we fix a finite set of primitive tests $T$, which represent uninterpreted expressions that may or may not hold.
+To model them, we fix a finite set of primitive tests $B$, which represent uninterpreted expressions that may or may not hold.
 The full syntax is as follows.
 \[
- \BExp ∋ b, c ::=
- \false
- \mid \true
- \mid t ∈ T
- \mid {\color{blue}x = i\ (i ∈ I)}
- \mid b ∨ c
- \mid b ∧ c
- \mid ¬ b
+ \BExp ∋ e_{b1}, e_{b2} ::=
+ \false ∣ \true ∣ b ∈ B ∣ {\color{blue}x = i\ (i ∈ I)}
+ ∣ e_{b1} ∨ e_{b2} ∣ e_{b1} ∧ e_{b2} ∣ ¬ e_{b1}
 \]
 Compared to GKAT, tests in CF-GKAT include the \emph{indicator variable test} $x = i$ (highlighted in \textcolor{blue}{blue}) for each \emph{indicator value} $i$ drawn from a finite but fixed set of possible indicator values $I$.
 As the notation suggests, this test holds when the indicator variable $x$ currently has the value $i$.
 % Since the set \(I\) is finite, any complex predicate \(P\) on \(I\) can be encoded as a disjunction that enumerates all the values in \(P\)\ : \[⋁ \{(x = i) ∣ P(i)\}.\]
 
-The top level syntax of GKAT is built using a finite set of uninterpreted commands \(Σ\) (the \emph{primitive actions}), as well as \emph{assertions} of the form $\comAssert{b}$, where $b \in \BExp$ is a test.
+The top level syntax of GKAT is built using a finite set of uninterpreted commands \(K\) (the \emph{primitive actions}), as well as \emph{assertions} of the form $\comAssert{b}$, where $e_b \in \BExp$ is a test.
 Expressions are composed using sequencing, \texttt{if} statements, and \texttt{while} loops.
 CF-GKAT extends the base elements of the syntax with indicator variable assignments \(x := i\) (for each $i \in I$), which changes the value of the indicator variable \(x\) to \(i\).
 In addition, it adds the non-local control flow commands $\comBrk$ and $\comRet$, as well as $\comGoto{\ell}$ and $\comLabel{\ell}$, where $\ell$ is taken from a fixed but finite set of labels $L$.
@@ -166,12 +149,12 @@ The full syntax is given below; constructs new compared to GKAT are highlighted 
 \begin{align*}
  \CFGKAT ∋ e, f ::= {}&
  \comAssert{b}
- ∣ p ∈ Σ
+ ∣ p ∈ K
  ∣ {\color{blue}x := i\ (i ∈ I)}
  ∣ e; f
- ∣ \comITE{b}{e}{f} ∣ {} \\
+ ∣ \comITE{e_b}{e}{f} ∣ {} \\
  &
- \comWhile{b}{e}
+ \comWhile{e_b}{e}
  ∣ {\color{blue} \comBrk}
  ∣ {\color{blue} \comRet}
  ∣ {\color{blue} \comGoto{ℓ}\ (ℓ ∈ L)}
@@ -179,9 +162,9 @@ The full syntax is given below; constructs new compared to GKAT are highlighted 
 \end{align*}
 
 \begin{remark}
-We do not specify the sets $T$, $\Sigma$, $I$ and $L$ of (respectively) primitive tests, primitive actions, indicator values, and labels in more detail on purpose.
+We do not specify the sets $T$, $K$, $I$ and $L$ of (respectively) primitive tests, primitive actions, indicator values, and labels in more detail on purpose.
 When comparing CF-GKAT expressions, it is more practical to gather the symbols that appear in the corresponding positions, and construct the relevant set from them.
-For example, when we compare \Cref{prog: assignment inside branches} to \Cref{prog: assignment outside branches}, we infer that $T = \emptyset$, $\Sigma = \{ p, q \}$, $I = \{ 0, 42 \}$, and $L = \emptyset$; similarly, when comparing \Cref{prog: goto version two state automaton} to \Cref{prog: break version two state automaton}, we set $T = \{ t \}$, $\Sigma = \{ p, q \}$, $I = \emptyset$ and $L = \{ \ell_0, \ell_1 \}$.
+For example, when we compare \Cref{prog: assignment inside branches} to \Cref{prog: assignment outside branches}, we infer that $B = ∅$, $K = \{ p, q \}$, $I = \{ 0, 42 \}$, and $L = ∅$; similarly, when comparing \Cref{prog: goto version two state automaton} to \Cref{prog: break version two state automaton}, we set $B = \{ b \}$, $K = \{ p, q \}$, $I = ∅$ and $L = \{ ℓ_0, ℓ_1 \}$.
 This is sound, because including more symbols in these sets does change whether or not the two programs are actually equivalent.
 \end{remark}
 
@@ -205,7 +188,7 @@ For the sake of simplicity, we assume that the reader does not require a more fo
 %FIXME: move to semantics
 \begin{remark}
  For soundness, it is important that the indicator variable $x$ does not
- occur in any primitive test $t ∈ T$ or action $p ∈ Σ$.
+ occur in any primitive test $t ∈ T$ or action $p ∈ K$.
  In other words, $x$ is completely divorced from the other actions in the program,
  and may influence execution only by affecting flow control.
 \end{remark}
@@ -213,41 +196,37 @@ For the sake of simplicity, we assume that the reader does not require a more fo
 \subsection{Boolean semantics}
 
 To assign a semantics to CF-GKAT expressions, we first need to talk about the semantics of the Boolean sublanguage.
-Intuitively, each Boolean expression in CF-GKAT symbolically denotes a set of execution contexts in which it is true.
-But how do we model an execution context?
-Because the primitive tests from $T$ are uninterpreted, we represent them by simply listing the ones that are true; the unlisted tests are then assumed to be false.
-This coincides with the semantics of (G)KAT~\cite{Schmid_Kappé_Kozen_Silva_2021,Kozen_1997}. % 36
-As for the indicator tests, we include the current value of the indicator variable $x$ in the execution context.
-This means that each execution context is of the form $(α, i)$, for $α ⊆ T$ and $i ∈ I$.
+Similar to GKAT~\cite{Smolka_Foster_Hsu_Kappé_Kozen_Silva_2020}, the semantics of a boolean is defined as a set of program states that satisfy the boolean expression. 
+The difference however is that we not only need to keep track of which primitive tests are satisfied under the boolean expression (represented by atoms), but also need to record the indicator variables that satisfy the boolean expression.
 
-Putting these ideas together, we can calculate the set of execution contexts that satisfy a given Boolean expression \(b ∈ \BExp\) by induction.
+Thus the semantics of a boolean expression is a set of atom-indicator pairs.
+Formally, we can calculate the set of execution contexts that satisfy a given Boolean expression \(e_b ∈ \BExp\) by induction.
 This set will be regarded as the semantics of \(b\).
 
 \begin{definition}
- Let $\At$ denote $2^T$, the set of \emph{atoms} of (the free Boolean algebra generated by) $T$.
  We define the \emph{Boolean semantics} function $⟦-⟧: \BExp → 2^{\At × I}$ inductively,
  as follows.
  \begin{align*}
   ⟦ \false ⟧ & ≜ ∅
     & ⟦ t ⟧& ≜ \{ (α, i) ∣ t ∈ α, i ∈ I \}
-    & ⟦ b ∨ c ⟧ & ≜ ⟦ b ⟧ ∪ ⟦ c ⟧ \\
+    & ⟦ e_{b1} ∨ e_{b2} ⟧ & ≜ ⟦ e_{b1} ⟧ ∪ ⟦ e_{b2} ⟧ \\
   ⟦ \true ⟧  & ≜ \At × I
     & ⟦ x = i ⟧ & ≜ \{ (α, i) ∣ α ∈ \At \}
-    & ⟦ b ∧ c ⟧ & ≜ ⟦ b ⟧ ∩ ⟦ c ⟧ \\
-  & & & & ⟦ ¬ b ⟧ & ≜ \At × I \setminus ⟦ b ⟧
+    & ⟦ e_{b1} ∧ e_{b2} ⟧ & ≜ ⟦ e_{b1} ⟧ ∩ ⟦ e_{b2} ⟧ \\
+  & & & & ⟦ ¬ e_{b} ⟧ & ≜ \At × I \setminus ⟦ e_b ⟧
  \end{align*}
 \end{definition}
 
 \begin{example}
- Take $T = \{ t_1, t_2 \}$ and $I = \{ 1, 2, 3 \}$; then we can calculate that
+ Take $B = \{ b_1, b_2 \}$ and $I = \{ 1, 2, 3 \}$; then we can calculate that
  \[
-  ⟦ (t_1 ∨ ¬ t_2) ∧ (x = 2) ⟧ = \{
-  (\{ t_1, t_2\}, 2),
-  (\{ t_1 \}, 2),
-  (∅, 2)
+  ⟦ (b_1 ∨ ¬ b_2) ∧ (x = 2) ⟧ = \{
+  (b_1 b_2, 2),
+  (b_1 \overline{b₂}, 2),
+  (\overline{b₁} \overline{b₂}, 2)
   \}
  \]
- In other words, the test above holds in execution contexts where $t_1$ and $t_2$ are both true (first element) or both false (last element), and those where $t₁$ is true but $t₂$ is false (middle element).
+ In other words, the test above holds in execution contexts where $b₁$ and $b₂$ are both true (first element) or both false (last element), and those where $b₁$ is true but $b₂$ is false (middle element).
  In contrast, $⟦ x = 1 ∧ x = 3⟧ = ∅$, which is to say that this test does not hold in any execution context, because the indicator variable \(x\) cannot be both 1 and 3 at the same time.
 \end{example}
 
@@ -258,14 +237,14 @@ Like (G)KAT, the semantics of CF-GKAT is given in terms of \emph{guarded languag
 These traces record the initial, intermediate and final machine states observed during execution, as well as the actions that occurred between those states. % chktex 36
 Because the value of the indicator variable matters only for control flow, we do not consider indicators to be part of the machine state; hence, machine states in a guarded word are drawn from $\At$.
 \begin{definition}
- A \emph{guarded word} is a sequence of the form $α₁ p₁ α₂ p₂ ⋯ α_{n-1} pₙ αₙ$, where \(αᵢ ∈ \At\) and \(pᵢ ∈ Σ\); that is to say, guarded words are elements of the regular language $\At ⋅ (Σ ⋅ \At)^*$.
+ A \emph{guarded word} is a sequence of the form $α₁ p₁ α₂ p₂ ⋯ α_{n-1} pₙ αₙ$, where \(αᵢ ∈ \At\) and \(pᵢ ∈ K\); that is to say, guarded words are elements of the regular language $\At ⋅ (K ⋅ \At)^*$.
  We refer to sets of guarded words as \emph{guarded languages}; the set of guarded languages is denoted $𝒢$.
 \end{definition}
-\begin{example}
- Let $T = \{ t₁, t₂ \}$ and $\Sigma = \{ p₁, p₂ \}$.
- Now the guarded word $\{ t₁ \}p₁\{ t_2 \}p₂\emptyset$ represents a program trace that starts out in a machine state where $t_1$ is true (but $t₂$ is not).
- The program then executes the action $p₁$, after which $t_2$ is true (but $t₁$ is not).
- Finally, the program goes on to execute the action $p₂$, and halts in a state where neither $t₁$ nor $t₂$ is true.
+\begin{example} 
+ Let $B = \{ b₁, b₂ \}$ and $K = \{ p₁, p₂ \}$.
+ Now the guarded word \[b₁ \overline{b₂} ⋅ p₁ ⋅ \overline{b₁} b₂ ⋅ p₂ ⋅ \overline{b₁} \overline{b₂}\] represents a program trace that starts out in a machine state where $b₁$ is true (but $b₂$ is not).
+ The program then executes the action $p₁$, after which $b₂$ is true (but $b₁$ is not).
+ Finally, the program goes on to execute the action $p₂$, and halts in a state where neither $b₁$ nor $b₂$ is true.
 \end{example}
 
 Our semantics of a CF-GKAT expression will ultimately be a guarded language.
@@ -366,15 +345,15 @@ The last rule ensures that traces that encountered non-local control flow within
   G₁ & = \{ αpβ ⋅ \brk{1},\; βpα ⋅ \acc{2} \}
     & G₂& = \{ αqβ \cdot \acc{1} \} \\
   H₁ & = \{ γqβ ⋅ \ret \}
-    & H₂ & = \{ αrβ ⋅ \jmp{(1, ℓ₁)} \}
+    & H₂ & = \{ αrβ ⋅ \jmp{(ℓ₁, 1)} \}
   \intertext{
    Then we can compute that the sequencing $G ⋄ H$ is the following indexed family:
   }
-  (G ⋄ H)₁ & = \{ αpβ ⋅ \brk{1},\; βpαrβ ⋅ \jmp{(1, ℓ₁)} \}
+  (G ⋄ H)₁ & = \{ αpβ ⋅ \brk{1},\; βpαrβ ⋅ \jmp{(ℓ₁, 1)} \}
            & (G ⋄ H)₂ & = ∅
  \end{align*}
  Here, we find that $(G \diamond H)_1$ contains $\alpha p \beta \cdot \brk{1}$ by the second rule, because $G_1$ does.
- Furthermore, the trace $\beta p \alpha \cdot \acc{2}$ in $G_1$ is composed with $\alpha r \beta \cdot \jmp{(1, \ell_1)}$ from $H_2$ to form $\beta p \alpha r \beta \cdot \jmp {(1, \ell_1)}$ in $(G \diamond H)_1$, by the first rule.
+ Furthermore, the trace $\beta p \alpha \cdot \acc{2}$ in $G_1$ is composed with $\alpha r \beta \cdot \jmp{(\ell_1, 1)}$ from $H_2$ to form $\beta p \alpha r \beta \cdot \jmp {(\ell_1, 1)}$ in $(G \diamond H)_1$, by the first rule.
  The set $(G \diamond H)_2$ is empty, because despite the fact that $αqβ \cdot \acc{1} \cdot \acc{1} \in G_2$, there is no trace in $H_2$ that starts with $\beta$, and so neither rule can apply.
 \end{example}
 
@@ -385,7 +364,7 @@ We start with the base cases.
 \begin{definition}[continuation semantics, base]
  For all $i, j ∈ I$, we define the following sets:
  \begin{align*}
-  ⟦\comAssert{b}⟧ᵢ^♯ & ≜ \{ α ⋅ \acc{i} ∣ (α, i) ∈ ⟦ b ⟧ \}
+  ⟦\comAssert{e_b}⟧ᵢ^♯ & ≜ \{ α ⋅ \acc{i} ∣ (α, i) ∈ ⟦ e_b ⟧ \}
     & ⟦ \comGoto{ℓ} ⟧ᵢ^♯ & ≜ \{ α ⋅ \jmp{(ℓ, i)} ∣ α ∈ \At \} \\
   ⟦p⟧ᵢ^♯             & ≜ \{α p β ⋅ \mathbf{acc}\ i ∣ α, β ∈ \At\}
     & ⟦ \comLabel{ℓ} ⟧ᵢ^♯ & ≜ \{ α ⋅ \acc{i} ∣ α ∈ \At \} \\
@@ -416,17 +395,17 @@ First of all, the $\comITE{b}{e}{f}$ filters out traces in the semantics of the 
  We define $⟦ \comITE{b}{e}{f} ⟧^♯$ as the least indexed family that satisfies the following rules for all $i \in I$:
  \begin{mathpar}
     \inferrule{
-        \alpha \in ⟦ b ⟧ \\
-        \alpha{}w \cdot c \in ⟦ e ⟧^♯ᵢ
+        α ∈ ⟦ e_b ⟧ \\
+        \alpha{}w ⋅ c ∈ ⟦ e ⟧^♯ᵢ
     }{%
-        \alpha{}w \cdot c \in ⟦ \comITE{b}{e}{f} ⟧^♯ᵢ
+        \alpha{}w ⋅ c ∈ ⟦ \comITE{e_b}{e}{f} ⟧^♯ᵢ
     }
     \and
     \inferrule{
-        \alpha \not\in ⟦ b ⟧ \\
-        \alpha{}w \cdot c \in ⟦ f ⟧^♯ᵢ
+        α ∉ ⟦ e_b ⟧ \\
+        \alpha{}w ⋅ c ∈ ⟦ f ⟧^♯ᵢ
     }{%
-        \alpha{}w \cdot c \in ⟦ \comITE{b}{e}{f} ⟧^♯ᵢ
+        \alpha{}w ⋅ c ∈ ⟦ \comITE{e_b}{e}{f} ⟧^♯ᵢ
     }
  \end{mathpar}
  \end{definition}
@@ -436,25 +415,25 @@ First of all, the $\comITE{b}{e}{f}$ filters out traces in the semantics of the 
 
  \begin{definition}[continuation semantics, sequencing and loops]%
  \label{def:intermediate-sequencing-loops}
- Let $e, f \in \CFGKAT$.
+ Let $e, f ∈ \CFGKAT$.
  We define
  \(
     ⟦e; f⟧^♯ ≜ ⟦ e ⟧^♯ ⋄ ⟦ f ⟧^♯
  \).
- Also, for all $b \in \BExp$, we define $⟦\comWhile{b}{e}⟧^♯$ as the least indexed family satisfying:
+ Also, for all $e_b ∈ \BExp$, we define $⟦\comWhile{e_b}{e}⟧^♯$ as the least indexed family satisfying:
  \begin{mathpar}
     \inferrule{%
-        i \in I \\
-        \alpha \not\in ⟦ b ⟧
+        i ∈ I \\
+        α ∉ ⟦ e_b ⟧
     }{%
-        \alpha \cdot \acc{i} \in ⟦\comWhile{b}{e}⟧^♯ᵢ
+        α ⋅ \acc{i} ∈ ⟦\comWhile{e_b}{e}⟧^♯ᵢ
     }
     \and
     \inferrule{%
-        \alpha \in ⟦ b ⟧ \\
-        \alpha w \cdot c \in (⟦ e ⟧^♯ ⋄ ⟦\comWhile{b}{e}⟧^♯)ᵢ
+        α ∈ ⟦ e_b ⟧ \\
+        α w ⋅ c ∈ (⟦ e ⟧^♯ ⋄ ⟦\comWhile{e_b}{e}⟧^♯)ᵢ
     }{%
-        \alpha w \cdot \lfloor c \rfloor \in ⟦\comWhile{b}{e}⟧^♯_i
+        α w ⋅ ⌊ c ⌋ ∈ ⟦\comWhile{e_b}{e}⟧^♯_i
     }
  \end{mathpar}
  The operation $\lfloor - \rfloor$ in the last rule is defined by $\lfloor c \rfloor = \acc{i}$ when $c = \brk{i}$, and $\lfloor c \rfloor = c$ otherwise.
@@ -476,7 +455,7 @@ For the base cases, this is relatively simple to accomplish: just check if we st
  Let $e ∈ \CFGKAT$.
  For each $ℓ ∈ L$, we define the following guarded languages with continuations:
  \begin{align*}
-  ⟦\comAssert{b}⟧ᵢ^ℓ & ≜ ∅
+  ⟦\comAssert{e_b}⟧ᵢ^ℓ & ≜ ∅
     & ⟦ \comGoto{ℓ'} ⟧ᵢ^ℓ  & ≜ ∅ \\
   ⟦p⟧ᵢ^ℓ             & ≜ ∅
     & ⟦ \comLabel{ℓ'} ⟧ᵢ^ℓ & ≜ \{ α ⋅ \mathbf{acc}\ i ∣ α ∈ \At,\ ℓ = ℓ' \} \\
@@ -489,10 +468,10 @@ Note how none of these cases has a trace, except the one for $⟦ \comLabel{ℓ'
 With these cases covered, we can then treat the inductive step.
 
 \begin{definition}[continuation semantics starting from a label, sequencing and branching]
-Let $e, f \in \CFGKAT$, $b \in \BExp$ and $\ell \in L$.
+Let $e, f \in \CFGKAT$, $e_b \in \BExp$ and $\ell \in L$.
 We define the following indexed families to cover the traces of CF-GKAT programs starting from the label $\ell$ when composed using branching or sequencing:
 \begin{mathpar}
-    ⟦\comITE{b}{e}{f}⟧^ℓᵢ ≜ ⟦ e ⟧^ℓᵢ \cup ⟦ f ⟧^ℓᵢ
+    ⟦\comITE{e_b}{e}{f}⟧^ℓᵢ ≜ ⟦ e ⟧^ℓᵢ \cup ⟦ f ⟧^ℓᵢ
     \and
     ⟦e; f⟧^ℓᵢ ≜ (⟦ e ⟧^ℓ ⋄ ⟦ f ⟧^♯)ᵢ \cup ⟦ f ⟧^ℓᵢ
 \end{mathpar}
@@ -505,17 +484,17 @@ In this case, if we start execution from a label somewhere in the body, we may n
 On the other hand, early termination in the loop body still needs to be turned into an accepting trace.
 
 \begin{definition}[continuation semantics starting from a label, loops]
-Let $e \in \CFGKAT$ and $b \in \BExp$.
+Let $e \in \CFGKAT$ and $e_b \in \BExp$.
 We define the indexed family $⟦\comWhile{b}{e}⟧^ℓ$ below, where $\lfloor - \rfloor$ is as in \Cref{def:intermediate-sequencing-loops}:
 \[
-    ⟦\comWhile{b}{e}⟧^ℓ_i = \{ w \cdot \lfloor c \rfloor \mid w \cdot c \in (⟦ e ⟧^ℓ ⋄ ⟦\comWhile{b}{e}⟧^♯)ᵢ \}
+    ⟦\comWhile{e_b}{e}⟧^ℓ_i = \{ w \cdot \lfloor c \rfloor \mid w \cdot c \in (⟦ e ⟧^ℓ ⋄ ⟦\comWhile{e_b}{e}⟧^♯)ᵢ \}
 \]
 \end{definition}
 
 \subsection{Guarded language semantics}
 
 The continuation semantics of a CF-GKAT program $e$ in terms of indexed families $⟦ e ⟧^♯$ uses continuations to record how a trace ends.
-In particular, some traces may end with the continuation of the form $\jmp{(i, \ell)}$, signaling that computation needs to continue from the label $\ell$.
+In particular, some traces may end with the continuation of the form $\jmp{(\ell, i)}$, signaling that computation needs to continue from the label $\ell$.
 But we have just seen that we can also obtain the traces of $e$ starting from $\ell$, in the form of the indexed family $⟦ e ⟧^ℓ$.
 This means that we have the information we need to resolve the jumping continuations, if we just put together the right traces.
 We will end this section by doing just that.
@@ -530,10 +509,10 @@ To formalize our approach, we need a way to refer to the intermediate CF-GKAT se
 \begin{definition}
  A \emph{labeled family of guarded languages (with continuations)}, or \emph{labeled family} for short, is a function $G$ from $L + ♯$ to indexed families of guarded languages (with continuations), e.g., $G: L + ♯ → I → 𝒞$.
  We often use superscripts to denote the value at a given label $♯$, writing $L^ℓ$ for $L(ℓ)$.
- Note that under this convention, $L^ℓ$ is an indexed family, which means that we may further unravel by writing $L^ℓ_i$ to obtain the guarded language with continuations $L(ℓ, i)$.
+ Note that under this convention, $G^ℓ$ is an indexed family, which means that we may further unravel by writing $G^ℓ_i$ to obtain the guarded language with continuations $G(ℓ, i)$.
 \end{definition}
 
-Crucially, we can retrofit the continuation semantics $⟦ e ⟧$ as a labeled family; after all, $⟦ e ⟧^\sharp$ is an indexed family, and so is $⟦ e ⟧^\ell$ for each $\ell \in L$.
+Crucially, we can retrofit the continuation semantics $⟦ e ⟧$ as a labeled family; after all, $⟦ e ⟧^♯$ is an indexed family, and so is $⟦ e ⟧^ℓ$ for each $ℓ ∈ L$.
 We will thus treat $⟦ e ⟧$ as such from this point on.
 
 \smallskip
@@ -572,17 +551,17 @@ while the third rule strings together guarded words continuations that jump to a
 \begin{example}
  Let $G$ be the labeled family of guarded languages with continuations defined by
  \begin{align*}
-  G₁^♯ & = \{ α ⋅ \jmp{(\ell, 1)} \}
+  G₁^♯ & = \{ α ⋅ \jmp{(ℓ, 1)} \}
     & G₂^♯ & = ∅ \\
-  G₁^{\ell} & = \{ α p α ⋅ \jmp{(\ell', 1)}, β ⋅ \acc{1} \}
-    & G₂^{\ell} & = \{ α ⋅ \jmp{(\ell', 2)} \} \\
-  G₁^{\ell'} & = \{ α q α ⋅ \jmp{(\ell, 1)}, α r β ⋅ \jmp{(\ell, 1)} \}
-    & G₂^{\ell'} & = \{ α ⋅ \jmp{(\ell, 1)}\}
+  G₁^{ℓ} & = \{ α p α ⋅ \jmp{(ℓ', 1)}, β ⋅ \acc{1} \}
+    & G₂^{ℓ} & = \{ α ⋅ \jmp{(ℓ', 2)} \} \\
+  G₁^{ℓ'} & = \{ α q α ⋅ \jmp{(ℓ, 1)}, α r β ⋅ \jmp{(ℓ, 1)} \}
+    & G₂^{ℓ'} & = \{ α ⋅ \jmp{(ℓ, 1)}\}
  \end{align*}
  Now $G\!↓₁^♯$ contains, among other things,
  the guarded word $α p α q α p α r β$.
 
- Note furthermore that $G\!↓₂^{\ell}$ is empty, despite $G₂^{\ell}$ containing a guarded word with a continuation that has a mutual jump with another guarded word with continuation in $G₂^{\ell'}$, as these can never be concatenated into one guarded word with continuation of the form $\acc{i}$ or $\ret$.
+ Note furthermore that $G\!↓₂^{ℓ}$ is empty, despite $G₂^{\ell}$ containing a guarded word with a continuation that has a mutual jump with another guarded word with continuation in $G₂^{\ell'}$, as these can never be concatenated into one guarded word with continuation of the form $\acc{i}$ or $\ret$.
 \end{example}
 
 In total, we can then obtain the semantics of a CF-GKAT term as $⟦ e ⟧\!\downarrow$, in the form of a labeled family of guarded languages.
@@ -616,9 +595,9 @@ Finally, the soundness and completeness of our decision procedure can be derived
 
 In order to establish our decision procedure, we will first recap on GKAT automata and its trace semantics.
 \begin{definition}[GKAT automata~\cite{Schmid_Kappé_Kozen_Silva_2021, kozen_BohmJacopiniTheorem_2008a}]
- A \emph{GKAT automaton} $A ≜ ⟨ S, δ, \hat{s} ⟩$ consists of a set of \emph{states} $S$, a \emph{transition function} $\delta: S → \At → ⊥ + ⊤ + Σ × S$, and a \emph{start state} $\hat{s} ∈ S$.
+ A \emph{GKAT automaton} $A ≜ ⟨ S, δ, \hat{s} ⟩$ consists of a set of \emph{states} $S$, a \emph{transition function} $\delta: S → \At → ⊥ + ⊤ + K × S$, and a \emph{start state} $\hat{s} ∈ S$.
 \end{definition}
-Intuitively, the transition function of a GKAT automaton tells us, given a state $q$ and an atom $α$ accounting for the truth value of each primitive test, to either \emph{reject} the input, represented by $δ(q, α) = ⊥$, \emph{accept} the input, represented by $δ(q, α) = ⊤$, or to \emph{transition} to a new state in $S$ after executing an action from $Σ$, represented by $δ(q, α) ∈ Σ × S$.
+Intuitively, the transition function of a GKAT automaton tells us, given a state $q$ and an atom $α$ accounting for the truth value of each primitive test, to either \emph{reject} the input, represented by $δ(q, α) = ⊥$, \emph{accept} the input, represented by $δ(q, α) = ⊤$, or to \emph{transition} to a new state in $S$ after executing an action from $K$, represented by $δ(q, α) ∈ K × S$.
 
 A GKAT automaton induces a guarded language in a fairly straightforward manner.
 \begin{definition}
@@ -655,7 +634,7 @@ Like GKAT automaton, CF-GKAT automaton is defined by a dynamics, people familiar
 %FIXME: Do we want to keep using the name dynamics? I am not sure others use this name?
 \begin{definition}[CF-GKAT dynamics]
  Given a set $X$, we write $G(X)$ for the set
- \[G(X) ≜ I × \At → ⊥ + C + Σ × X × I.\]
+ \[G(X) ≜ I × \At → ⊥ + C + K × X × I.\]
  %FIXME: I think we need to fix the code to follow this type
 \end{definition}
 
@@ -667,7 +646,7 @@ Given a current indicator value \(i ∈ I\) and an atom $α$ accounting for the 
  \item
        offer a \emph{continuation}, represented by $ρ(i, α) ∈ C$; or
  \item
-       execute a primitive action in $Σ$ and set a new indicator value from $I$ while transitioning to a new state in $S$, represented by $ρ(i, α) ∈ Σ × X × I$.
+       execute a primitive action in $K$ and set a new indicator value from $I$ while transitioning to a new state in $S$, represented by $ρ(i, α) ∈ K × X × I$.
 \end{itemize}
 
 Then the definition of CF-GKAT automaton is similar to GKAT automaton, except we will need a function \(λ: L → G(S)\) where \(λ(ℓ)\) provides a dynamics representing the ``entry point'' for label \(ℓ\).
@@ -676,7 +655,7 @@ Then the definition of CF-GKAT automaton is similar to GKAT automaton, except we
  a \emph{start state} \(\hat{s} ∈ S\), and a \emph{jump map} \(λ: L → G(S)\).
 \end{definition}
 
-Intuitively, the transition map \(δ\) assigns every state in $S$ a dynamics from $G(S)$; the jump map $λ$, on the other hand, assign a dynamics for each label $ℓ ∈ L$, indicating how to resume the computation after a \(\jmp{ℓ}\) continuation is reached.
+Intuitively, the transition map \(δ\) assigns every state in $S$ a dynamics from $G(S)$; the jump map $λ$, on the other hand, assign a dynamics for each label $ℓ ∈ L$, indicating how to resume the computation after a \(\jmp{ℓ, i}\) continuation is reached.
 Dynamics in \(G(S)\) can then be assigned a continuation semantics in the CF-GKAT automaton \(A ≜ ⟨S, δ, ŝ, λ⟩\), as follows.
 
 \begin{example}[A simple CF-GKAT automaton]
@@ -686,17 +665,17 @@ Dynamics in \(G(S)\) can then be assigned a continuation semantics in the CF-GKA
     {} & {\hat{s}} & s & {} \\
     & {} & {}
     \arrow[shorten <=8pt, from=1-1, to=1-2]
-    \arrow["{\{b\}/p}", from=1-2, to=1-3]
-    \arrow["∅"'{pos=1}, Rightarrow, from=1-2, to=2-2]
-    \arrow["\{b\}"{pos=0.5}, shorten >=15pt, Rightarrow, from=1-3, to=1-4]
-    \arrow["∅"'{pos=1}, Rightarrow, from=1-3, to=2-3]
+    \arrow["{b/p}", from=1-2, to=1-3]
+    \arrow["\overline{b}"'{pos=1}, Rightarrow, from=1-2, to=2-2]
+    \arrow["b"{pos=0.5}, shorten >=15pt, Rightarrow, from=1-3, to=1-4]
+    \arrow["\overline{b}"'{pos=1}, Rightarrow, from=1-3, to=2-3]
   \end{tikzcd}\]
-  where \(ŝ \xrightarrow{\{b\}/p} s\) means that \(δ(ŝ, i, \{b\}) = (s, p)\) and \(ŝ ⇒^∅\) means that \(δ(ŝ, i, ∅) = \acc{i}\).
+  where \(ŝ \xrightarrow{b/p} s\) means that \(δ(ŝ, i, b) = (s, p)\) and \(ŝ ⇒^{\overline{b}}\) means that \(δ(ŝ, i, \overline{b}) = \acc{i}\).
   In the above automaton, where the start state is \(ŝ\), 
   \begin{itemize}
-    \item If the input atom is \(\{b\}\), then it will transition to the state \(s\), while executing \(p\);
+    \item If the input atom is \(b\), then it will transition to the state \(s\), while executing \(p\);
     then the state \(s\) will always accept.
-    \item If the input atom is \(∅\), then it will simply accept the input without executing any action.
+    \item If the input atom is \(\overline{b}\), then it will simply accept the input without executing any action.
   \end{itemize}
   As we can see, the behavior of \(ŝ\) indeed matches the behavior of the program when executing from the start.
   Then the entry dynamics for \(ℓ\) can be defined as follows:
@@ -758,7 +737,6 @@ First, we "embed" the indicator values into the state set; the new state set the
 Second, we resolve all the continuations in transition results.
 In particular, we need to resolve the jump continuations using the jump map $λ$: when $δ(s, i, α) = \jmp{(ℓ, j)}$, the $α$-transition leaving the state $(s, i)$ in the resulting GKAT automaton is determined by looking at the $α$-behavior starting from the label $ℓ$ with indicator value $j$, given by $λ(ℓ, j, α)$.
 
-%FIXME: many \jmp(ℓ, i) still have ℓ and i in the wrong place. 
 The main obstacle to properly resolve jump continuation is that $λ(ℓ, j, α)$ may itself point to a different label by returning $\jmp{(ℓ', k)}$, then \(λ(ℓ', k, α)\) may also yield a another jump, et cetera.
 These jump sequences can be resolved by iterating the jump map, and terminate when either the result is no longer a jump, or a infinite loop is detected.
 
@@ -834,7 +812,7 @@ Intuitively, the continuation resolution is separated into two procedure: we fir
   \end{cases}
  \end{align*}
 \end{definition}
-Notice \(λ\!↓\) is total and \(δ'((s, i), α)\) will not return a jump continuation, therefore $δ\!↓$ is well-defined; in other words, for all $s ∈ S$, $i ∈ I$ and $α ∈ \At$, it holds that $δ\!↓((s, i), α) ∈ ⊥ + ⊤ + Σ × (S × I)$, as expected for a GKAT automaton on state set $S × I$.
+Notice \(λ\!↓\) is total and \(δ'((s, i), α)\) will not return a jump continuation, therefore $δ\!↓$ is well-defined; in other words, for all $s ∈ S$, $i ∈ I$ and $α ∈ \At$, it holds that $δ\!↓((s, i), α) ∈ ⊥ + ⊤ + K × (S × I)$, as expected for a GKAT automaton on state set $S × I$.
 
 Having defined our lowering operation, we can state its correctness as follows.
 
@@ -875,11 +853,11 @@ Suffice it to say that they can be easily converted to a plain CF-GKAT automata 
 \begin{table}
   \centering
   \begin{tabular}{c || c | l | l | l}
-   \(e\)  & \(S\) & \(δ(s): G(S)\) & \(ι(i, α): ⊥ + C + Σ × S × I\) & \(λ(ℓ): G(S)\) \\
+   \(e\)  & \(S\) & \(δ(s): G(S)\) & \(ι(i, α): ⊥ + C + K × S × I\) & \(λ(ℓ): G(S)\) \\
    \hline
-   \(\comAssert{b}\)& \(∅\)& \(!\)& \(
+   \(\comAssert{e_b}\)& \(∅\)& \(!\)& \(
    \begin{cases}
-    \acc{i} & (α, i) ∈ ⟦ b ⟧   \\
+    \acc{i} & (α, i) ∈ ⟦ e_b ⟧   \\
     ⊥       & \text{otherwise}
    \end{cases}
    \) & \(0\) \\
@@ -896,15 +874,15 @@ Suffice it to say that they can be easily converted to a plain CF-GKAT automata 
      \end{cases}
    \)\\
    %
-   \(e₁ +_b e₂\) & \(S₁ + S₂\) & \(
+   \(e₁ +_{e_b} e₂\) & \(S₁ + S₂\) & \(
    \begin{cases}
     δ₁(s) & s ∈ S₁ \\
     δ₂(s) & s ∈ S₂
    \end{cases}
    \) & \(
    \begin{cases}
-    ι₁(i, α) & (α, i) ∈ ⟦ b ⟧ \\
-    ι₂(i, α) & (α, i) ∉ ⟦ b ⟧
+    ι₁(i, α) & (α, i) ∈ ⟦ e_b ⟧ \\
+    ι₂(i, α) & (α, i) ∉ ⟦ e_b ⟧
    \end{cases}
    \) & \(
    \begin{cases}
@@ -927,11 +905,11 @@ Suffice it to say that they can be easily converted to a plain CF-GKAT automata 
    \end{cases}
    \) \\
    %
-   \({e₁}^{(b)}\)
+   \({e₁}^{(e_b)}\)
    & \(S_{e₁}\)
-   & \(⌊δ₁(s)[ι₁ᵇ]⌋\)
-   & \(⌊ι₁ᵇ⌋(i, α)\)
-   & \( ⌊ λ(ℓ)[ι₁ᵇ] ⌋ \) \\
+   & \(⌊δ₁(s)[ι₁^{e_b}]⌋\)
+   & \(⌊ι₁^{e_b}⌋(i, α)\)
+   & \( ⌊ λ(ℓ)[ι₁^{e_b}] ⌋ \) \\
   \end{tabular}
   %FIXME: CZ: I don't feel like we need a new notation 0
   \caption{Thompson's construction for CF-GKAT. Here,
@@ -948,13 +926,13 @@ Finally, to obtain a CF-GKAT automaton with the same continuation semantics as \
 
 %FIXME: CZ: I think all the following paragraphs should have formally defined the thompson's construction using notation. And the table should only be used as a reference.
 % in this way we can make the table more compact.
-\subsubsection*{Converting \comBrk, \comRet, \comGoto{ℓ}, and indicator assignment:}
+\subsubsection*{Converting \comBrk, \comRet, \command{goto}, and indicator assignment:}
 recall the semantics of \(\comBrk\), \(\comRet\), \(\comGoto{ℓ}\), and indicator assignments will simply emit the corresponding continuations.
 Thus, the Thompson's automata for these commands consist only of a start dynamic which yields the desired continuation.
 
 \subsubsection*{Converting tests and primitive actions:}
 the conversions of primitive tests and primitive actions largely inherit the Thompson's construction for GKAT.
-The Thompson's automaton for tests \(b\) will contain only a start dynamic, which will accept the input indicator-atom pairs if and only if they satisfy \(b\).
+The Thompson's automaton for tests \(e_b\) will contain only a start dynamic, which will accept the input indicator-atom pairs if and only if they satisfy \(e_b\).
 The Thompson's automata for primitive actions \(p\) will contain a start dynamic that always transition to the unique state while executing the action \(p\), then the unique state will accept all inputs.
 
 \subsubsection*{Converting labels:}
@@ -970,8 +948,8 @@ In this case, the jump map will map \(ℓ'\) to the behavior of the identity ope
 
 % FIXME: I think this is too on the nose... Basically just reiterating the definition
 \subsubsection*{Converting \command{if} statements:}
-the Thompson automaton for \(\comITE{b}{e₁}{e₂}\) is also similar to that of GKAT:
-If the input atom-indicator pair satisfies \(b\), the start \(ι\) will enter the Thompson automaton of \(e₁\) by taking on the behavior of \(ι₁\) ; and when the starting atom-indicator pair doesn't satisfy \(b\), then \(ι\) will take on the behavior of \(ι₂\).
+the Thompson automaton for \(\comITE{e_b}{e₁}{e₂}\) is also similar to that of GKAT:
+If the input atom-indicator pair satisfies \(e_b\), the start \(ι\) will enter the Thompson automaton of \(e₁\) by taking on the behavior of \(ι₁\) ; and when the starting atom-indicator pair doesn't satisfy \(e_b\), then \(ι\) will take on the behavior of \(ι₂\).
 The jump map \(λ\) assigns the entry point for label \(ℓ\) based on where \(ℓ\) appears: namely if \(ℓ\) appears in \(e₁\), then \(ℓ\) will take its entry point in \(A₁\); and similarly, if \(ℓ\) appears in \(e₂\), \(ℓ\) will take its entry point in \(A₂\).
 
 \subsubsection*{Converting Sequencing:}
@@ -1012,16 +990,16 @@ Even worse, when starting with an indicator variable that is not in \(\{0, 1, 2\
 
 Fortunately, these difficulties can be resolved by the \(\iter\) function (\cref{def: iteration lifting}). We will iterate the loop body until we encounter a primitive action or non-local control.
 \begin{definition}[Iterated Start Dynamics]
-  Let $S$ be a set, let $h ∈ G(S)$, and $b ∈ \BExp$.
+  Let $S$ be a set, let $h ∈ G(S)$, and $e_b ∈ \BExp$.
   We can use the \(\iter\) function to define $hᵇ: G(S)$, as follows:
   \begin{align*}
-   h^b & : G(S)\\
-   h^b & ≜
+   h^{e_b} & : G(S)\\
+   h^{e_b} & ≜
    \iter\left(
      (i, α) ↦
      \begin{cases}
-       \exitWith(\acc{i}) & \text{if } (i, α) ∉ ⟦b⟧ \\
-       \contWith(i', α) & \text{if } (i, α) ∈ ⟦b⟧ \text{ and } h(i, α) = \acc{i'} \\
+       \exitWith(\acc{i}) & \text{if } (i, α) ∉ ⟦e_b⟧ \\
+       \contWith(i', α) & \text{if } (i, α) ∈ ⟦e_b⟧ \text{ and } h(i, α) = \acc{i'} \\
        \exitWith(h(i, α)) & \text{otherwise}
      \end{cases}
    \right)

@@ -133,9 +133,9 @@ At the bottom level, there are \emph{tests}; these are Boolean assertions that c
 To model them, we fix a finite set of primitive tests $B$, which represent uninterpreted expressions that may or may not hold.
 The full syntax is as follows.
 \[
- \BExp ∋ e_{b1}, e_{b2} ::=
+ \BExp ∋ e_{b}, e_{c} ::=
  \false ∣ \true ∣ b ∈ B ∣ {\color{blue}x = i\ (i ∈ I)}
- ∣ e_{b1} ∨ e_{b2} ∣ e_{b1} ∧ e_{b2} ∣ ¬ e_{b1}
+ ∣ e_{b} ∨ e_{c} ∣ e_{b} ∧ e_{c} ∣ \overline{e_{b}}
 \]
 Compared to GKAT, tests in CF-GKAT include the \emph{indicator variable test} $x = i$ (highlighted in \textcolor{blue}{blue}) for each \emph{indicator value} $i$ drawn from a finite but fixed set of possible indicator values $I$.
 As the notation suggests, this test holds when the indicator variable $x$ currently has the value $i$.
@@ -491,7 +491,7 @@ We define the indexed family $C(\comWhile{b}{e})^ℓ$ below, where $\lfloor - \r
 \]
 \end{definition}
 
-\subsection{Guarded language semantics}
+\subsection{Continuation semantics}
 
 The continuation semantics of a CF-GKAT program $e$ in terms of indexed families $C( e )^♯$ uses continuations to record how a trace ends.
 In particular, some traces may end with the continuation of the form $\jmp{(\ell, i)}$, signaling that computation needs to continue from the label $\ell$.
@@ -784,7 +784,7 @@ Having defined our lowering operation, we can state its correctness as follows.
 
 \begin{theorem}[Correctness of lowering]\label{the:cf-gkat-automaton-lowering-correctness}
  Let \(A ≜ ⟨S, δ, \hat{s}, λ⟩\) be a CF-GKAT automaton.
- The translation from CF-GKAT automata to GKAT automata commutes with the semantic jump resolution operator, in the sense that for $i ∈ I$, it holds that $C(A\!↓_i) = C(A)\!↓^♯ᵢ$.
+ The translation from CF-GKAT automata to GKAT automata commutes with the semantic jump resolution operator, in the sense that for $i ∈ I$, it holds that $G(A\!↓_i) = C(A)\!↓^♯ᵢ$.
 \end{theorem}
 
 \subsection{Converting expressions to CF-GKAT automata}

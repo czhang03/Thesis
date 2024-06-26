@@ -7,6 +7,8 @@
 
 
 
+
+
 \paragraph{Our Contributions}
 
 \section{Technical Background}
@@ -339,7 +341,7 @@ In fact, these new \command{if}-statement and \command{while}-loop can be embedd
     \comITE{e_b}{e}{f} & ≜ e_b ⋅ e + \overline{e_b} ⋅ f \\  
     \comWhile{e_b}{e} & ≜ (e_b ⋅ e)* ⋅ \overline{e_b}
 \end{align*}
-This embedding into KAT gives Guarded Kleene Algebra with Tests a natural trace semantics: by computing the trace of the underlying KAT term; and a PSPACE decision procedure for trace-equivalence.
+This embedding into KAT gives Guarded Kleene Algebra with Tests a natural trace semantics: by computing the trace of the underlying KAT term; and a PSPACE decision procedure for trace-equivalence. Because the trace semantics of GKAT is obtained by the embedding into KAT we will overload the notation \(G(e)\) as the trace interpretation of a GKAT expression \(e\). 
 
 The main advantage of GKAT, compare to KAT, is its efficient decision procedure. Such decision procedure is enabled by its deterministic nature, namely all the non-deterministic operations are guarded by tests. Thus, endowing GKAT a different automaton structure.
 

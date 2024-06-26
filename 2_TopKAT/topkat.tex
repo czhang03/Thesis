@@ -2,7 +2,7 @@
 \label{chapter:TopKAT}
 \thispagestyle{myheadings}
 
-\section{Overview}
+\section{Motivation and Overview}
 
 % 1 - Program logics are a fundamental tool for program reasoning
 % 2 - Hoare logic have guided the development of formal reasoning frameworks
@@ -21,21 +21,9 @@ where \(p\) is a program, and \(b\) and \(c\) are assertions describing the pre-
 and post-conditions.  Such Hoare triples are (partial) correctness
 specifications, which state that, if we run \(p\) on an initial state satisfying
 \(b\), all the final states (if reached) will satisfy \(c\). In other words, \(c\)
-\emph{over-approximates} the set of final states of \(p\) starting from \(b\).
+\emph{over-approximates} the set of final states of \(p\) starting from \(b\). 
 
-Despite their popularity, such logics are not the only tool for verifying
-programs. Another long-standing approach, which can be traced back to works by
-\citet{Taylor79} and \citet{odonnell_1985} in the 80s, is
-\emph{equational reasoning}. Programs are modeled as elements of some algebraic
-structure, whose equational theory can be used to prove specifications. One such
-algebraic structure is \emph{Kleene algebra with tests}~\cite{Kozen_1997}
-(KAT), which extends Kleene algebra with predicates for modeling
-conditionals. Kleene algebras with tests have several pleasing properties, such
-as equality of expressions being decidable in PSPACE, and have been applied in several
-domains, including program transformations~\cite{Angus_Kozen_2001}, 
-networking~\cite{Anderson_Foster_Guha_Jeannin_Kozen_Schlesinger_Walker_2014,Foster_Kozen_Milano_Silva_Thompson_2015,Smolka_Kumar_Foster_Kozen_Silva,Smolka_Kumar_Kahn_Foster_Hsu_Kozen_Silva_2019}, 
-compiler optimization~\cite{Kozen_Patron_2000}, and more.
-
+Despite their popularity, \emph{equational reasoning}, like Kleene Algebra with Tests has also prevailed in parallel.
 The two approaches turned out to be not so different. \citet{Kozen_2000}
 showed that KAT can express the validity of a Hoare triple as an equation, in
 such a way that the deduction rules of a large fragment of Hoare Logic can be
@@ -95,7 +83,7 @@ adding a top element \(\top\) to KAT\@.   We call such a structure a \emph{Kleen
 encode inequalities between images, which we use to express incorrectness
 triples.  The encoding allows us to prove the rules of incorrectness logic
 equationally, thus extending \citeauthor{Kozen_2000}'s correspondence to
-incorrectness reasoning. In fact, the use of TopKAT to encode incorrectness logic was also suggested by~\citet{OHearn_2020}.
+incorrectness reasoning. In fact, the use of TopKAT to encode incorrectness logic was also hinted in the original incorrectness logic paper~\cite{OHearn_2020}.
 
 For clarity of exposition, our main focus is on the fragment of incorrectness
 logic that handles normal program termination.  However,
@@ -146,43 +134,15 @@ properties of TopKAT\@: \emph{completeness} and \emph{decidability}.  We say
 that an equational theory is complete for a certain class of structures if it
 can derive any equation that is valid in the class.  We are particularly
 interested in completeness with respect to relational structures, since they are
-the natural setting for formulating program logics. However, it is well-known that the
-addition of a top element can be problematic for completeness of relational 
-structures~\cite{pousAutomataRelationAlgebra2016}, 
-and we show that this is the case for TopKAT as well: the theory is incomplete for
-\(\TopREL\), the class of relational structures where the top element is the
-complete relation.  However, we do get completeness by considering a larger
-class \(\TopGREL\), where the top element might not be the complete relation.
-We also show that TopKAT is complete for so-called \emph{language TopKATs}, a
-class of structures inspired by prior work on KAT\@.
-(Figure~\ref{fig:completeness} summarizes the relationships between these
-different structures.)  Finally, we show that the equality of TopKAT expressions can
-be decided in PSPACE, by reducing a TopKAT expression into a KAT expression and 
-applying the PSPACE algorithm for KAT equalities~\cite{Cohen_Kozen_Smith_1999}.
+the natural setting for formulating program logics. 
+However, it is well-known that the addition of a top element can be problematic for completeness of relational structures~\cite{pousAutomataRelationAlgebra2016}, and we show that this is the case for TopKAT as well: the theory is incomplete for \(\TopREL\), the class of relational structures where the top element is the complete relation.  
+However, we were able to obtain (co)domain completeness: all (co)domain comparison inequalities, which subsumes both the encoding of incorrectness logic and Hoare logic, are derivable if and only if they are true in relational model. Setting a solid foundation for reasoning about program logic using KAT.
 
-Summarizing, our contributions are:
-\begin{itemize}
-\item We show that (propositional) incorrectness logic cannot be encoded in
-  relational KATs. Consequently, KAT cannot be used to reason equationally about
-  incorrectness triples in general.
-\item We consider TopKAT, an extension of KAT with an additional top element
-  \(\top\), and show that (propositional) incorrectness logic for programs
-  without error primitives can be encoded in relational TopKATs, by using \(\top\)
-  to encode the codomain of a relation.  We prove that all the rules of this
-  fragment of incorrectness logic can be derived solely by appealing to the
-  equational theory of TopKAT\@.
-\item We study the relations between the different systems we present
-  in terms of expressivity and completeness.
-\aaa{The phrasing sounds a bit weak. Can we relate this somehow to the original
-  motivation in terms of incorrectness logic?}
-\item We prove that deciding equality of TopKAT expressions is PSPACE-complete.
-\item We consider FailTopKAT, an extension of TopKAT by means of an element
-  \(\fail\) and we show that this can be used to encode incorrectness logic with
-  an error primitive.
-\end{itemize}
+The (co)domain comparison result is built upon several lower-level completeness result. Specifically, the completeness regarding language TopKAT, which naturally induces the completeness of general relational TopKAT (\TopGREL), a larger class of TopKAT where the elements are relations.
+Given the relational nature of TopGREL, it is natural to wonder if we can encode incorrectness logic in it. However, we have shown that it is impossible: every predicate that is encodable in TopGREL is already encodable in relational KAT.
+All of the above completeness results and equi-expressiveness results are simple corollaries of our new structured version of reduction~\cite{Pous_Rot_Wagemaker_2021}, where instead of relating relating both the language model and the theory, we characterize the reduction simply as an injective interpretation.
 
-
-\section{Program Logics}
+\section{Preliminary on Program Logics}
 
 \subsection{Hoare Logic}\label{sec:incorrectness-and-hoare}
 
@@ -197,7 +157,7 @@ a memory satisfying \(b\), it will result in a memory satisfying \(c\).
 the classical setting in their omission of the assignment rule.
 
 
-\begin{figure}\label{fig:HL}
+\begin{figure}
     \begin{mathpar}
         \inferrule[Composition]
         {\hoareTriple{a}{p}{b} \\ \hoareTriple{b}{q}{c}}
@@ -219,6 +179,7 @@ the classical setting in their omission of the assignment rule.
         {\hoareTriple{b'}{p}{c'}}
 
       \end{mathpar}
+      \caption{proof rules of propositional Hoare logic}\label{fig:HL}
 \end{figure}
 
 In its essence, Hoare logic is an \emph{over-approximation} logic.  To see this,
@@ -244,8 +205,7 @@ partial correctness of propositional Hoare logic in KAT\@.
 To do this  we can use tests to represent pre and post-conditions,
 thus encode a partial correctness propositional Hoare triple
 \(\hoareTriple{b}{p}{c}\) as the KAT equality:
-\[b p \overline{c} = 0\]
-or equivalently \[b p = b p c.\]
+\[b p \overline{c} = 0, \text{ or equivalently, } b p = b p c.\]
 
 Indeed, we can show that in all relational KATs \((ℛ, ℬ)\) and
 \(p \in ℛ, b, c \in ℬ\),
@@ -366,9 +326,7 @@ The generic proof rules of incorrectness logic are listed in \Cref{fig: orignal
   proof rules of inc logic}.
 Following \citet{OHearn_2020}, we formulate
 incorrectness logic for a language of commands which is essentially
-the same of KAT terms. Conditionals and loops can be encoded with an
-encoding that is similar to the one given by
-\citet{Kozen_1997}.
+the same of KAT terms. Conditionals and loops as their embedding from GKAT~\cite{Kozen_2000,Smolka_Foster_Hsu_Kappé_Kozen_Silva_2020}, which we will recall here:
 \begin{align*}
     \comITE{b}{p}{q} & ≜  (\comAssert{b};p) + (\comAssert{\overline{b}}; q) \\
     \comWhile{b}{p} & ≜ {(\comAssert{b}^*; p)} ;\comAssert{\overline{b}}

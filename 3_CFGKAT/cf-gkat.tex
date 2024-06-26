@@ -204,30 +204,30 @@ Formally, we can calculate the set of execution contexts that satisfy a given Bo
 This set will be regarded as the semantics of \(b\).
 
 \begin{definition}
- We define the \emph{Boolean semantics} function $⟦-⟧: \BExp → 2^{\At × I}$ inductively,
+ We define the \emph{Boolean semantics} function $C(-): \BExp → 2^{\At × I}$ inductively,
  as follows.
  \begin{align*}
-  ⟦ \false ⟧ & ≜ ∅
-    & ⟦ t ⟧& ≜ \{ (α, i) ∣ t ∈ α, i ∈ I \}
-    & ⟦ e_{b1} ∨ e_{b2} ⟧ & ≜ ⟦ e_{b1} ⟧ ∪ ⟦ e_{b2} ⟧ \\
-  ⟦ \true ⟧  & ≜ \At × I
-    & ⟦ x = i ⟧ & ≜ \{ (α, i) ∣ α ∈ \At \}
-    & ⟦ e_{b1} ∧ e_{b2} ⟧ & ≜ ⟦ e_{b1} ⟧ ∩ ⟦ e_{b2} ⟧ \\
-  & & & & ⟦ ¬ e_{b} ⟧ & ≜ \At × I \setminus ⟦ e_b ⟧
+  C( \false ) & ≜ ∅
+    & C( t )& ≜ \{ (α, i) ∣ t ∈ α, i ∈ I \}
+    & C( e_{b1} ∨ e_{b2} ) & ≜ C( e_{b1} ) ∪ C( e_{b2} ) \\
+  C( \true )  & ≜ \At × I
+    & C( x = i ) & ≜ \{ (α, i) ∣ α ∈ \At \}
+    & C( e_{b1} ∧ e_{b2} ) & ≜ C( e_{b1} ) ∩ C( e_{b2} ) \\
+  & & & & C( ¬ e_{b} ) & ≜ \At × I \setminus C( e_b )
  \end{align*}
 \end{definition}
 
 \begin{example}
  Take $B = \{ b_1, b_2 \}$ and $I = \{ 1, 2, 3 \}$; then we can calculate that
  \[
-  ⟦ (b_1 ∨ ¬ b_2) ∧ (x = 2) ⟧ = \{
+  C( (b_1 ∨ ¬ b_2) ∧ (x = 2) ) = \{
   (b_1 b_2, 2),
   (b_1 \overline{b₂}, 2),
   (\overline{b₁} \overline{b₂}, 2)
   \}
  \]
  In other words, the test above holds in execution contexts where $b₁$ and $b₂$ are both true (first element) or both false (last element), and those where $b₁$ is true but $b₂$ is false (middle element).
- In contrast, $⟦ x = 1 ∧ x = 3⟧ = ∅$, which is to say that this test does not hold in any execution context, because the indicator variable \(x\) cannot be both 1 and 3 at the same time.
+ In contrast, $C( x = 1 ∧ x = 3) = ∅$, which is to say that this test does not hold in any execution context, because the indicator variable \(x\) cannot be both 1 and 3 at the same time.
 \end{example}
 
 \subsection{Guarded languages with continuations}\label{sec:continuation-semantics}
@@ -358,19 +358,19 @@ The last rule ensures that traces that encountered non-local control flow within
 \end{example}
 
 \subsection{continuation semantics}
-With the theory of indexed families in place, we can now define the continuation semantics $⟦e⟧^♯$ of a CF-GKAT program $e$ in terms of an indexed family.
+With the theory of indexed families in place, we can now define the continuation semantics $C(e)^♯$ of a CF-GKAT program $e$ in terms of an indexed family.
 We start with the base cases.
 
 \begin{definition}[continuation semantics, base]
  For all $i, j ∈ I$, we define the following sets:
  \begin{align*}
-  ⟦\comAssert{e_b}⟧ᵢ^♯ & ≜ \{ α ⋅ \acc{i} ∣ (α, i) ∈ ⟦ e_b ⟧ \}
-    & ⟦ \comGoto{ℓ} ⟧ᵢ^♯ & ≜ \{ α ⋅ \jmp{(ℓ, i)} ∣ α ∈ \At \} \\
-  ⟦p⟧ᵢ^♯             & ≜ \{α p β ⋅ \mathbf{acc}\ i ∣ α, β ∈ \At\}
-    & ⟦ \comLabel{ℓ} ⟧ᵢ^♯ & ≜ \{ α ⋅ \acc{i} ∣ α ∈ \At \} \\
-  ⟦ x := j ⟧ᵢ^♯ & ≜ \{ α ⋅ \acc{j} ∣ α ∈ \At \}
-    & ⟦ \comBrk ⟧ᵢ^♯ & ≜ \{ α ⋅ \brk{i} ∣ α ∈ \At \} \\
-  ⟦ \comRet ⟧ᵢ^♯ & ≜ \{ α ⋅ \ret ∣ α ∈ \At \}
+  C(\comAssert{e_b})ᵢ^♯ & ≜ \{ α ⋅ \acc{i} ∣ (α, i) ∈ C( e_b ) \}
+    & C( \comGoto{ℓ} )ᵢ^♯ & ≜ \{ α ⋅ \jmp{(ℓ, i)} ∣ α ∈ \At \} \\
+  C(p)ᵢ^♯             & ≜ \{α p β ⋅ \mathbf{acc}\ i ∣ α, β ∈ \At\}
+    & C( \comLabel{ℓ} )ᵢ^♯ & ≜ \{ α ⋅ \acc{i} ∣ α ∈ \At \} \\
+  C( x := j )ᵢ^♯ & ≜ \{ α ⋅ \acc{j} ∣ α ∈ \At \}
+    & C( \comBrk )ᵢ^♯ & ≜ \{ α ⋅ \brk{i} ∣ α ∈ \At \} \\
+  C( \comRet )ᵢ^♯ & ≜ \{ α ⋅ \ret ∣ α ∈ \At \}
  \end{align*}
  \end{definition}
 
@@ -383,7 +383,7 @@ A primitive action $p$ yields traces of the form $\alpha p \beta \cdot \acc{i}$ 
 The only information retained is the value of the indicator variable, because primitive actions cannot interact with indicators.
 In contrast with primitive actions, an assignment like $x := j$ has traces that accept immediately, without changing the machine state; however, each trace ends with the indicator value $j$ --- regardless of the initial indicator value $i$.
 
-Finally, labels are encoded as no-operations, which makes them neutral for sequencing operator, i.e., we have $⟦ \comLabel{ℓ} ⟧^♯ ⋄ G = G = ⟦ \comLabel{ℓ} ⟧^♯ ⋄ G$ for all indexed families $G$.
+Finally, labels are encoded as no-operations, which makes them neutral for sequencing operator, i.e., we have $C( \comLabel{ℓ} )^♯ ⋄ G = G = C( \comLabel{ℓ} )^♯ ⋄ G$ for all indexed families $G$.
 This is because labels serve only as potential starting points of execution; we will leverage them in the next subsection.
 
 We now turn our attention to the program composition operators.
@@ -392,20 +392,20 @@ First of all, the $\comITE{b}{e}{f}$ filters out traces in the semantics of the 
 
  \begin{definition}[continuation semantics, branching]
  Let $e, f \in \CFGKAT$.
- We define $⟦ \comITE{b}{e}{f} ⟧^♯$ as the least indexed family that satisfies the following rules for all $i \in I$:
+ We define $C( \comITE{b}{e}{f} )^♯$ as the least indexed family that satisfies the following rules for all $i \in I$:
  \begin{mathpar}
     \inferrule{
-        α ∈ ⟦ e_b ⟧ \\
-        \alpha{}w ⋅ c ∈ ⟦ e ⟧^♯ᵢ
+        α ∈ C( e_b ) \\
+        \alpha{}w ⋅ c ∈ C( e )^♯ᵢ
     }{%
-        \alpha{}w ⋅ c ∈ ⟦ \comITE{e_b}{e}{f} ⟧^♯ᵢ
+        \alpha{}w ⋅ c ∈ C( \comITE{e_b}{e}{f} )^♯ᵢ
     }
     \and
     \inferrule{
-        α ∉ ⟦ e_b ⟧ \\
-        \alpha{}w ⋅ c ∈ ⟦ f ⟧^♯ᵢ
+        α ∉ C( e_b ) \\
+        \alpha{}w ⋅ c ∈ C( f )^♯ᵢ
     }{%
-        \alpha{}w ⋅ c ∈ ⟦ \comITE{e_b}{e}{f} ⟧^♯ᵢ
+        \alpha{}w ⋅ c ∈ C( \comITE{e_b}{e}{f} )^♯ᵢ
     }
  \end{mathpar}
  \end{definition}
@@ -418,22 +418,22 @@ First of all, the $\comITE{b}{e}{f}$ filters out traces in the semantics of the 
  Let $e, f ∈ \CFGKAT$.
  We define
  \(
-    ⟦e; f⟧^♯ ≜ ⟦ e ⟧^♯ ⋄ ⟦ f ⟧^♯
+    C(e; f)^♯ ≜ C( e )^♯ ⋄ C( f )^♯
  \).
- Also, for all $e_b ∈ \BExp$, we define $⟦\comWhile{e_b}{e}⟧^♯$ as the least indexed family satisfying:
+ Also, for all $e_b ∈ \BExp$, we define $C(\comWhile{e_b}{e})^♯$ as the least indexed family satisfying:
  \begin{mathpar}
     \inferrule{%
         i ∈ I \\
-        α ∉ ⟦ e_b ⟧
+        α ∉ C( e_b )
     }{%
-        α ⋅ \acc{i} ∈ ⟦\comWhile{e_b}{e}⟧^♯ᵢ
+        α ⋅ \acc{i} ∈ C(\comWhile{e_b}{e})^♯ᵢ
     }
     \and
     \inferrule{%
-        α ∈ ⟦ e_b ⟧ \\
-        α w ⋅ c ∈ (⟦ e ⟧^♯ ⋄ ⟦\comWhile{e_b}{e}⟧^♯)ᵢ
+        α ∈ C( e_b ) \\
+        α w ⋅ c ∈ (C( e )^♯ ⋄ C(\comWhile{e_b}{e})^♯)ᵢ
     }{%
-        α w ⋅ ⌊ c ⌋ ∈ ⟦\comWhile{e_b}{e}⟧^♯_i
+        α w ⋅ ⌊ c ⌋ ∈ C(\comWhile{e_b}{e})^♯_i
     }
  \end{mathpar}
  The operation $\lfloor - \rfloor$ in the last rule is defined by $\lfloor c \rfloor = \acc{i}$ when $c = \brk{i}$, and $\lfloor c \rfloor = c$ otherwise.
@@ -455,25 +455,25 @@ For the base cases, this is relatively simple to accomplish: just check if we st
  Let $e ∈ \CFGKAT$.
  For each $ℓ ∈ L$, we define the following guarded languages with continuations:
  \begin{align*}
-  ⟦\comAssert{e_b}⟧ᵢ^ℓ & ≜ ∅
-    & ⟦ \comGoto{ℓ'} ⟧ᵢ^ℓ  & ≜ ∅ \\
-  ⟦p⟧ᵢ^ℓ             & ≜ ∅
-    & ⟦ \comLabel{ℓ'} ⟧ᵢ^ℓ & ≜ \{ α ⋅ \mathbf{acc}\ i ∣ α ∈ \At,\ ℓ = ℓ' \} \\
-  ⟦x := j⟧ᵢ^ℓ        & ≜ ∅
-    & ⟦ \comBrk ⟧ᵢ^ℓ     & ≜ ∅ \\
-  ⟦ \comRet ⟧ᵢ^ℓ     & ≜ ∅
+  C(\comAssert{e_b})ᵢ^ℓ & ≜ ∅
+    & C( \comGoto{ℓ'} )ᵢ^ℓ  & ≜ ∅ \\
+  C(p)ᵢ^ℓ             & ≜ ∅
+    & C( \comLabel{ℓ'} )ᵢ^ℓ & ≜ \{ α ⋅ \mathbf{acc}\ i ∣ α ∈ \At,\ ℓ = ℓ' \} \\
+  C(x := j)ᵢ^ℓ        & ≜ ∅
+    & C( \comBrk )ᵢ^ℓ     & ≜ ∅ \\
+  C( \comRet )ᵢ^ℓ     & ≜ ∅
  \end{align*}
 \end{definition}
-Note how none of these cases has a trace, except the one for $⟦ \comLabel{ℓ'} ⟧ᵢ^ℓ$ when $\ell' = \ell$, which accepts immediately.
+Note how none of these cases has a trace, except the one for $C( \comLabel{ℓ'} )ᵢ^ℓ$ when $\ell' = \ell$, which accepts immediately.
 With these cases covered, we can then treat the inductive step.
 
 \begin{definition}[continuation semantics starting from a label, sequencing and branching]
 Let $e, f \in \CFGKAT$, $e_b \in \BExp$ and $\ell \in L$.
 We define the following indexed families to cover the traces of CF-GKAT programs starting from the label $\ell$ when composed using branching or sequencing:
 \begin{mathpar}
-    ⟦\comITE{e_b}{e}{f}⟧^ℓᵢ ≜ ⟦ e ⟧^ℓᵢ \cup ⟦ f ⟧^ℓᵢ
+    C(\comITE{e_b}{e}{f})^ℓᵢ ≜ C( e )^ℓᵢ \cup C( f )^ℓᵢ
     \and
-    ⟦e; f⟧^ℓᵢ ≜ (⟦ e ⟧^ℓ ⋄ ⟦ f ⟧^♯)ᵢ \cup ⟦ f ⟧^ℓᵢ
+    C(e; f)^ℓᵢ ≜ (C( e )^ℓ ⋄ C( f )^♯)ᵢ \cup C( f )^ℓᵢ
 \end{mathpar}
 \end{definition}
 For branching, the semantics starting from $\ell$ disregards the guard and descends into the operands.
@@ -485,17 +485,17 @@ On the other hand, early termination in the loop body still needs to be turned i
 
 \begin{definition}[continuation semantics starting from a label, loops]
 Let $e \in \CFGKAT$ and $e_b \in \BExp$.
-We define the indexed family $⟦\comWhile{b}{e}⟧^ℓ$ below, where $\lfloor - \rfloor$ is as in \Cref{def:intermediate-sequencing-loops}:
+We define the indexed family $C(\comWhile{b}{e})^ℓ$ below, where $\lfloor - \rfloor$ is as in \Cref{def:intermediate-sequencing-loops}:
 \[
-    ⟦\comWhile{e_b}{e}⟧^ℓ_i = \{ w \cdot \lfloor c \rfloor \mid w \cdot c \in (⟦ e ⟧^ℓ ⋄ ⟦\comWhile{e_b}{e}⟧^♯)ᵢ \}
+    C(\comWhile{e_b}{e})^ℓ_i = \{ w \cdot \lfloor c \rfloor \mid w \cdot c \in (C( e )^ℓ ⋄ C(\comWhile{e_b}{e})^♯)ᵢ \}
 \]
 \end{definition}
 
 \subsection{Guarded language semantics}
 
-The continuation semantics of a CF-GKAT program $e$ in terms of indexed families $⟦ e ⟧^♯$ uses continuations to record how a trace ends.
+The continuation semantics of a CF-GKAT program $e$ in terms of indexed families $C( e )^♯$ uses continuations to record how a trace ends.
 In particular, some traces may end with the continuation of the form $\jmp{(\ell, i)}$, signaling that computation needs to continue from the label $\ell$.
-But we have just seen that we can also obtain the traces of $e$ starting from $\ell$, in the form of the indexed family $⟦ e ⟧^ℓ$.
+But we have just seen that we can also obtain the traces of $e$ starting from $\ell$, in the form of the indexed family $C( e )^ℓ$.
 This means that we have the information we need to resolve the jumping continuations, if we just put together the right traces.
 We will end this section by doing just that.
 
@@ -508,12 +508,12 @@ To formalize our approach, we need a way to refer to the intermediate CF-GKAT se
 
 \begin{definition}
  A \emph{labeled family of guarded languages (with continuations)}, or \emph{labeled family} for short, is a function $G$ from $L + ♯$ to indexed families of guarded languages (with continuations), e.g., $G: L + ♯ → I → 𝒞$.
- We often use superscripts to denote the value at a given label $♯$, writing $L^ℓ$ for $L(ℓ)$.
+ We often use superscripts to denote the value at a given label $ℓ$, writing $G^ℓ$ for $G(ℓ)$.
  Note that under this convention, $G^ℓ$ is an indexed family, which means that we may further unravel by writing $G^ℓ_i$ to obtain the guarded language with continuations $G(ℓ, i)$.
 \end{definition}
 
-Crucially, we can retrofit the continuation semantics $⟦ e ⟧$ as a labeled family; after all, $⟦ e ⟧^♯$ is an indexed family, and so is $⟦ e ⟧^ℓ$ for each $ℓ ∈ L$.
-We will thus treat $⟦ e ⟧$ as such from this point on.
+Crucially, we can retrofit the continuation semantics $C( e )$ as a labeled family; after all, $C( e )^♯$ is an indexed family, and so is $C( e )^ℓ$ for each $ℓ ∈ L$.
+We will thus treat $C( e )$ as such from this point on.
 
 \smallskip
 To resolve the jumps in a labeled family of guarded languages with continuations, we resolve the traces ending in $\jmp{(ℓ, i)}$ by looking up the traces that originate from label $ℓ$ with indicator value $i$.
@@ -564,12 +564,12 @@ while the third rule strings together guarded words continuations that jump to a
  Note furthermore that $G\!↓₂^{ℓ}$ is empty, despite $G₂^{\ell}$ containing a guarded word with a continuation that has a mutual jump with another guarded word with continuation in $G₂^{\ell'}$, as these can never be concatenated into one guarded word with continuation of the form $\acc{i}$ or $\ret$.
 \end{example}
 
-In total, we can then obtain the semantics of a CF-GKAT term as $⟦ e ⟧\!\downarrow$, in the form of a labeled family of guarded languages.
+In total, we can then obtain the semantics of a CF-GKAT term as $C( e )\!\downarrow$, in the form of a labeled family of guarded languages.
 This concludes our discussion of the semantics of CF-GKAT\@.
 
 % FIXME: Do we need this here..?
 \begin{lemma}\label{the: label missing causes empty semantics}
-    If \(\comLabel{ℓ}\) does not appear in expression \(e\), then \(∀ i ∈ I, ⟦e⟧ᵢ^ℓ = ∅\).
+    If \(\comLabel{ℓ}\) does not appear in expression \(e\), then \(∀ i ∈ I, C(e)ᵢ^ℓ = ∅\).
 \end{lemma}
 
 % FIXME: I think this should be conversion to GKAT automaton
@@ -586,55 +586,21 @@ Indeed, there exist two programs with the same trace semantics but different con
 \end{mathpar} 
 The first program sets the indicator variable to 1, and the second program simply skips. 
 The trace semantics of the above two programs are the same, as both indicator assignment and skip are ``unproductive'', i.e. they will terminate immediately regardless of the input atoms and indicator variable.
-Yet, their continuation semantics are different: \(⟦x := 1⟧ᵢ^♯\) will constantly emit the continuation \(\acc{1}\) regardless of \(i\), but \(⟦\comAssert{\true}⟧ᵢ^♯\) will preserve starting indicator by outputting the continuation \(\acc{i}\).
+Yet, their continuation semantics are different: \(C(x := 1)ᵢ^♯\) will constantly emit the continuation \(\acc{1}\) regardless of \(i\), but \(C(\comAssert{\true})ᵢ^♯\) will preserve starting indicator by outputting the continuation \(\acc{i}\).
 
 Thus, our decision procedure does not rely on bisimulation between CF-GKAT automaton; instead, we lower the CF-GKAT automata into GKAT automata. This process allows us to reuse the nearly-linear decision algorithm for GKAT automata equivalences.
 Finally, the soundness and completeness of our decision procedure can be derived from a sequence of correctness results: first the correctness of Thompson's construction (\Cref{the:thompson-correctness}), second the correctness of the lowering (\Cref{the:cf-gkat-automaton-lowering-correctness}), and finally the soundness and completeness of GKAT automata equivalence~\cite{Schmid_Kappé_Kozen_Silva_2021}.
 
-\subsection{GKAT automata}
-
-In order to establish our decision procedure, we will first recap on GKAT automata and its trace semantics.
-\begin{definition}[GKAT automata~\cite{Schmid_Kappé_Kozen_Silva_2021, kozen_BohmJacopiniTheorem_2008a}]
- A \emph{GKAT automaton} $A ≜ ⟨ S, δ, \hat{s} ⟩$ consists of a set of \emph{states} $S$, a \emph{transition function} $\delta: S → \At → ⊥ + ⊤ + K × S$, and a \emph{start state} $\hat{s} ∈ S$.
-\end{definition}
-Intuitively, the transition function of a GKAT automaton tells us, given a state $q$ and an atom $α$ accounting for the truth value of each primitive test, to either \emph{reject} the input, represented by $δ(q, α) = ⊥$, \emph{accept} the input, represented by $δ(q, α) = ⊤$, or to \emph{transition} to a new state in $S$ after executing an action from $K$, represented by $δ(q, α) ∈ K × S$.
-
-A GKAT automaton induces a guarded language in a fairly straightforward manner.
-\begin{definition}
- Given a GKAT automaton $A ≜ ⟨ S, δ, \hat{s} ⟩$, we define $⟦ - ⟧_A: S → 𝒢$ as the (pointwise) smallest function satisfying the following rules for all $s ∈ S$ and $α ∈ \At$:
- \begin{mathpar}
-  \inferrule{%
-   δ(s, α) = ⊤
-  }{%
-   α ∈ ⟦ s ⟧_A
-  }
-  \and
-  \inferrule{%
-   δ(s, α) = (p, s') \\
-   w ∈ ⟦ s' ⟧_A
-  }{%
-   αpw ∈ ⟦ s ⟧_A
-  }
- \end{mathpar}
- Finally, we define the guarded language semantics of $A$ by setting $⟦ A ⟧ = ⟦ \hat{s} ⟧_A$.
-\end{definition}
-
-Equivalence of finite GKAT automata is decidable, which we record as follows.
-\begin{theorem}[Decidability for GKAT~\cite{Schmid_Kappé_Kozen_Silva_2021}]
- Given two finite GKAT automata $A₀$ and $A₁$, it is decidable whether they represent the same guarded language, i.e., whether $⟦ A₀ ⟧ = ⟦ A₁ ⟧$.
- The algorithm to do this has a complexity that is nearly-linear\footnote{$𝒪(\hat{α}(n))$, where $\hat{α}$ is the inverse Ackermann function; c.f.~\cite{Tarjan75}.} in the total number of states.
-\end{theorem}
-
 \subsection{CF-GKAT automata}
 
-To leverage the efficient decision algorithm for GKAT automaton, we will need to convert each CF-GKAT expression $e$ into a GKAT automaton $A$ that implements $⟦ e ⟧\!↓$.
+To leverage the efficient decision algorithm for GKAT automaton, we will need to convert each CF-GKAT expression $e$ into a GKAT automaton $A$ that implements $C( e )\!↓$.
 As we have discussed before, this process is separated into two steps, where we use CF-GKAT automaton as an intermediate between CF-GKAT expressions and GKAT automata. In this section, we will formally define CF-GKAT automata and their continuation semantics.
 
 Like GKAT automaton, CF-GKAT automaton is defined by a dynamics, people familiar with universal coalgebra~\cite{rutten_UniversalCoalgebraTheory_2000,jacobs_IntroductionCoalgebraMathematics_2016} might recall that dynamics are also called the \emph{signature} of a coalgebra.
 %FIXME: Do we want to keep using the name dynamics? I am not sure others use this name?
 \begin{definition}[CF-GKAT dynamics]
  Given a set $X$, we write $G(X)$ for the set
- \[G(X) ≜ I × \At → ⊥ + C + K × X × I.\]
+ \[G(X) ≜ I × \At → \reject + C + K × X × I.\]
  %FIXME: I think we need to fix the code to follow this type
 \end{definition}
 
@@ -642,7 +608,7 @@ Intuitively, the elements of \(G(S)\) represent possible transition behaviors in
 Given a current indicator value \(i ∈ I\) and an atom $α$ accounting for the truth value of each primitive test, a dynamic $ρ ∈ G(S)$ may either:
 \begin{itemize}
  \item
-       \emph{reject} the input, represented by $ρ(i, α) = ⊥$;
+       \emph{reject} the input, represented by $ρ(i, α) = \reject$;
  \item
        offer a \emph{continuation}, represented by $ρ(i, α) ∈ C$; or
  \item
@@ -689,44 +655,44 @@ To formalize the intuition of ``behaviors'' in the previous example. We can assi
 \begin{definition}[continuation semantics]
  Given an automaton \(A ≜ ⟨S, δ, \hat{s}, λ⟩\),
  the continuation semantics of each dynamics \(ρ ∈ G(S)\) is
- a family \(⟦ρ⟧_A: I → 𝒞\),
+ a family \(C(ρ)_A: I → 𝒞\),
  defined as the (point-wise) smallest set satisfying the following rules for $i, j ∈ I$ and $α ∈ \At$:
  \begin{mathpar}
   \inferrule{%
    ρ(i, α) = \acc{j}
   }{%
-   α ⋅ \acc{j} ∈ (⟦ρ⟧_A)ᵢ
+   α ⋅ \acc{j} ∈ (C(ρ)_A)ᵢ
   }
   \and
   \inferrule{%
    ρ(i, α) = \brk{j}
   }{%
-   α ⋅ \brk{j} ∈ (⟦ρ⟧_A)ᵢ
+   α ⋅ \brk{j} ∈ (C(ρ)_A)ᵢ
   }
   \and
   \inferrule{%
    ρ(i, α) = \ret
   }{%
-   α ⋅ \ret ∈ (⟦ρ⟧_A)ᵢ
+   α ⋅ \ret ∈ (C(ρ)_A)ᵢ
   }
   \\
   \inferrule{%
    ρ(i, α) = \jmp{(ℓ, j)}
   }{%
-   α ⋅ \jmp{(ℓ, j)} ∈ (⟦ρ⟧_A)ᵢ
+   α ⋅ \jmp{(ℓ, j)} ∈ (C(ρ)_A)ᵢ
   }
   \and
   \inferrule{%
    ρ(i, α) = (p, s, j) \\
-   w ∈ (⟦δ(s)⟧_A)ⱼ
+   w ∈ (C(δ(s))_A)ⱼ
   }{%
-   αpw ∈ (⟦ρ⟧_A)ᵢ
+   αpw ∈ (C(ρ)_A)ᵢ
   }
  \end{mathpar}
- Similar to the continuation semantics of expressions, the continuations semantics of automata are also labeled families of guarded languages with continuations. Specifically, the semantics from the start \(⟦A⟧^♯\) is defined by the dynamics of the start state, and the semantics of a label \(ℓ ∈ L\) is defined by the jump map: 
+ Similar to the continuation semantics of expressions, the continuations semantics of automata are also labeled families of guarded languages with continuations. Specifically, the semantics from the start \(C(A)^♯\) is defined by the dynamics of the start state, and the semantics of a label \(ℓ ∈ L\) is defined by the jump map: 
  \begin{mathpar}
-  ⟦ A ⟧^♯ = ⟦ δ( ŝ ) ⟧_A, \and 
-  ⟦ A ⟧^ℓ = ⟦ λ(ℓ) ⟧_A \text{ for } ℓ ∈ L.
+  C( A )^♯ = C( δ( ŝ ) )_A, \and 
+  C( A )^ℓ = C( λ(ℓ) )_A \text{ for } ℓ ∈ L.
  \end{mathpar}
 \end{definition}
 
@@ -741,34 +707,34 @@ The main obstacle to properly resolve jump continuation is that $λ(ℓ, j, α)$
 These jump sequences can be resolved by iterating the jump map, and terminate when either the result is no longer a jump, or a infinite loop is detected.
 
 \begin{definition}[iteration lifting]\label{def: iteration lifting}
-  Given a function \(h: X → X + ⊥ + E\), where \(X\) is a finite set
-  and \(⊥ + E\) specifies the ``exit results'',
+  Given a function \(h: X → X + \reject + E\), where \(X\) is a finite set
+  and \(\reject + E\) specifies the ``exit results'',
   then this function can be lifted to \(\iter(h)\) by iterating \(h\).
   We will use \(M\) to keep track of the explored value of \(M\):
   \begin{align*}
-  \iter'(h) & : 2^X → X → ⊥ + E \\
+  \iter'(h) & : 2^X → X → \reject + E \\
   \iter'(h) & (M)(m) ≜ \begin{cases}
-      ⊥ & \text{if } m ∈ M  \\
-      h(m) & \text{if } m ∉ M \text{ and } h(m) ∈ ⊥ + E \\
+      \reject & \text{if } m ∈ M  \\
+      h(m) & \text{if } m ∉ M \text{ and } h(m) ∈ \reject + E \\
       \iter'(h)(M ∪ \{m\})(h(m)) & \text{if } m ∉ M \text{ and } h(m) ∈ X
     \end{cases};
   \intertext{and \(\iter\) defined as supplying \(∅\) as the starting point of \(M\):}
-    \iter(h) & : X → ⊥ + E \\
+    \iter(h) & : X → \reject + E \\
     \iter(h) & ≜ \iter'(h)(∅)
   \end{align*}
   To improve clarity, in the definition of \(h\),
-  we will write \(\injL : X → X + ⊥ + E\) as \(\contWith\),
+  we will write \(\injL : X → X + \reject + E\) as \(\contWith\),
   to indicate the iteration will continue;
-  and write \(\injR: ⊥ + E → X + ⊥ + E\) as \(\exitWith\),
+  and write \(\injR: \reject + E → X + \reject + E\) as \(\exitWith\),
   to indicate the iteration will be exited.
 \end{definition}
 Intuitively, \(M\) keeps track of all the explored value in \(X\),
 and if a input has already been explored,
-then rejection \(⊥\) will be returned to indicate a infinite loop;
+then rejection \(\reject\) will be returned to indicate a infinite loop;
 as unproductive infinite iterations will not produce any observable trace.
 Indeed, GKAT treats un-productive infinite iterations
 in the \command{while} loops with the same strategy~\cite{Schmid_Kappé_Kozen_Silva_2021}.
-On the other hand, if \(h(m)\) falls into the exit set \(⊥ + E\),
+On the other hand, if \(h(m)\) falls into the exit set \(\reject + E\),
 then \(\iter(h)\) will stop and return \(h(m)\).
 Finally, if the \(h(m)\) fall into \(X\), then \(\iter(h)\) will continue the loop with \(h(m)\) as input, and mark \(m\) as explored.
 Notice that \(\iter(h)\) will be total when \(h\) is total,
@@ -806,19 +772,19 @@ Intuitively, the continuation resolution is separated into two procedure: we fir
     % \mathrlap and \hphantom is used for alignment purpose
     % the \mathrlap is the displayed expression
     % and \hphantom contains the "longest expression" for alignment
-    \mathrlap{⊥}\hphantom{λ\!↓(ℓ, i, α)} & δ'(s, i, α) ∈ \{ \brk{j} \}\\
-   ⊤ & δ'(s, i, α) ∈ \{ \ret, \acc{j} : j ∈ I \} \\
+    \mathrlap{\reject}\hphantom{λ\!↓(ℓ, i, α)} & δ'(s, i, α) ∈ \{ \brk{j} \}\\
+   \accept & δ'(s, i, α) ∈ \{ \ret, \acc{j} : j ∈ I \} \\
    δ(q, i, α) & \text{otherwise}
   \end{cases}
  \end{align*}
 \end{definition}
-Notice \(λ\!↓\) is total and \(δ'((s, i), α)\) will not return a jump continuation, therefore $δ\!↓$ is well-defined; in other words, for all $s ∈ S$, $i ∈ I$ and $α ∈ \At$, it holds that $δ\!↓((s, i), α) ∈ ⊥ + ⊤ + K × (S × I)$, as expected for a GKAT automaton on state set $S × I$.
+Notice \(λ\!↓\) is total and \(δ'((s, i), α)\) will not return a jump continuation, therefore $δ\!↓$ is well-defined; in other words, for all $s ∈ S$, $i ∈ I$ and $α ∈ \At$, it holds that $δ\!↓((s, i), α) ∈ \{\reject, \accept\} + K × (S × I)$, as expected for a GKAT automaton on state set $S × I$.
 
 Having defined our lowering operation, we can state its correctness as follows.
 
 \begin{theorem}[Correctness of lowering]\label{the:cf-gkat-automaton-lowering-correctness}
  Let \(A ≜ ⟨S, δ, \hat{s}, λ⟩\) be a CF-GKAT automaton.
- The translation from CF-GKAT automata to GKAT automata commutes with the semantic jump resolution operator, in the sense that for $i ∈ I$, it holds that $⟦A\!↓_i⟧ = ⟦A⟧\!↓^♯ᵢ$.
+ The translation from CF-GKAT automata to GKAT automata commutes with the semantic jump resolution operator, in the sense that for $i ∈ I$, it holds that $C(A\!↓_i) = C(A)\!↓^♯ᵢ$.
 \end{theorem}
 
 \subsection{Converting expressions to CF-GKAT automata}
@@ -853,26 +819,26 @@ Suffice it to say that they can be easily converted to a plain CF-GKAT automata 
 \begin{table}
   \centering
   \begin{tabular}{c || c | l | l | l}
-   \(e\)  & \(S\) & \(δ(s): G(S)\) & \(ι(i, α): ⊥ + C + K × S × I\) & \(λ(ℓ): G(S)\) \\
+   \(e\)  & \(S\) & \(δ(s)\) & \(ι(i, α)\) & \(λ(ℓ)\) \\[5px]
    \hline
    \(\comAssert{e_b}\)& \(∅\)& \(!\)& \(
    \begin{cases}
-    \acc{i} & (α, i) ∈ ⟦ e_b ⟧   \\
-    ⊥       & \text{otherwise}
+    \acc{i} & (α, i) ∈ C( e_b )   \\
+    \reject       & \text{otherwise}
    \end{cases}
-   \) & \(0\) \\
+   \) & \(\reject\) \\[20px]
    %
-   \(x := i'\) & \(∅\) & \(!\) & \(\acc{i}\) & \(0\) \\
-   \(p\) & \(\{*\}\) & \(\acc{i}\) & \((p, *, i)\) & \( 0 \) \\
-   \(\comRet\) & \(∅\) & \(!\) & \(\ret\) & \(0\) \\
-   \(\comBrk\) & \(∅\) & \(!\) & \(\brk{i}\) & \(0\) \\
-   \(\comGoto{ℓ}\) & \(∅\) & \(!\) & \(\jmp{(ℓ, i)}\) & \(0\) \\
+   \(x := i'\) & \(∅\) & \(!\) & \(\acc{i}\) & \(\reject\) \\[20px]
+   \(p\) & \(\{*\}\) & \(\acc{i}\) & \((p, *, i)\) & \( \reject \) \\[20px]
+   \(\comRet\) & \(∅\) & \(!\) & \(\ret\) & \(\reject\) \\[20px]
+   \(\comBrk\) & \(∅\) & \(!\) & \(\brk{i}\) & \(\reject\) \\[20px]
+   \(\comGoto{ℓ}\) & \(∅\) & \(!\) & \(\jmp{(ℓ, i)}\) & \(\reject\) \\[20px]
    \(\comLabel{ℓ'}\) & \(∅\) & \(!\)  & \(\acc{i}\) &
-    \((α, i) ↦ \begin{cases}
+    \(\begin{cases}
       \acc{i} & ℓ = ℓ' \\
-      ⊥    & \text{otherwise}
+      \reject    & \text{otherwise}
      \end{cases}
-   \)\\
+   \)\\[25px]
    %
    \(e₁ +_{e_b} e₂\) & \(S₁ + S₂\) & \(
    \begin{cases}
@@ -881,16 +847,16 @@ Suffice it to say that they can be easily converted to a plain CF-GKAT automata 
    \end{cases}
    \) & \(
    \begin{cases}
-    ι₁(i, α) & (α, i) ∈ ⟦ e_b ⟧ \\
-    ι₂(i, α) & (α, i) ∉ ⟦ e_b ⟧
+    ι₁(i, α) & (α, i) ∈ C( e_b ) \\
+    ι₂(i, α) & (α, i) ∉ C( e_b )
    \end{cases}
    \) & \(
    \begin{cases}
-    λ₁(ℓ) & \text{\(\comLabel{ℓ}\) in \(e₁\)} \\
-    λ₂(ℓ) & \text{\(\comLabel{ℓ}\) in \(e₁\)} \\
-    0 & \text{otherwise}
+    λ₁(ℓ) & \text{\(ℓ\) in \(e₁\)} \\
+    λ₂(ℓ) & \text{\(ℓ\) in \(e₂\)} \\
+    \reject & \text{otherwise}
    \end{cases}
-   \)\\
+   \)\\[30px]
    %
    \(e₁ ⋅ e₂\) & \(S₁ + S₂\) & \(
    \begin{cases}
@@ -899,23 +865,22 @@ Suffice it to say that they can be easily converted to a plain CF-GKAT automata 
    \end{cases}
    \) & \( ι₁[ι₂](i, α) \) & \(
    \begin{cases}
-    λ₁(ℓ)[ι₂] & \text{\(\comLabel{ℓ}\) in \(e₁\)} \\
-    λ₂(ℓ) & \text{\(\comLabel{ℓ}\) in \(e₁\)} \\
-    0 & \text{otherwise}
+    λ₁(ℓ)[ι₂] & \text{\(ℓ\) in \(e₁\)} \\
+    λ₂(ℓ) & \text{\(ℓ\) in \(e₂\)} \\
+    \reject & \text{otherwise}
    \end{cases}
-   \) \\
+   \) \\[30px]
    %
    \({e₁}^{(e_b)}\)
    & \(S_{e₁}\)
    & \(⌊δ₁(s)[ι₁^{e_b}]⌋\)
    & \(⌊ι₁^{e_b}⌋(i, α)\)
-   & \( ⌊ λ(ℓ)[ι₁^{e_b}] ⌋ \) \\
+   & \( ⌊ λ(ℓ)[ι₁^{e_b}] ⌋ \) \\[10px]
   \end{tabular}
   %FIXME: CZ: I don't feel like we need a new notation 0
   \caption{Thompson's construction for CF-GKAT. Here,
   \(!\) denotes the unique function \(!: ∅ → X\) for any $X$,
-  and $0$ denotes the constant rejection dynamics,
-  i.e., $0(i, α) = ⊥$ for all $i ∈ I$ and $α ∈ \At$.}
+  and $\reject, \acc{i}$, depends on the type, sometimes will denote the constant $\reject, \acc{i}$ function}
   \label{tab: thompson's construction}
 \end{table}
 
@@ -940,8 +905,8 @@ recall that \(\comLabel{ℓ'}\) is a non-operation when computing the semantics 
 However, the behavior of \(\comLabel{ℓ'}\) and \(\comAssert{\true}\) diverges when we consider the semantics starting from labels.
 Specifically, when starting from a label \(ℓ ≠ ℓ'\),
 \begin{mathpar}
-  ⟦\comLabel{ℓ'}⟧ᵢ^ℓ = ∅; \and
-  ⟦\comAssert{\true}⟧ᵢ^ℓ = \{α ⋅ \acc{i} ∣ α ∈ \At \}.
+  C(\comLabel{ℓ'})ᵢ^ℓ = ∅; \and
+  C(\comAssert{\true})ᵢ^ℓ = \{α ⋅ \acc{i} ∣ α ∈ \At \}.
 \end{mathpar}
 This difference is reflected in the jump map \(λ: L → G(S)\), which specifies the entry point for each label.
 In this case, the jump map will map \(ℓ'\) to the behavior of the identity operation \(\comAssert{\true}\), and map every other label to constant rejection, representing that the continuation \(\jmp{ℓ}\) will not resume from \(\comLabel{ℓ'}\) when \(ℓ' ≠ ℓ\).
@@ -998,8 +963,8 @@ Fortunately, these difficulties can be resolved by the \(\iter\) function (\cref
    \iter\left(
      (i, α) ↦
      \begin{cases}
-       \exitWith(\acc{i}) & \text{if } (i, α) ∉ ⟦e_b⟧ \\
-       \contWith(i', α) & \text{if } (i, α) ∈ ⟦e_b⟧ \text{ and } h(i, α) = \acc{i'} \\
+       \exitWith(\acc{i}) & \text{if } (i, α) ∉ C(e_b) \\
+       \contWith(i', α) & \text{if } (i, α) ∈ C(e_b) \text{ and } h(i, α) = \acc{i'} \\
        \exitWith(h(i, α)) & \text{otherwise}
      \end{cases}
    \right)
@@ -1040,14 +1005,14 @@ And the final case is reached when the program executes an action or encounters 
   \begin{align*}
     ι₁^{x≠2}(0, ∅) 
     & = ι₁^{x≠2}(1, ∅) 
-      & \text{because }(0, ∅) ∈ ⟦x ≠ 2⟧ \text{ and } ι₁(0, ∅) = \acc{1} \\  
+      & \text{because }(0, ∅) ∈ C(x ≠ 2) \text{ and } ι₁(0, ∅) = \acc{1} \\  
     & = (p, s, 2)
       & \text{because } ι₁(1, ∅) = (p, s, 2) \\
     ι₁^{x≠2}(3, ∅) 
     & = ι₁^{x≠2}(3, ∅) 
-      & \text{because }(3, ∅) ∈ ⟦x ≠ 2⟧ \text{ and } ι₁(3, ∅) = \acc{3} \\  
-    & = ⊥
-      & \text{because the input \((3, ∅)\) is already explored}
+      & \text{because }(3, ∅) ∈ C(x ≠ 2) \text{ and } ι₁(3, ∅) = \acc{3} \\  
+    & = \reject
+      & \text{the input \((3, ∅)\) is already explored}
   \end{align*}
 \end{example}
 
@@ -1083,7 +1048,7 @@ then resolving the \(\brk{i}\) continuations using the break resolution function
 With the Thompson's construction defined, we can state the correctness of the Thompson's construction as follows.
 \begin{theorem}\label{the:thompson-correctness}
  Let $e ∈ \CFGKAT$, and let $A$ be the Thompson automaton for $e$.
- Then for all $ℓ ∈ L$ we have that $⟦A⟧ = ⟦e⟧^♯$ and $⟦λₑ(ℓ)⟧_A = ⟦e⟧^ℓ$.
+ Then for all $ℓ ∈ L$ we have that $C(A) = C(e)^♯$ and $C(λₑ(ℓ))_A = C(e)^ℓ$.
 \end{theorem}
 
 \subsection{Algorithm and Complexity}

@@ -5,6 +5,8 @@
 \section{A Brief History Of Kleene Algebra}
 \label{sec:history}
 
+
+
 \paragraph{Our Contributions}
 
 \section{Technical Background}
@@ -256,6 +258,7 @@ defined by lifting the following action on the primitives:
     G(b) = \{ \alpha   \mid  \text{\(b\) appears positively in \( \alpha \)}\}, \\
     G(p) = \{ \alpha  p  \beta   \mid   \alpha ,  \beta   \in  \At\}.
 \]
+Because the trace interpretation is the complete interpretation of KAT, we often name it trace semantics as write it as \(G(e)\) instead of \(G(e)\), when it is convenient.
 
 % AAA: What is this a corollary of?
 % CZ: I changed it to a lemma. I originally named it corollary, because it can be easily observed.
@@ -298,25 +301,87 @@ i.e. the theory of KAT is complete with respect to relational KAT.
 Besides using composition of injective homomorphisms, another technique commonly
 used to prove injectivity is to construct a left inverse: 
 if a (Top)KAT homomorphism \(f: \mathcal{K}  \to  \mathcal{K}'\) has a left inverse homomorphism \(g: \mathcal{K}'  \to  \mathcal{K}\) 
-i.e. \(g  \circ  f = id_{\mathcal{K}}\), then \(f\) is injective.  
+i.e. \(g  ∘  f = id_{\mathcal{K}}\), then \(f\) is injective.  
 Notice that \(g\) does not need to be a homomorphism for \(f\) to be injective,
 however, in the case where \(f\) is an interpretation, 
-\(g\) being a homomorphism makes the equality \(g  \circ  f = id_{\mathcal{K}}\) easier to check.
-Because both \(g  \circ  f\) and \(id_{\mathcal{K}}\) are all interpretations,
+\(g\) being a homomorphism makes the equality \(g  ∘  f = id_{𝒦}\) easier to check.
+Because both \(g  ∘  f\) and \(id_{𝒦}\) are all interpretations,
 they are equal if and only if they have the same action on all the primitives.
 % AAA: This is only true because
 
 Finally, we provide a shorthand for domain reasoning. 
-For two terms \(e_1, e_2  \in  \KAT\), we write
-\[\REL  \models  \dom(e_1)  \geq  \dom(e_2),\] when 
-\(\dom(I(e_1))  \supseteq  \dom(I(e_1))\) for all relational KAT interpretations \(I\);  
+For two terms \(e_1, e_2  ∈  \KAT\), we write
+\[\REL  ⊧  \dom(e_1)  ≥  \dom(e_2),\] when 
+\(\dom(I(e_1))  ⊇  \dom(I(e_1))\) for all relational KAT interpretations \(I\);  
 and similarly for relational TopKAT and general relational TopKAT.  
 Then \Cref{the: TopKAT encodes domain PRIMITIVE} implies the following:
 \begin{lemma}\label{the: top element represent domain}
     For two KAT terms \(e_1, e_2  \in  \KAT_{K, B}\):
     \begin{align*}
-        \TopREL  \models  e_1  \top   \geq  e_2  \top  &  \iff  \REL  \models  \dom(e_1)  \geq  \dom(e_2) \\
-        \TopREL  \models   \top  e_1  \geq   \top  e_2 &  \iff  \REL  \models  \cod(e_1)  \geq  \cod(e_2)
+        \TopREL  ⊧  e_1  ⊤   ≥  e_2  ⊤  &  ⟺ \REL  ⊧  \dom(e_1)  ≥  \dom(e_2) \\
+        \TopREL  ⊧   ⊤  e_1  ≥   ⊤  e_2 &  ⟺  \REL  ⊧  \cod(e_1)  ≥  \cod(e_2)
     \end{align*}
 \end{lemma}
+
+\section{Guarded Kleene Algebra With Tests}
+
+Guarded Kleene Algebra with Tests (GKAT)~\cite{Smolka_Foster_Hsu_Kappé_Kozen_Silva_2020} is a efficient fragment of Kleene Algebra with tests. Specifically, GKAT uses tests to ``guard'' the non-deterministic operations like \(+\) and \(*\), to make it more akin to simply \command{while}-programs. 
+A GKAT expression over an alphabet \(K, B\) is defined as follow:
+\begin{align*}
+    \BExp ∋ e_b, f_b & ≜ 
+        b ∈ B ∣ 1 ∣ 0 ∣ e_{b} ∧ f_{b} ∣ e_{b} ∨ f_{b} ∣ \overline{e_{b}} ; \\
+    \GKAT ∋ e, f & ≜ 
+        p ∈ K ∣ e_b ∣ e ⋅ f ∣  \comITE{e_b}{e}{f} ∣ \comWhile{e_b}{e} .
+\end{align*}
+Sometimes, like in~\cref{tab: thompson's construction}, we will use the compact notation \(e +_{e_b} f\) for \(\comITE{e_b}{e}{f}\) and \(e^{(e_b)}\) for \(\comWhile{e_b}{e}\).
+In fact, these new \command{if}-statement and \command{while}-loop can be embedded back into KAT in the usual manner~\cite{Kozen_1997}:
+\begin{align*}
+    \comITE{e_b}{e}{f} & ≜ e_b ⋅ e + \overline{e_b} ⋅ f \\  
+    \comWhile{e_b}{e} & ≜ (e_b ⋅ e)* ⋅ \overline{e_b}
+\end{align*}
+This embedding into KAT gives Guarded Kleene Algebra with Tests a natural trace semantics: by computing the trace of the underlying KAT term; and a PSPACE decision procedure for trace-equivalence.
+
+The main advantage of GKAT, compare to KAT, is its efficient decision procedure. Such decision procedure is enabled by its deterministic nature, namely all the non-deterministic operations are guarded by tests. Thus, endowing GKAT a different automaton structure.
+
+\begin{definition}[GKAT automaton]\label{def:GKAT-automaton}
+    A GKAT automaton \(A ≜ ⟨S, δ, ŝ⟩\) over an alphabet \(K, B\) consists of a state set \(S\), a transition function \(δ: S → 2 + K × S\), and a start state \(ŝ ∈ S\).
+\end{definition}
+where \(2\) denotes \(\{\accept, \reject\}\), which represents accept and reject respectively.
+Intuitively, the transition function of a GKAT automaton tells us, given a state $q$ and an atom $α$ accounting for the truth value of each primitive test, to either \emph{reject} the input, represented by $δ(q, α) = \reject$, \emph{accept} the input, represented by $δ(q, α) = \accept$, or to \emph{transition} to a new state in $S$ after executing an action from $K$, represented by $δ(q, α) ∈ K × S$.
+
+People familiar with coalgebra~\cite{jacobs_IntroductionCoalgebraMathematics_2016,rutten_UniversalCoalgebraTheory_2000} might realize that this definition is a pointed coalgebra over the following \emph{signature} (or \emph{dynamics}):
+\[2 + K × (-).\]
+
+A GKAT automaton induces a guarded language in a fairly straightforward manner.
+\begin{definition}
+ Given a GKAT automaton $A ≜ ⟨ S, δ, \hat{s} ⟩$, we define $G( - )_A: S → 𝒢$ as the (pointwise) smallest function satisfying the following rules for all $s ∈ S$ and $α ∈ \At$:
+ \begin{mathpar}
+  \inferrule{%
+   δ(s, α) = \accept
+  }{%
+   α ∈ G( s )_A
+  }
+  \and
+  \inferrule{%
+   δ(s, α) = (p, s') \\
+   w ∈ G( s' )_A
+  }{%
+   αpw ∈ G( s )_A
+  }
+ \end{mathpar}
+ Finally, we define the guarded language semantics of $A$ by setting $G( A ) = G( \hat{s} )_A$.
+\end{definition}
+
+\citet{Smolka_Foster_Hsu_Kappé_Kozen_Silva_2020} was able to design a efficient trace equivalence decision procedure based on the classical Hopcroft-Karp algorithm~\cite{hopcroft_LinearAlgorithmTesting_1971}
+
+\begin{theorem}[Decidability for GKAT~\cite{Schmid_Kappé_Kozen_Silva_2021}]
+    Given two finite GKAT automata $A₀$ and $A₁$, it is decidable whether they represent the same guarded language, i.e., whether $G( A₀ ) = G( A₁ )$.
+    The algorithm to do this has a complexity that is nearly-linear\footnote{$𝒪(\hat{α}(n))$, where $\hat{α}$ is the inverse Ackermann function; c.f.~\cite{Tarjan75}.} in the total number of states.
+\end{theorem}
+
+When given two expression \(e\) and \(f\), the decision procedure will first convert it into two trace equivalent automaton via the \emph{Thompson's Construction}~\cite{Smolka_Foster_Hsu_Kappé_Kozen_Silva_2020}. Concretely, two GKAT automata \(A_e\) and \(A_f\) s.t.
+\[G(A_e) = G(e); \qquad G(A_f) = G(f).\]
+Then, apply the efficient decision procedure to decide the trace-equivalence of \(A_e\) and \(A_f\)
+
+
 

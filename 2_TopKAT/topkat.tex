@@ -312,8 +312,8 @@ Since incorrect programs often lead to explicit errors,
 \citet{OHearn_2020} also considered incorrectness triples
 \(\incorTriple{b}{p}{\errState: c}\), which mean that, in addition to satisfying
 $c$, we require that the final states of $p$ lead to an error.  More generally,
-we use the notation $\incorTriple{b}{p}{\gamma: c}$, where the \emph{error
-  code} \(\gamma \in \{\okState, \errState\}\) signals whether the program
+we use the notation $\incorTriple{b}{p}{γ: c}$, where the \emph{error
+  code} \(γ ∈ \{\okState, \errState\}\) signals whether the program
 terminated normally or not; hence, the unqualified notation
 \(\incorTriple{b}{p}{c}\) is simply a shorthand for
 \(\incorTriple{b}{p}{\okState: c}\), when abnormal termination is not a
@@ -362,11 +362,11 @@ incorrectness logic.
 
 \begin{definition}\label{def: relational validity of incorrectness triple}
   Given a relational KAT \((ℛ, ℬ)\), \(p \in ℛ\)
-  and \(b, c \in ℬ\), an Incorrectness Triple
+  and \(b, c ∈ ℬ\), an Incorrectness Triple
   \(\incorTriple{b}{p}{c}\) is \emph{valid} with respect to
   \((ℛ, ℬ)\), denoted
-  \((ℛ, ℬ) \models \incorTriple{b}{p}{c}\), if
-  \[\cod(bp) \supseteq \cod(c)\]
+  \((ℛ, ℬ) ⊧ \incorTriple{b}{p}{c}\), if
+  \[\cod(bp) ⊇ \cod(c)\]
   we consider the predicate of incorrectness triple:
   \(inc(b, p, c) ≜ \incorTriple{b}{p}{c}\).  We write \(inc\) over
   primitive tests \(b, c\) and primitive action \(p\) as
@@ -387,10 +387,10 @@ which will help us narrow down our goal.
 \begin{lemma}[redundancy of alphabet]\label{the: redundancy of alphabet}
     If for some \(K, B\) where \(p ∈ K\) and \(b, c ∈ B\), 
     and a pair of terms \(e_1, e_2 ∈ \KAT_{K, B}\),
-    that for all relational KAT valuations \(I: \KAT_{K, B} → ℛ\),
+    that for all relational KAT interpretations \(I: \KAT_{K, B} → ℛ\),
     \[I(e_1) = I(e_2) ⟺ \incorTriple{I(b)}{I(p)}{I(c)}\]
     then there exist \(\hat{e_1}, \hat{e_2} ∈ \KAT_{\{p\},\{b, c\}}\) 
-    such that, for every relational valuation \(I': \KAT_{\{p\}, \{b, c\}} → ℛ\), 
+    such that, for every relational interpretation \(I': \KAT_{\{p\}, \{b, c\}} → ℛ\), 
     \[I'(\hat{e_1}) = I'(\hat{e_2}) ⟺ \incorTriple{I(b)}{I(p)}{I(c)}\]
 \end{lemma}
 
@@ -420,7 +420,7 @@ that are capable of formulating incorrectness logic.
 
 \begin{lemma}\label{the: only one action var}
     Given a expression \(e ∈ \KAT_{\{p\}, \{b, c\}}\)
-    and a relational KAT valuation \(u\) with \(I(p) = ∅\), if
+    and a relational KAT interpretation \(I\) with \(I(p) = ∅\), if
     \((x, y) ∈ I(e)\), we have \(x = y\).
 \end{lemma}
 
@@ -430,7 +430,7 @@ that are capable of formulating incorrectness logic.
 
 \begin{lemma}\label{the: KAT inccorrectness logic core lemma}
     Given a expression \(e ∈ \KAT_{\{p\},\{b, c\}}\)
-    and a relational KAT valuation \(u\), if \((x, y) ∈ I(e)\),
+    and a relational KAT interpretation \(I\), if \((x, y) ∈ I(e)\),
     then either:
     \begin{itemize}
     \item there exist \(z\) and \(z'\) such that \((x, z) ∈ I(p) \text{ and } (z', y) ∈ I(p)\); or
@@ -462,7 +462,7 @@ that are capable of formulating incorrectness logic.
             thus, we can have \(z = y, z' = x\), hence 
             \[(x, z) ∈ I(p)  \text{ and }  (z', y) ∈ I(p)\]
         \item If \(e = b\) or \(e = c\),
-            then the valuation of \(p\) will not matter, 
+            then the interpretation of \(p\) will not matter, 
             hence assigning \(p\) to empty will also contain \((x, y)\).
             Therefore \((x, y) ∈ I_∅(e)\).
             And by \Cref{the: only one action var}, \(x = y\)
@@ -549,7 +549,7 @@ that are capable of formulating incorrectness logic.
         \item If \(e\) is of the form \(\overline{e_1}\),
         then by definition \(e_1\) cannot contain primitive action.
         Hence \(e_1\) and \(e\) will not contain \(p\).
-        Therefore the valuation of \(p\) do not matter to the interpretation.
+        Therefore the interpretation of \(p\) do not matter to the interpretation.
         Thus we have \[(x, y) ∈ I_∅(e)\]
         and by \Cref{the: only one action var}, \(x = y\) \qedhere
     \end{itemize}
@@ -588,16 +588,16 @@ This result demonstrates crucial limitation about domain and reachability reason
     \end{align*}
     Where the incorrectness triple
     \(\incorTriple{b}{p}{c}\) is valid with interpretation
-    \(I\), but not with \(I_{\emptyset}\).  And the only difference between
-    \(I\) and \(I_{\emptyset}\) is that \(p\) is mapped to \(\emptyset\)
-    in \(I_{\emptyset}\).
+    \(I\), but not with \(I_{∅}\).  And the only difference between
+    \(I\) and \(I_{∅}\) is that \(p\) is mapped to \(∅\)
+    in \(I_{∅}\).
 
-    Since \(I_{\emptyset}\) valuates the only action variable \(p\) as \(\emptyset\),
+    Since \(I_{∅}\) valuates the only action variable \(p\) as \(∅\),
     By \Cref{the: only one action var} 
     all the elements of \(I_∅(e₁)\) must be of the form \((x, x)\).
     Then because the incorrectness triple \(\incorTriple{b}{p}{c}\)
-    is invalid with \(u_{\emptyset}\),
-    \[I_∅(e₁) \neq I_∅(e₂).\]
+    is invalid with \(I_{∅}\),
+    \[I_∅(e₁) ≠ I_∅(e₂).\]
     Without loss of generality, assume that
     \((x, x) ∈ I_∅(e₁)\), but not in
     \(I_∅(e₂)\).  Then by monotonicity of KAT operators,
@@ -607,10 +607,10 @@ This result demonstrates crucial limitation about domain and reachability reason
     above strategy using \Cref{fig: proof of KAT cannot encode IL}.
 
     Because \((x, x) ∉ I_∅(e₂)\)
-    and the only element of the action \(u(p)\) is \((1, 0)\),
+    and the only element of the action \(I(p)\) is \((1, 0)\),
     none of the conditions in \Cref{the: KAT inccorrectness logic core lemma} is satisfied,
     therefore \((x, x)\) cannot be in \(I(e₂)\),
-    which contradicts the earlier result stating \((x, x) \in I(e₂)\).
+    which contradicts the earlier result stating \((x, x) ∈ I(e₂)\).
 \end{proof}
 
 \begin{figure}
@@ -634,7 +634,7 @@ This result demonstrates crucial limitation about domain and reachability reason
         (x, x) ∉ I_∅(e₂) 
             \arrow[uuu, dash, "\text{contradiction}"', "×"marking]\\
     \end{tikzcd}
-    \caption{Relation of interpretations \(I\) and \(I_{\emptyset}\)}\label{fig: proof of KAT cannot encode IL}
+    \caption{Relation of interpretations \(I\) and \(I_{∅}\)}\label{fig: proof of KAT cannot encode IL}
 \end{figure}
 
 One strategy for exploiting the symmetry between Hoare and incorrectness logic
@@ -646,7 +646,7 @@ work~\cite[Section~4]{Mamouras_2017}, though for a different purpose.
 
 \begin{definition}[Kleene Algebra with Top and Tests]
   A Kleene Algebra with Top and Tests, or TopKAT, is a KAT \(𝒦\) that contains a largest
-  element \(\top\); that is, for all elements \(p ∈ 𝒦\),
+  element \(⊤\); that is, for all elements \(p ∈ 𝒦\),
   \[⊤ ≥ p.\]
   A relational TopKAT over \(X\) is a relational KAT that includes the complete relation \(X × X\).
 \end{definition}
@@ -718,8 +718,8 @@ we can find several equivalent formulations of incorrectness triple:
 \begin{proof}
 We show that these conditions are equivalent in all TopKATs.
 \begin{itemize}
-    \item First show \[\top b p \geq \top c \iff \top b p \geq c,\]
-    the \(\implies\) is true because \(\top \geq 1\):
+    \item First show \[⊤ b p ≥ ⊤ c ⟺ ⊤ b p ≥ c,\]
+    the \(⟹\) is true because \(⊤ ≥ 1\):
     \[\top b p \geq \top c \geq c,\]
     the \(\impliedby\) can be proven by idempotency of \(\top\):
     \[\top b p = \top \top b p \geq \top c.\]
@@ -806,8 +806,8 @@ multiplication \(pq\) in KAT, and the logical implication \(b → b'\)
 corresponds to order \(b \leq b'\).)  For the Iter-dependent rule (Backwards
 Variant in~\cite{OHearn_2020}), the function \(b(n)\) corresponds
 to a sequence of tests \((b_n)_{n \in ℕ}\), and the existential
-\(\exists n, b(n)\) corresponds to the infinite disjunction of all these
-\(b_n\), which we express as \(\sup_{n \in ℕ} b_n\).  (Note that \(\sup\)
+\(∃ n, b(n)\) corresponds to the infinite disjunction of all these
+\(b_n\), which we express as \(\sup_{n ∈ ℕ} b_n\).  (Note that \(\sup\)
 does not exist in KATs, TopKATs, or boolean algebras in general, and this rule
 implicitly assumes that \(\sup_{n \in ℕ} b(n)\) exists.)
 
@@ -916,17 +916,17 @@ Since the proof rules of propositional Hoare logic are sound for that encoding~\
 \begin{proof}
 \begin{itemize}
     \item We first show the equivalence:
-        \[b p \leq \top c  \iff  \top b p \leq \top c.\]
-        \(\impliedby\) is by \(1 \leq \top\),
+        \[b p ≤ ⊤ c  ⟺  ⊤ b p ≤ ⊤ c.\]
+        \(⟸\) is by \(1 ≤ ⊤\),
         thus \[b p \leq \top b p \leq \top c,\]
-        and \(\implies\) is by the idempotency of \(\top\),
+        and \(⟹\) is by the idempotency of \(\top\),
         multiply both side with \(\top\), we have 
         \[\top b p \leq \top \top c = \top c.\]
     \item Then we show the equivalence
         \[b p \leq \top c  \iff  b p = b p c.\]
-        Start with \(\impliedby\), because \(\top \geq b p\), we have
-        \[b p = b p c \leq \top c.\]
-        Then \(\implies\), we start from \(b p \leq \top c\),
+        Start with \(⟸\), because \(⊤ ≥ b p\), we have
+        \[b p = b p c ≤ ⊤ c.\]
+        Then \(⟹\), we start from \(b p ≤ ⊤ c\),
         we first multiply \(\overline{c}\) on both side,
         \[b p \overline{c} \leq \top c \overline{c} = \top 0 = 0,\]
         and because \(b p \overline{c} \geq 0\) (\(0\) is the smallest element),
@@ -974,7 +974,7 @@ We start with our negative result, which is the incompleteness over relational T
   \end{align*}
   (Note that this KAT is \emph{not} a relational TopKAT\@: the largest
   element is not the complete relation.)
-  Then, by taking a valuation \(u(p) ≜\{(0, 1)\}\), we see that
+  Then, by taking a interpretation lifted by \(I(p) ≜\{(0, 1)\}\), we see that
   \begin{align*}
     I(⊤ p) & = \{(0, 1)\} \\
     I((⊤ p) (⊤ p)) & 
@@ -1491,15 +1491,15 @@ To capture this type of control flow, we adapt the ideas from
 in the setting of KAT\@.
 \begin{definition}[FailTopKAT]
   A FailTopKAT is a tuple \((\mathcal{F},\mathcal{K},\mathcal{B},\fail)\), where
-  \((\mathcal{K}, \mathcal{B})\) is a TopKAT, \(\fail \in \mathcal{F}\), and
-  \(\mathcal{K} \subsetneq \mathcal{F}\). The set \(\mathcal{F}\) has the
+  \((𝒦, ℬ)\) is a TopKAT, \(\fail ∈ ℱ\), and
+  \(𝒦 ⊊ ℱ\). The set \(ℱ\) has the
   structure of a KAT that extends that of \(\mathcal{K}\), except that the right
-  annihilation rule \(p \cdot 0 = 0\) need not hold.  Instead,
-  \[\fail \cdot p = \fail,\] where \(p\) is any element of \(\mathcal{F}\).
-  (Crucially, we do \emph{not} assume \(\top \geq \fail\).) We call
-  \((\mathcal{K},\mathcal{B})\) the \emph{fail-free subalgebras}, 
+  annihilation rule \(p ⋅ 0 = 0\) need not hold.  Instead,
+  \[\fail ⋅ p = \fail,\] where \(p\) is any element of \(ℱ\).
+  (Crucially, we do \emph{not} assume \(⊤ ≥ \fail\).) We call
+  \((𝒦,ℬ)\) the \emph{fail-free subalgebras}, 
   which model programs that do not fail.  
-  We will omit some of \(\mathcal{K},\mathcal{B},\fail\),
+  We will omit some of \(𝒦,ℬ,\fail\),
   if they are not used or can be inferred from the context.
 
   The class of all FailTopKATs is denoted \(\FailTopKAT\).
@@ -1534,10 +1534,10 @@ executions that terminate normally, and \(p'\) represents executions that fail.
     \overline{(b, 0_{\mathcal{K}})} & = (\overline{b}, 0_{\mathcal{K}}).
   \end{align*}
 \end{definition}
-To develop some intuitions for this construction, suppose that \(\mathcal{K}\) is a relational TopKAT over \(X\).  
-There exists a canonical embedding of \(\mathcal{F}\) in \(𝒫(X \times X \times \{\okState,\errState\})\) that identifies \((p,p') ∈ \mathcal{F}\) with the relation
+To develop some intuitions for this construction, suppose that \(𝒦\) is a relational TopKAT over \(X\).  
+There exists a canonical embedding of \(ℱ\) in \(𝒫(X × X × \{\okState,\errState\})\) that identifies \((p,p') ∈ \mathcal{F}\) with the relation
 \(r = p × \{\okState\} ∪ p' × \{\errState\} ⊆ X × X × \{\okState,\errState\}\).
-Intuitively, \((x,y,\gamma) ∈ r\) means that a program took the input state \(x\) to
+Intuitively, \((x,y,γ) ∈ r\) means that a program took the input state \(x\) to
 the output state \(y\), and the bit \(\gamma ∈ \{\okState,\errState\}\) signals whether an error has
 occurred.  By looking at the definition of sequential composition under this
 reading, it says that we get an error either by getting an error when running
@@ -1860,7 +1860,7 @@ prove a certain post condition is the strongest
 (as in Hoare logic) without a relational semantics.
 
 \begin{example}[Reasoning With Hoare And Incorrectness Logic]\label{exp: hoare and incorrect together}
-    The assertion \(x \geq 0\) is the strongest post condition of program 
+    The assertion \(x ≥ 0\) is the strongest post condition of program 
     \(\comWhile{x < 0}{\comAssign{x}{x + 1}}\) with precondition \(\true\).
 
     We can show this by the following two triples:
@@ -1901,7 +1901,7 @@ We first show a proof in a relational setting, as a comparison to the algebraic 
     \item \(\cod(c {(b p))^* \overline{b}} \supseteq \cod(\overline{b})\):
         because on the left hand side, every output needs to go through the final check 
         of \(\overline{b}\), it will also be in \(\cod(\overline{b})\);
-    \item \(\cod(c {(b p)}^* \overline{b}) \subseteq \cod(\overline{b})\):
+    \item \(\cod(c {(b p)}^* \overline{b}) ⊆ \cod(\overline{b})\):
         if the input of the left hand side is in \(\cod(\overline{b})\), 
         it will not be filtered out by \(c\), will not go into loop \({(b p)}^*\),
         will not be filtered out by \(\overline{b}\), and will be outputted unchanged. 

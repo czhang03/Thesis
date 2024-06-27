@@ -224,25 +224,25 @@ In~\Cref{the: TopGREL expressive power},
 we show that this result is a simple corollary of our new reduction result.
 
 We are also interested in maps between models:
-A \emph{KAT homomorphism} \(f\) is a map between two KATs \(\mathcal{K}\) and \(\mathcal{K}'\)
+A \emph{KAT homomorphism} \(h\) is a map between two KATs \(\mathcal{K}\) and \(\mathcal{K}'\)
 s.t. it preserves the sorts and operations:
-given a test \(b\) in \(\mathcal{K}\) then \(f(b)\) is a test in \(\mathcal{K}'\);
+given a test \(b\) in \(\mathcal{K}\) then \(h(b)\) is a test in \(\mathcal{K}'\);
 and all the KAT operations (complement, identities, addition, multiplication, and star) are preserved:
 \begin{align*}
-    f & : \mathcal{K}  \to  \mathcal{K}'\\
-    f(\bar{b}) & = \overline{f(b)} \\  
-    f(1) & = 1 \\  
-    f(0) & = 0 \\
-    f(p + q) & = f(p) + f(q) \\  
-    f(p  \cdot  q) & = f(p)  \cdot  f(q) \\  
-    f(p^*) & = f(p)^*.
+    h & : 𝒦  →  𝒦'\\
+    h(b̄) & = \overline{f(b)} \\  
+    h(1) & = 1 \\  
+    h(0) & = 0 \\
+    h(p + q) & = h(p) + h(q) \\  
+    h(p ⋅ q) & = h(p) ⋅ h(q) \\  
+    h(p^*) & = h(p)^*.
 \end{align*}
 Similarly, a \emph{TopKAT homomorphism} is a KAT homomorphism that preserves the
 largest element.
 
 \subsection{Interpretation, Completeness, and Injectivity}\label{sec: completeness background}
 
-Consider a KAT equation such as \(p  \cdot  b  \cdot  \bar{b} = 0\). To determine its
+Consider a KAT equation such as \(p ⋅ b ⋅ b̄ = 0\). To determine its
 validity in a particular KAT \(\mathcal{K}\), we need to assign meaning to it by
 interpreting each primitive as an element in \(\mathcal{K}\); that is, by defining a map
 \(\hat{I}\) of type \(K + B  \to  \mathcal{K}\).  Such a map \(\hat{I}: K + B  \to  \mathcal{K}\) induces a

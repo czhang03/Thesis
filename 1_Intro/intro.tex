@@ -68,9 +68,9 @@ the addition, multiplication, and the identities of Kleene algebra.
 We refer to elements of this embedded Boolean algebra as \emph{tests}.
 
 Given an algebraic theory, we can construct its \emph{free model} 
-over a finite set \( \Sigma \), 
+over a finite set \( Σ \), 
 called the \emph{alphabet}~\cite{burrisCourseUniversalAlgebra1981}.  
-The free model consists of all the terms formed by \( \Sigma \) modulo 
+The free model consists of all the terms formed by \( Σ \) modulo  
 provable equivalences of the algebra. The operations of the free model are obtained 
 by lifting the term-level operations to equivalence classes.
 
@@ -98,9 +98,9 @@ proofs of some properties of algebraic theories, as we will see in~\Cref{chapter
 
 Other important models that we will use in this paper are language (Top)KATs and
 relational (Top)KATs, which we review here.  An \emph{atom} (short for ``atomic
-test'') over a test alphabet \(B = \{b_{1}, b_{2},  \ldots , b_{n}\}\) is a sequence of the form
+test'') over a test alphabet \(B = \{b_{1}, b_{2},  … , b_{n}\}\) is a sequence of the form
 \[\hat{b_{1}}  \cdot  \hat{b_{2}}  \cdot   \cdots   \cdot \hat{b_{n}} \text{ where } \hat{b_{i}}  \in  \{b_{i}, \bar{b_{i}}\}.\] 
-We denote atoms as \( \alpha ,  \beta ,  \gamma ,  \ldots \) and the set of all atoms as \(\At\).
+We denote atoms as \( α ,  β ,  γ ,  … \) and the set of all atoms as \(\At\).
 
 A \emph{guarded string} (or \emph{guarded word}) over \(K, B\) is an alternation 
 between atoms and primitive actions that starts and ends in atoms: 
@@ -119,9 +119,9 @@ Because the value of the indicator variable matters only for control flow, we do
 We denote the set of all guarded
 strings over alphabet \(K, B\) as \(GS_{K, B}\), and we will omit the alphabet
 \(K, B\) when it is irrelevant or can be inferred from context.  The notation
-\( \alpha  s\) denotes a guarded string starting with atom \( \alpha \) with the rest of the string
-\(s\); similarly, \(s  \alpha \) denotes a guarded string that ends with atom \( \alpha \) with
-rest of the string being \(s\).
+\( α  w\) denotes a guarded string starting with atom \( α \) with the rest of the string
+\(w\); similarly, \(w  α \) denotes a guarded string that ends with atom \( α \) with
+rest of the string being \(w\).
 
 \begin{definition}[Language/trace KAT~\cite{Kozen_Smith_1997}]
   The \emph{language KAT} (also called ``\emph{trace KAT}'') over an alphabet \(K, B\) is
@@ -180,8 +180,8 @@ and all the KAT operations (complement, identities, addition, multiplication, an
 Consider a KAT equation such as \(p ⋅ b ⋅ b̄ = 0\). To determine its
 validity in a particular KAT \(\mathcal{K}\), we need to assign meaning to it by
 interpreting each primitive as an element in \(\mathcal{K}\); that is, by defining a map
-\(\hat{I}\) of type \(K + B  \to  \mathcal{K}\).  Such a map \(\hat{I}: K + B  \to  \mathcal{K}\) induces a
-unique KAT homomorphism \(I : \KAT_{K,B}  \to  \mathcal{K}\) inductively defined on the term 
+\(\hat{I}\) of type \(K + B  →  𝒦\).  Such a map \(\hat{I}: K + B  →  𝒦\) induces a
+unique KAT homomorphism \(I : \KAT_{K,B}  →  \mathcal{K}\) inductively defined on the term 
 as follows:
 \begin{equation}
     \begin{aligned}
@@ -206,13 +206,13 @@ that a homomorphism must satisfy.  It also allows us to prove that two
 interpretations are equal by arguing that they map the primitives to
 equal values.
 
-Given a KAT \(\mathcal{K}\), and two terms \(e_1, e_2  \in  \KAT_{K, B}\) we say that \(\mathcal{K}  \models  e_1 = e_2\) if
-\[ \forall  I : \KAT_{K, B}  \to  \mathcal{K}, I(e_1) = I(e_2).\] In particular, 
-for two terms in the free model \(e_1, e_2  \in  \KAT_{K, B}\),
-\(\KAT_{K, B}  \models  e_1 = e_2\) is equivalent to \(e_1 = e_2\).  
+Given a KAT \(𝒦\), and two terms \(e_1, e_2  ∈  \KAT_{K, B}\) we say that \(𝒦  ⊧  e_1 = e_2\) if
+\[ ∀  I : \KAT_{K, B}  →  𝒦, I(e_1) = I(e_2).\] In particular, 
+for two terms in the free model \(e_1, e_2  ∈  \KAT_{K, B}\),
+\(\KAT_{K, B}  ⊧  e_1 = e_2\) is equivalent to \(e_1 = e_2\).  
 For a collection of models \(\mathsf{K}\), 
-we say that \(\mathsf{K}  \models  e_1 = e_2\) if for all \(\mathcal{K}  \in  \mathsf{K}\),
-\(\mathcal{K}  \models  e_1 = e_2\).  For example, \(\REL  \models  e_1 = e_2\) means that \(e_1 = e_2\) is
+we say that \(𝖪  ⊧  e_1 = e_2\) if for all \(\mathcal{K}  ∈  𝖪\),
+\(𝒦  ⊧  e_1 = e_2\).  For example, \(\REL  ⊧  e_1 = e_2\) means that \(e_1 = e_2\) is
 valid in all relational KATs.  All the above notations and terminologies can be
 similarly extended to TopKAT.
 
@@ -225,7 +225,7 @@ we say that the theory of KAT is \emph{complete} with respect to \(I\).
 Recall that \(\KAT_{K, B}  \models  e_1 = e_2\) is equivalent to \(e_1 = e_2\);  
 thus, by definition, an interpretation \(I\) is complete if and only if it is injective.
 One of such interpretation is the guarded string interpretation
-\(G: \KAT_{K, B}  \to  \mathcal{G}_{K, B}\)~\cite{Kozen_Smith_1997},
+\(G: \KAT_{K, B}  →  𝒢_{K, B}\)~\cite{Kozen_Smith_1997},
 defined by lifting the following action on the primitives:
 \[
     G(b) = \{ α   ∣  \text{\(b\) appears positively in \( α \)}\}, \\
@@ -238,7 +238,7 @@ Since a complete interpretation is an injective homomorphism, such interpretatio
 Many previous proofs can also be explained by seeing complete interpretations as injective homomorphisms: the proof for completeness of relational KATs constructs an injective homomorphism $h$ from a language KAT into a relational
 KAT~\cite{Kozen_Smith_1997}.  
 Since both \(G\) and \(h\) are injective homomorphisms, \(h  ∘  G\) is also an injective homomorphism, hence a complete interpretation.  Since \(h  ∘  G\) is a relational interpretation:
-\[\KAT_{K, B}  ⊧  e_1 = e_2  ⟹  \REL  ⊧  e_1 = e_2  \implies  h  ∘  G(e_1) = h  ∘  G(e_2);\]
+\[\KAT_{K, B}  ⊧  e_1 = e_2  ⟹  \REL  ⊧  e_1 = e_2  ⟹  h  ∘  G(e_1) = h  ∘  G(e_2);\]
 then the completeness of \(h  ∘  G\) implies
 \((h  ∘  G)(e_1) = (h  ∘  G)(e_2)  ⟺  \KAT_{K, B}  ⊧  e_1 = e_2\). Hence,
 \[\KAT_{K, B}  ⊧  e_1 = e_2  ⟺  \REL  ⊧  e_1 = e_2,\]
@@ -256,8 +256,8 @@ i.e. the theory of KAT is complete with respect to relational KAT.
 
 Besides using composition of injective homomorphisms, another technique commonly
 used to prove injectivity is to construct a left inverse: 
-if a (Top)KAT homomorphism \(f: \mathcal{K}  \to  \mathcal{K}'\) has a left inverse homomorphism \(g: \mathcal{K}'  \to  \mathcal{K}\) 
-i.e. \(g  ∘  f = id_{\mathcal{K}}\), then \(f\) is injective.  
+if a (Top)KAT homomorphism \(f: 𝒦  →  𝒦'\) has a left inverse homomorphism \(g: 𝒦'  →  𝒦\) 
+i.e. \(g  ∘  f = id_{𝒦}\), then \(f\) is injective.  
 Notice that \(g\) does not need to be a homomorphism for \(f\) to be injective,
 however, in the case where \(f\) is an interpretation, 
 \(g\) being a homomorphism makes the equality \(g  ∘  f = id_{𝒦}\) easier to check.

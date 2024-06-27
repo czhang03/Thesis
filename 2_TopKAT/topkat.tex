@@ -641,23 +641,22 @@ One strategy for exploiting the symmetry between Hoare and incorrectness logic
 is to extend KAT with a codomain operator.  Similar ideas have been explored in prior work~\cite{Möller_O’Hearn_Hoare_2021}. However,
 rather than adopting a full-fledged codomain operator, it suffices for our
 purposes to consider a equational theory that only extends KAT with a top
-element.  Such an algebraic structure has also been considered in prior
+element.  Similar algebraic structure has also been considered in prior
 work~\cite[Section~4]{Mamouras_2017}, though for a different purpose.
 
-\begin{definition}[KAT with a Top Element]
-  A KAT with top, or TopKAT, is a KAT \(𝒦\) that contains a largest
-  element \(\top\); that is, for all elements \(p \in 𝒦\),
-  \[\top \geq p.\]
-  A relational TopKAT over \(X\) is a relational KAT 
-  where the top element is the complete relation \(X \times X\).
+\begin{definition}[Kleene Algebra with Top and Tests]
+  A Kleene Algebra with Top and Tests, or TopKAT, is a KAT \(𝒦\) that contains a largest
+  element \(\top\); that is, for all elements \(p ∈ 𝒦\),
+  \[⊤ ≥ p.\]
+  A relational TopKAT over \(X\) is a relational KAT that includes the complete relation \(X × X\).
 \end{definition}
 
-\begin{theorem}[TopKAT can Express Codomain]\label{the: top element can express domain}
+\begin{theorem}[TopKAT can Express Codomain]\label{the: TopKAT encodes domain PRIMITIVE}
     For all relational TopKATs \(ℛ\),
-    and \(p, q \in ℛ\) The following is true:
-    \[\top p = \top q \iff \cod(p) = \cod(q)\]
-    and 
-    \[\top p \leq \top q \iff \cod(p) \subseteq \cod(q).\]
+    and \(p, q ∈ ℛ\) The following is true:
+    \[⊤ p = ⊤ q ⟺ \cod(p) = \cod(q)
+    \text{ and }
+    ⊤ p ≤ ⊤ q ⟺ \cod(p) ⊆ \cod(q).\]
 \end{theorem}
 
 \begin{proof}
@@ -676,10 +675,23 @@ work~\cite[Section~4]{Mamouras_2017}, though for a different purpose.
         ⊤ ⋅ q ≤ ⊤ ⋅ p & ⟺ 
         \{(z, y) ∣ z ∈ X ∧ y ∈ \cod(q)\}
         \subseteq \{(z, y) \mid z \in X \land y \in \cod(p)\} \\
-        & \iff \cod(q) \subseteq \cod(p) 
+        & \iff \cod(q) \subseteq \cod(p) \qedhere
     \end{align*} 
 \end{proof}
 
+We also provide a shorthand for domain reasoning. 
+For two terms \(e_1, e_2  ∈  \KAT\), we write
+\[\REL  ⊧  \dom(e_1)  ≥  \dom(e_2),\] when 
+\(\dom(I(e_1))  ⊇  \dom(I(e_1))\) for all relational KAT interpretations \(I\);  
+and similarly for relational TopKAT and general relational TopKAT.  
+Then \Cref{the: TopKAT encodes domain PRIMITIVE} implies the following:
+\begin{lemma}\label{the: top element represent domain}
+    For two KAT terms \(e_1, e_2  ∈  \KAT_{K, B}\):
+    \begin{align*}
+        \TopREL  ⊧  e_1  ⊤   ≥  e_2  ⊤  &  ⟺ \REL  ⊧  \dom(e_1)  ≥  \dom(e_2) \\
+        \TopREL  ⊧   ⊤  e_1  ≥   ⊤  e_2 &  ⟺  \REL  ⊧  \cod(e_1)  ≥  \cod(e_2)
+    \end{align*}
+\end{lemma}
 
 \begin{corollary}\label{the: topkat can express incorrectness logic normal termination}
     For all relational TopKATs \((ℛ, ℬ)\),
@@ -696,8 +708,8 @@ As a matter of fact, just by using the equational theory of TopKAT,
 we can find several equivalent formulations of incorrectness triple:
 
 \begin{theorem}[Equivalent Formulation of Incorrectness Logic]
-  Given a TopKAT \((𝒦, ℬ)\), where \(p \in 𝒦\) and
-  \(b, c \in ℬ\), we say that an incorrectness triple
+  Given a TopKAT \((𝒦, ℬ)\), where \(p ∈ 𝒦\) and
+  \(b, c ∈ ℬ\), we say that an incorrectness triple
   \(\incorTriple{b}{p}{c}\) is valid if the following equivalent conditions are
   met:
   \[⊤ b p ≥ ⊤ c ⟺ ⊤ b p ≥ c ⟺ ⊤ b p c = ⊤ c\]
@@ -889,14 +901,10 @@ implicitly assumes that \(\sup_{n \in ℕ} b(n)\) exists.)
 
 \paragraph*{An alternative encoding for Hoare logic}
 
-Since \(\TopKAT\) can express codomain (\Cref{the: top element can express
-  domain}), we can exploit the symmetry between incorrectness logic and Hoare
-logic (\Cref{sec:incorrectness-and-hoare}) to give another encoding of Hoare
-logic in \(\TopKAT\): \[\top b p \leq \top c.\] This is equivalent to the
-original encoding $bp = bpc$ proposed for KATs~\cite{Kozen_2000} in \emph{all TopKAT},
-not just relational ones.  
-Since the proof rules of propositional Hoare logic are sound for that
-encoding~\cite[Theorem~3.1]{Kozen_2000}, they are also sound for ours.
+Since \(\TopKAT\) can express codomain (\Cref{the: top element represent domain}), we can exploit the symmetry between incorrectness logic and Hoare logic (\Cref{sec:incorrectness-and-hoare}) to give another encoding of Hoare logic in \(\TopKAT\): 
+\[\top b p \leq \top c.\] 
+This is equivalent to the original encoding $bp = bpc$ proposed for KATs~\cite{Kozen_2000} in \emph{all TopKAT}, not just relational ones.  
+Since the proof rules of propositional Hoare logic are sound for that encoding~\cite[Theorem~3.1]{Kozen_2000}, they are also sound for ours.
 
 \begin{theorem}[Equivalence of Hoare Logic Formulations]\label{the: hoare logic formulation equivalent}
   For all TopKATs \((𝒦, ℬ)\), and three elements
@@ -978,22 +986,22 @@ We start with our negative result, which is the incompleteness over relational T
   \(p ⊤ p ≥ p\).
 \end{proof}
 
-The incompleteness result might be discouraging, since we might not be able to derive some valid theorems of incorrectness logic using TopKAT. However in
-\Cref{the: incor logic rule sound ok} and \Cref{the: incorrectness logic fail rule sound}, we show that all the rules of incorrectness logic are
-derivable using either the equational theory of TopKAT or FailTopKAT\@.  Thus,
-our framework is at least as strong as the structural proof rules presented
-by~\citet{OHearn_2020}.
+In fact, \citeauthor{Pous_Wagemaker_2022}~\cite{Pous_Wagemaker_2023,Pous_Wagemaker_2022} has shown that with the additional axiom \(p ⊤ p ≥ p\), the theory of TopKAT is indeed complete with relational model.
+
+Without this additional axiom, the incompleteness result might be discouraging, since we might not be able to derive some valid theorems of incorrectness logic using TopKAT. However in \Cref{the: incor logic rule sound ok} and \Cref{the: incorrectness logic fail rule sound}, we show that all the rules of incorrectness logic are derivable using either the equational theory of TopKAT or FailTopKAT\@.  Thus,
+our framework is at least as strong as the structural proof rules presented by~\citet{OHearn_2020}.
+
+In fact, this power of TopKAT is not accidental: as we will show in~\cref{sec: domain completeness of TopKAT}, TopKAT without the additional axiom \(p ⊤ p ≥ p\), is still complete with respect to domain comparison inequalities. Concretely, given any KAT terms \(e₁, e₂ ∈ \KAT\), the inequalities of the following form:
+\[⊤ e₁ ≥ ⊤ e₂ \text{ and } e₁ ⊤ ≥ e₂ ⊤\]
+are called domain comparison inequalities; because they corresponds to domain comparisons in relational models (\cref{the: top element represent domain}).
+And these forms of inequalities subsumes the encoding of both propositional Hoare and incorrectness logic.
 
 \subsection{Reduction on free models}\label{sec: reduction on free models}
 
-Our goal in this section is to construct a complete interpretation for TopKAT,
-by reducing its theory to that of plain KAT.  In other words, any equation
-between two TopKAT expressions is logically equivalent to another equation between a
-pair of corresponding KAT terms.  While this result is not
-new~\cite{Zhang_de_Amorim_Gaboardi_2022, Zhang_de_Amorim_Gaboardi_2022_POPL,
-  Pous_Wagemaker_2022}, we present a more streamlined proof that hinges on the
-universal properties of free KATs and TopKATs, without relying explicitly on
-language models.  Similar to previous works, we obtain the
+Our goal for \Cref{sec: reduction on free models,sec: complete model for free} is to construct a complete interpretation for TopKAT, by reducing its theory to that of plain KAT.  
+In other words, any equation between two TopKAT expressions is logically equivalent to another equation between a pair of corresponding KAT terms.  
+We present a streamlined proof that hinges on the universal properties of free KATs and TopKATs, without relying explicitly on language models, unlike previous definitions of reduction~\cite{Pous_Rot_Wagemaker_2021,Kozen_Smith_1997}.  
+Similar to previous works, we obtain the
 decidability of the equational theory of TopKAT as a corollary of reduction.
 However, because of the new notion of reduction,
 our decidability result no longer depends on the completeness of the language TopKAT.  
@@ -1049,9 +1057,10 @@ Since we already know that the KAT interpretations \(G: \KAT → 𝒢\) and
 construct complete TopKAT interpretations by \emph{composition}, 
 if we can construct an injective TopKAT interpretation \(r\) of type
 \(\TopKAT_{K, B} → \KAT_{K_⊤, B}\):
-\[\TopKAT_{K, B} \xrightarrow{r} \KAT_{K_⊤, B} \xrightarrow{G} 𝒢_{K_⊤, B},\\  
-  \TopKAT_{K, B} \xrightarrow{r} \KAT_{K_⊤, B} \xrightarrow{G} 𝒢_{K_⊤, B}
-  \xrightarrow{h} \Img(h).\] 
+\begin{align*}
+    \TopKAT_{K, B} \xrightarrow{r} \KAT_{K_⊤, B} \xrightarrow{G} 𝒢_{K_⊤, B},\\
+    \TopKAT_{K, B} \xrightarrow{r} \KAT_{K_⊤, B} \xrightarrow{G} 𝒢_{K_⊤, B} \xrightarrow{h} \Img(h).
+\end{align*} 
 
 In fact, such an injective homomorphism can be obtained by lifting 
 the embedding map \(K + B ↪ \KAT_{K_⊤, B}\):
@@ -1151,8 +1160,10 @@ we can construct the complete interpretation just by composition,
 and compute the complete model by computing the range of the complete interpretation.
 
 We already know that there are two complete interpretations of TopKAT defined as follows:
-\[\TopKAT_{K, B} \xrightarrow{r} \KAT_{K_⊤, B} \xrightarrow{G} 𝒢_{K_⊤, B},\\  
-\TopKAT_{K, B} \xrightarrow{r} \KAT_{K_⊤, B} \xrightarrow{G} 𝒢_{K_⊤, B} \xrightarrow{h} \Img(h),\]
+\begin{align*}
+    \TopKAT_{K, B} \xrightarrow{r} \KAT_{K_⊤, B} \xrightarrow{G} 𝒢_{K_⊤, B},\\  
+    \TopKAT_{K, B} \xrightarrow{r} \KAT_{K_⊤, B} \xrightarrow{G} 𝒢_{K_⊤, B} \xrightarrow{h} \Img(h),
+\end{align*}
 with a complete language model \(𝒢_{K_⊤, B}\), 
 and a complete model consisting of relations \(\Img(h)\).
 
@@ -1245,24 +1256,17 @@ Here we show the aforementioned encoding is simply the reduction \(r\).
     Thus the two KAT expressions \(r(e₁), r(e₂) ∈ \KAT_{K_⊤, B}\) also can express the predicate \(P\).
 \end{proof}
 
-Since the image of \(I\) is not necessarily a relational TopKAT,
-where the top element is interpreted as the complete relation,
-the above trick does not work for relational TopKAT.
-It is also known that relational TopKAT is strictly more expressive than general relational TopKAT,
-since relational TopKAT can encode incorrectness logic,
-where general relational TopKAT cannot~\cite{Zhang_de_Amorim_Gaboardi_2022}.
+Since the image of \(I\) is not necessarily a relational TopKAT, where the top element is interpreted as the complete relation, the above trick does not work for relational TopKAT.
+In fact, in~\Cref{the: topkat can express incorrectness logic normal termination,the: KAT not able to express incorrectness logic}, we have already showed that relational TopKAT is strictly more expressive than relational KAT,
+since relational TopKAT can encode incorrectness logic, where relational KAT cannot.
 
 
 \subsection{(Co)domain Completeness}\label{sec: domain completeness of TopKAT}
 
-In general, TopKAT is not complete over relational models, which are crucial for
-applications in program logics~\cite{Zhang_de_Amorim_Gaboardi_2022}.  However, it
-was later showed that we can obtain a complete theory for relational
-models by simply adding the axiom \(p ⊤ p ≥ p\) to the theory of
-TopKAT~\cite{Pous_Wagemaker_2023}. 
+As we have shown in~\Cref{the: topkatstar incomplete over relational model}, TopKAT is not complete over relational models, which are crucial for applications in program logics (\Cref{the: top element represent domain}).  
+However, \citet{Pous_Wagemaker_2023} later showed that we can obtain a complete theory for relational models by simply adding the axiom \(p ⊤ p ≥ p\) to the theory of TopKAT. 
 
-In this paper, we take a different approach than Pous et al.~\cite{Pous_Wagemaker_2023}:
-instead of extending the TopKAT framework, we will restrict the completeness result.
+Here, we take a different approach than Pous et al.~\cite{Pous_Wagemaker_2023}: instead of extending the TopKAT framework, we will restrict the completeness result.
 In particular, the encoding of incorrectness logic and Hoare Logic in TopKAT~\cite{Zhang_de_Amorim_Gaboardi_2022}
 relies only on the ability of TopKAT to compare the domain and codomain of two
 relations.  This raises the question of whether TopKAT suffices for proving such
@@ -1281,7 +1285,7 @@ However, \(p ⊤ p ⊤ ≥ p ⊤\) is not provable in TopKAT,
 because the inequality is not valid with the language interpretation.
 The incompleteness of codomain comparison can also be shown using the same example.
 
-\subsection{Codomain completeness}
+\subsubsection{Codomain completeness}
 
 The core insight to prove the domain completeness result is 
 to construct a specific relational interpretation \(h ∘ i ∘ G\),
@@ -1291,11 +1295,11 @@ where \(i\) is the natural inclusion homomorphism \(i: 𝒢_{K, B} ↪ 𝒢_{K_�
 that maps every language to itself;
 and \(h\) is the classical embedding of language KAT into relational KAT~\cite{Kozen_Smith_1997},
 which we will recall as follows:
-\[h(L) = \{(s, s ⋄ s') ∣ s ∈ GS, s' ∈ L\}.\]
+\[h(W) = \{(w, w ⋄ w') ∣ w ∈ GS, w' ∈ W\}.\]
 Although \(i\) will not change the outcome of \(G\),
 it will add a new primitive action \(⊤\) to the alphabet, hence changing the outcome of \(h\).
 Such addition will equate the codomain of \(h ∘ i ∘ G(e)\) 
-with the complete TopKAT interpretation \(G ∘ r\) of \(⊤ t\).
+with the complete TopKAT interpretation \(G ∘ r\) of \(⊤ e\).
 The proof of this equality is by simply computing both sides of the equation.
 
 \begin{lemma}\label{the: codomain completeness core lemma}
@@ -1311,14 +1315,14 @@ The proof of this equality is by simply computing both sides of the equation.
         \xrightarrow{i} 𝒢_{K_⊤, B}
         \xrightarrow{h} 𝒫(𝒢_{K_⊤, B} × 𝒢_{K_⊤, B}).\]
     In this case, \(h\) is a KAT homomorphism from \(𝒢_{K_⊤, B}\):
-    \[h(S) = \{(s, s ⋄ s₁) ∣ s ∈ GS_{K_⊤, B}, s₁ ∈ S\}.\]
+    \[h(W) = \{(w, w ⋄ w₁) ∣ w ∈ GS_{K_⊤, B}, w₁ ∈ S\}.\]
     Since the reduction \(r\) preserves expressions without \(⊤\),
     let \(e ∈ \KAT_{K, B}\) (i.e. \(e\) does not contain \(⊤\)),
     \[G ∘ r(⊤) = GS_{K_⊤, B} \\ G ∘ r(e) = G(e).\]
     Therefore, for any expression \(e ∈ \KAT_{K, B}\)
     \begin{align*}
         \cod(h ∘ i ∘ G(e))
-         & = \{s α s₁ ∣ s α ∈ GS_{K_⊤, B}, α s₁ ∈ G(e)\} \\
+         & = \{w α w₁ ∣ w α ∈ GS_{K_⊤, B}, α w₁ ∈ G(e)\} \\
          & = GS_{K_⊤, B} ⋄ G(e)                          \\
          & = (G ∘ r(⊤)) ⋄ (G ∘ r(e))                     \\
          & = G ∘ r(e). \qedhere
@@ -1365,7 +1369,7 @@ we will obtain the completeness of codomain comparison.
     \[\TopKAT ⊧ ⊤ e₁ ≥ ⊤ e₂ ⟹ \TopREL ⊧ ⊤ e₁ ≥ ⊤ e₂ ⟹ \REL ⊧ \cod(e₁) ≥ \cod(e₂). \qedhere\]
 \end{proof}
 
-\subsection{Domain completeness}
+\subsubsection{Domain completeness}
 
 The domain completeness result can be derived from codomain completeness 
 by observing properties of opposite TopKAT and the converse operator \((-)^{∨}\), 
@@ -1459,7 +1463,7 @@ for all expressions \(e₁, e₂ ∈ \TopKAT\),
     by constructing the following \(h'\):
     \begin{align*}
         h' & : 𝒢_{K, B} → 𝒫(𝒢_{K, B} × 𝒢_{K, B})\\
-        h' & (S₁) ≜ \{(s₁ α s, α s) ∣ s₁ α ∈ S₁, α s ∈ GS_{K, B}\}.
+        h' & (W₁) ≜ \{(w₁ α w, α w) ∣ w₁ α ∈ W₁, α w ∈ GS_{K, B}\}.
     \end{align*}
     Then the proof would mirror that of \Cref{the: codomain completeness},
     replacing \(h\) with \(h'\) and replacing \(\cod\) with \(\dom\).
@@ -1473,11 +1477,9 @@ for all expressions \(e₁, e₂ ∈ \TopKAT\),
 \section{Modeling Errors in Incorrectness Logic}\label{sec: failkat and error}
 
 One of the advantages of algebraic methods is the ease of extension.
-In this section, we show how extending TopKAT with failure can naturally give 
-rise to incorrectness triples that express abnormal termination.  
+In this section, we show how extending TopKAT with failure can naturally give rise to incorrectness triples that express abnormal termination.  
 The main difference arises from the short-circuiting behavior of sequencing with errors.
-This can be seen in the following rule for sequential composition, which states
-that if an error already occurred in \(p\), \(q\) will not be executed.
+This can be seen in the following rule for sequential composition, which states that if an error already occurred in \(p\), \(q\) will not be executed.
 \[
 \inferrule[Composition-Fail]
 { \incorTriple{b}{p}{\errState: c}}
@@ -1500,7 +1502,7 @@ in the setting of KAT\@.
   We will omit some of \(\mathcal{K},\mathcal{B},\fail\),
   if they are not used or can be inferred from the context.
 
-  The class of all FailTopKATs is denoted \(FailTopKAT\).
+  The class of all FailTopKATs is denoted \(\FailTopKAT\).
 \end{definition}
 Note that the original definition of \citet{Mamouras_2017} allows for try-catch statements and different types of errors.  
 We omit these features for simplicity, since they are not needed in incorrectness logic~\cite{OHearn_2020}. 
@@ -1510,7 +1512,7 @@ failures.  The idea, which we adapt from Construction
 F~\cite[Definition~4]{Mamouras_2017} is to consider elements of the
 form \((p,p') ∈ 𝒦 × 𝒦\), where \(p\) represents
 executions that terminate normally, and \(p'\) represents executions that fail.
-\begin{definition}[Construction F for \(FailTopKAT\)]
+\begin{definition}[Construction F for \(\FailTopKAT\)]
   Given a TopKAT \((\mathcal{K}, \mathcal{B})\), we construct a FailTopKAT
   \((\mathcal{F}, \mathcal{K'}, \mathcal{B'})\).  The carrier sets are defined
   as 
@@ -1532,10 +1534,8 @@ executions that terminate normally, and \(p'\) represents executions that fail.
     \overline{(b, 0_{\mathcal{K}})} & = (\overline{b}, 0_{\mathcal{K}}).
   \end{align*}
 \end{definition}
-To develop some intuition for this construction, suppose that \(\mathcal{K}\) is a
-relational TopKAT over \(X\).  There exists a canonical embedding
-of \(\mathcal{F}\) in \(𝒫(X \times X \times \{\okState,\errState\})\) that identifies
-\((p,p') ∈ \mathcal{F}\) with the relation
+To develop some intuitions for this construction, suppose that \(\mathcal{K}\) is a relational TopKAT over \(X\).  
+There exists a canonical embedding of \(\mathcal{F}\) in \(𝒫(X \times X \times \{\okState,\errState\})\) that identifies \((p,p') ∈ \mathcal{F}\) with the relation
 \(r = p × \{\okState\} ∪ p' × \{\errState\} ⊆ X × X × \{\okState,\errState\}\).
 Intuitively, \((x,y,\gamma) ∈ r\) means that a program took the input state \(x\) to
 the output state \(y\), and the bit \(\gamma ∈ \{\okState,\errState\}\) signals whether an error has
@@ -1609,7 +1609,7 @@ obtain a formulation of incorrectness triple with abnormal termination.
   and for all tests \(b, c \in \mathcal{B}\), and for all
   \(\gamma \in \{\okState,\errState\}\), the following holds
     \[\incorTriple{b}{p}{\gamma: c} \iff \top b p \geq (c \cdot \hat{\gamma}).\]
-  where \(\hat{\gamma}\) is defined in \Cref{def: relational validity of incor triple with fail}
+  where \(\hat{\gamma}\) is defined in \Cref{def: relational validity of incor triple with fail}.
 \end{corollary}
 
 Thus, we can generalize incorrectness logic with errors to an arbitrary
@@ -1857,7 +1857,7 @@ as a way to reason about incorrect programs.
 However the under-approximation logic can have other use cases.
 For example, we can mix under-approximation and over-approximation triples to
 prove a certain post condition is the strongest
-(as in Hoare logic) without a relational semantics. We show this next.
+(as in Hoare logic) without a relational semantics.
 
 \begin{example}[Reasoning With Hoare And Incorrectness Logic]\label{exp: hoare and incorrect together}
     The assertion \(x \geq 0\) is the strongest post condition of program 

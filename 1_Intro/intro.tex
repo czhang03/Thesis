@@ -160,69 +160,6 @@ output.
   class of all relational KATs as \(\REL\).
 \end{definition}
 
-\emph{TopKAT} extends the theory of KAT with the largest element \( \top \), i.e.
-\( \top   \geq  p\) for all elements \(p\).  The \emph{language TopKAT} over an alphabet
-\(K, B\) has the same carrier and operations as \(\mathcal{G}_{K_ \top , B}\), where \(K_ \top \) is
-the set \(K\) joined with a new primitive action \( \top \); and the largest element
-is the full language \(GS_{K_ \top , B}\).
-
-The \emph{relational TopKAT} is a relational KAT that contains the complete relation:
-\[ \top   \triangleq  \{(x, y)  \mid  x, y  \in  X\};\] we denote the set of all relational TopKATs as
-\(\TopREL\).  It is known that there are equations that are valid in relational
-TopKAT, but are not derivable by the axioms of
-TopKAT~\cite{Zhang_de_Amorim_Gaboardi_2022}; however, by adding the axiom
-\(p  \top  p  \geq  p\), the theory becomes complete over relational
-TopKATs~\cite{Pous_Wagemaker_2022,Pous_Wagemaker_2023}.  
-In this paper, instead of working with a more complex theory, 
-we will show that TopKAT without any additional axiom already suffices 
-for the purpose of encoding domain comparisons. 
-Indeed, TopKAT is complete with respect to domain comparison inequalities,
-which can be used to encode both incorrectness logic and Hoare logic.
-
-In this paper, 
-we will use \(\dom\) and \(\cod\) to denote the 
-conventional (co)domain operators on relations, namely, for any relation \(R\):
-\begin{align*}
-    \dom(R)  \triangleq  \{x  \mid   \exists  y, (x, y)  \in  R\} \\
-    \cod(R)  \triangleq  \{y  \mid   \exists  x, (x, y  \in  R)\}.
-\end{align*}
-To demonstrate how TopKAT models (co)domain comparisons,
-we take any relational TopKAT \(\mathcal{R}\) and two relations \(R_{1}, R_{2}  \in  \mathcal{R}\),
-and we denote the complete relation as \( \top \):
-\begin{lemma}[TopKAT encodes (co)domain comparison]\label{the: TopKAT encodes domain PRIMITIVE}
-    \begin{align*}
-        R_{1}  \top   \supseteq  R_{2}  \top   \iff  \dom(R_{1})  \supseteq  \dom(R_{2}) \\
-         \top  R_{1}  \supseteq   \top  R_{2}  \iff  \cod(R_{1})  \supseteq  \cod(R_{2})
-    \end{align*}
-\end{lemma}
-If we regard \(R_{1}\) and \(R_{2}\) as the input output relation of two programs,
-which is typically encoded by KAT terms,
-we can see that \(R_{1}  \top   \supseteq  R_{2}  \top \) reflects that  
-the domain of \(R_{1}\) is larger than the domain of \(R_{2}\);
-and similarly for the inequality \( \top  R_{1}  \supseteq   \top  R_{2}\).
-Thus, given two KAT terms \(e_1, e_2  \in  \KAT_{K, B}\), we call inequalities like
-\(e_1  \top   \geq  e_2  \top \) \emph{domain comparison inequalities},
-and \( \top  e_1  \geq   \top  e_2\) \emph{codomain comparison inequalities}.
-Notice that the term \( \top  e_1\) is a shorthand for \( \top   \cdot  i(e_1)\),
-where \(i\) is the inclusion function \(\KAT_{K, B}  \hookrightarrow  \TopKAT_{K, B}\).
-In the rest of the paper, we will sometimes leave this inclusion function implicit.
-These two forms of inequalities will be the focus of 
-our completeness results in~\Cref{sec: domain completeness of TopKAT}.
-
-We also know another class of TopKATs named \emph{general relational TopKATs},
-which is denoted as \(\TopGREL\).
-The top element of general relational TopKAT is not necessarily the complete relation,
-but the largest relation in the model.
-All equations in the general relational TopKAT can be derived using the theory of TopKAT.
-
-However, the completeness of \(\TopGREL\) came at the cost of expressive power:
-every predicate that is expressible using general relational TopKAT 
-is already expressible using relational KAT~\cite{Zhang_de_Amorim_Gaboardi_2022},
-so the extension with top, in the case of general relational TopKAT, 
-does not grant any extra expressive power.
-In~\Cref{the: TopGREL expressive power}, 
-we show that this result is a simple corollary of our new reduction result.
-
 We are also interested in maps between models:
 A \emph{KAT homomorphism} \(h\) is a map between two KATs \(\mathcal{K}\) and \(\mathcal{K}'\)
 s.t. it preserves the sorts and operations:
@@ -237,8 +174,6 @@ and all the KAT operations (complement, identities, addition, multiplication, an
     h(p ⋅ q) & = h(p) ⋅ h(q) \\  
     h(p^*) & = h(p)^*.
 \end{align*}
-Similarly, a \emph{TopKAT homomorphism} is a KAT homomorphism that preserves the
-largest element.
 
 \subsection{Interpretation, Completeness, and Injectivity}\label{sec: completeness background}
 
@@ -293,37 +228,21 @@ One of such interpretation is the guarded string interpretation
 \(G: \KAT_{K, B}  \to  \mathcal{G}_{K, B}\)~\cite{Kozen_Smith_1997},
 defined by lifting the following action on the primitives:
 \[
-    G(b) = \{ \alpha   \mid  \text{\(b\) appears positively in \( \alpha \)}\}, \\
-    G(p) = \{ \alpha  p  \beta   \mid   \alpha ,  \beta   \in  \At\}.
+    G(b) = \{ α   ∣  \text{\(b\) appears positively in \( α \)}\}, \\
+    G(p) = \{ α  p  β   ∣   α ,  β   ∈  \At\}.
 \]
 Because the trace interpretation is the complete interpretation of KAT, we often name it trace semantics as write it as \(G(e)\) instead of \(G(e)\), when it is convenient.
 
-% AAA: What is this a corollary of?
-% CZ: I changed it to a lemma. I originally named it corollary, because it can be easily observed.
+In several previous works, the term ``free model'' refers to the range (set of reachable elements) of a complete interpretation.  
+Since a complete interpretation is an injective homomorphism, such interpretation induces an isomorphism on its range, thus our definition of free model is equivalent to these definitions.
 
-% AAA: The previous discussion is a bit confusing. We begin by talking about a
-% specific complete interpretation G, but right after that we say "when it
-% holds", giving the impression that G may or may not be complete.  It would be
-% useful to split the previous discussion into some material about general
-% interpretations (that we would like to be complete), and interpretations that
-% are similar to G, and that we know are complete.
-
-In several previous works, the term ``free model'' refers to the range (set of
-reachable elements) of a complete interpretation.  Since a complete
-interpretation is an injective homomorphism, 
-such interpretation induces an isomorphism on its range, 
-thus our definition of free model is equivalent to these definitions.
-
-Many previous proofs can also be explained by seeing complete interpretations as
-injective homomorphisms: the proof for completeness of relational KATs
-constructs an injective homomorphism $h$ from a language KAT into a relational
-KAT~\cite{Kozen_Smith_1997}.  Since both \(G\) and \(h\) are injective
-homomorphisms, \(h  \circ  G\) is also an injective homomorphism, hence a complete
-interpretation.  Since \(h  \circ  G\) is a relational interpretation:
-\[\KAT_{K, B}  \models  e_1 = e_2  \implies  \REL  \models  e_1 = e_2  \implies  h  \circ  G(e_1) = h  \circ  G(e_2);\]
-then the completeness of \(h  \circ  G\) implies
-\((h  \circ  G)(e_1) = (h  \circ  G)(e_2)  \iff  \KAT_{K, B}  \models  e_1 = e_2\). Hence,
-\[\KAT_{K, B}  \models  e_1 = e_2  \iff  \REL  \models  e_1 = e_2,\]
+Many previous proofs can also be explained by seeing complete interpretations as injective homomorphisms: the proof for completeness of relational KATs constructs an injective homomorphism $h$ from a language KAT into a relational
+KAT~\cite{Kozen_Smith_1997}.  
+Since both \(G\) and \(h\) are injective homomorphisms, \(h  ∘  G\) is also an injective homomorphism, hence a complete interpretation.  Since \(h  ∘  G\) is a relational interpretation:
+\[\KAT_{K, B}  ⊧  e_1 = e_2  ⟹  \REL  ⊧  e_1 = e_2  \implies  h  ∘  G(e_1) = h  ∘  G(e_2);\]
+then the completeness of \(h  ∘  G\) implies
+\((h  ∘  G)(e_1) = (h  ∘  G)(e_2)  ⟺  \KAT_{K, B}  ⊧  e_1 = e_2\). Hence,
+\[\KAT_{K, B}  ⊧  e_1 = e_2  ⟺  \REL  ⊧  e_1 = e_2,\]
 i.e. the theory of KAT is complete with respect to relational KAT.
 
 % Function/homomorphism composition will be used frequently in this paper,
@@ -346,20 +265,6 @@ however, in the case where \(f\) is an interpretation,
 Because both \(g  ∘  f\) and \(id_{𝒦}\) are all interpretations,
 they are equal if and only if they have the same action on all the primitives.
 % AAA: This is only true because
-
-Finally, we provide a shorthand for domain reasoning. 
-For two terms \(e_1, e_2  ∈  \KAT\), we write
-\[\REL  ⊧  \dom(e_1)  ≥  \dom(e_2),\] when 
-\(\dom(I(e_1))  ⊇  \dom(I(e_1))\) for all relational KAT interpretations \(I\);  
-and similarly for relational TopKAT and general relational TopKAT.  
-Then \Cref{the: TopKAT encodes domain PRIMITIVE} implies the following:
-\begin{lemma}\label{the: top element represent domain}
-    For two KAT terms \(e_1, e_2  \in  \KAT_{K, B}\):
-    \begin{align*}
-        \TopREL  ⊧  e_1  ⊤   ≥  e_2  ⊤  &  ⟺ \REL  ⊧  \dom(e_1)  ≥  \dom(e_2) \\
-        \TopREL  ⊧   ⊤  e_1  ≥   ⊤  e_2 &  ⟺  \REL  ⊧  \cod(e_1)  ≥  \cod(e_2)
-    \end{align*}
-\end{lemma}
 
 \section{Guarded Kleene Algebra With Tests}
 

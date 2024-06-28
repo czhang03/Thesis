@@ -30,6 +30,26 @@ This phenomenon is explained by an efficient fragment of KAT named \emph{Guarded
 
 
 
+To delve deeper into the utility of Kleene Algebra with Tests (KAT) and Guarded Kleene Algebra with Tests (GKAT), we have formulated two novel systems grounded in these frameworks.
+
+The first system, named Kleene algebra with tests and top (TopKAT), is used to facilitate domain/reachability reasoning.  
+The standard KAT lacks the capability to adequately encode notions of domain and reachability, in particular we proved that KAT failed to encode incorrectness logic.
+This leads to our development of TopKAT, which extends KAT by requiring a largest element. 
+In particular, TopKAT is capable of encoding domain comparisons in its relational model. 
+
+Even though TopKAT is incomplete with respect to its relational models, it is complete with respect to domain comparisons, making TopKAT a compact yet complete system to reason about reachability in regular programs.
+To obtain the domain completeness result, a novel perspective on the classical reduction techniques~\cite{Pous_Rot_Wagemaker_2021,Kozen_Smith_1997} arises: we are able to characterize reduction simply as an injective homomorphism. 
+This fresh look into reduction leads to more streamlined proof of completeness of TopKAT, and can potentially ease the burden for future completeness proof about TopKAT.
+
+The second system, Control-Flow GKAT (CF-GKAT), extends Guarded Kleene Algebra with Tests (GKAT) by incorporating control flow constructs such as indicator variables, \command{break}, \command{return}, and \command{goto}.
+Addressing the non-local nature inherent in these control flow commands, we devised continuation semantics and introduced the CF-GKAT automaton.
+These concepts complete the classical triangular correspondence~\cite{jacobs_BialgebraicReviewDeterministic_2006,Kozen_2008,Smolka_Foster_Hsu_Kappé_Kozen_Silva_2020} among programs, their semantics, and corresponding automata representations.
+
+To design a decision procedure for trace equivalence among CF-GKAT programs, we formulated a lowering procedure capable of converting any CF-GKAT automaton into a GKAT automaton.
+The decision procedure for CF-GKAT programs equivalence then follows from the lowering.
+Leveraging the efficiency, soundness, and completeness of the GKAT decision procedure, our algorithm not only preserves soundness and completeness with respect to trace equivalences, but also exhibits nearly-linear time efficiency relative to the input expression sizes.
+
+To summarize, I compiled our contribution in this thesis as a list for readability:
 \begin{itemize}
     \item Proved that KAT insufficiency for domain reasoning, by proving that KAT cannot encode incorrectness logic.
     \item Developed the system TopKAT, and proven it is sound and complete with respect to its trace/language interpretation and general relational model.

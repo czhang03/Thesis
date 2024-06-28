@@ -1024,22 +1024,51 @@ With the Thompson's construction defined, we can state the correctness of the Th
 
 \subsection{Algorithm and Complexity}
 
+With the definitions of lowering and Thompson's construction established, the decision procedure mostly follows.
+Nevertheless, it remains essential to define the alphabet: \((K, B, I, L)\), representing the set of primitive actions, primitive tests, indicator values, and labels, respectively. 
+We may safely restrict primitive actions, primitive tests, and labels to those explicitly present in the expression, as expanding the alphabet beyond these will preserve trace semantics. This trace perseverance can be validated through induction on the expression itself.
 
-\section{Control Flow Verification}
+Indicator variables, however, exhibit unique behavior within the alphabet. If the initial indicator value is absent from the program, the program's traces may diverge from traces starting from the present indicator values.
+\Cref{prog:loop-head-iter-example} is one of the witness of this phenomenon: if the initial indicator value is 0, 1, or 2, the program terminates; however, if starting from an indicator value that doesn't appear in the program, then the program will loop indefinitely. 
+An even simpler example is:
+\[(x = 1); q,\]
+where the program executes \(p\) if the initial indicator value is 1, but rejects for indicator values not present in the program.
 
-% Our theory can be specialized into control flow verification in two different way: first, we can decide the equivalence between a program with a flowchart, where the flowchart is represented by a GKAT automaton; second, we can directly decide the equivalence between to programs.
+Fortunately, given an expression \(e\), we can demonstrate that if neither \(i\) nor \(i'\) appears in \(e\), then 
+\[∀ ℓ, ⟦e⟧ᵢ^{ℓ} = ⟦e⟧_{i'}^{ℓ}.\]
+Therefore, when compiling the set of indicator values, it suffices to gather indicator values that appear explicitly in the program and augment this set with a special indicator \(*\) that does not appear in the program.
 
-We hypothesize that CF-GKAT can be a useful tool to check whether two programs have the same control flow, i.e.:\ under the same circumstances, they execute the same sequence of primitive commands.
-An example use case could be to validate the correctness of refactoring operations aimed at making code more readable by eliminating or introducing early loop termination.
-In general, this type of validation will never be \emph{complete}, as it cannot automatically validate the correctness of refactorings that introduce or eliminate primitive commands, even when this produces a functionally equivalent program.
-However, CF-GKAT should be applicable to refactoring operations that rearrange the code for the sake of improving the presentation of the control flow.
+We summarize our decision procedure as follows:
+\begin{enumerate}
+  \item Given two CF-GKAT programs \(e, f\), we first collect their alphabet \((K, B, I, L)\). We gather the sets of primitive actions \(K\), primitive tests \(B\), and labels \(L\) that are present in either program \(e\) or \(f\). 
+  Additionally, we identify indicator values, encompassing those found in either \(e\) or \(f\), along with an additional indicator \(*\) that is exclusive to neither program.
+  \item We then proceed to compute Thompson's automata of \(e\) and \(f\) and convert them into CF-GKAT automata, denoted as \(A_e\) and \(A_f\). 
+  It is noteworthy that these automata preserve the continuation semantics (\cref{the:thompson-correctness}). Formally,
+  \begin{mathpar}
+    C(A_e) = C(e) \and C(A_f) = C(f)
+  \end{mathpar}
+  \item Subsequently, we lower both CF-GKAT automata \(A_e\) and \(A_f\) to GKAT automata \(A_e\!↓ᵢ\) and \(A_f\!↓ᵢ\) for each \(i ∈ I\). 
+  According to~\cref{the:cf-gkat-automaton-lowering-correctness}, these GKAT automata exhibits the same traces as \(e\) and \(f\) starting from \(i\):
+  \begin{mathpar}
+    G(A_e \!↓ᵢ) = C(A_e)\!↓ᵢ = C(e)\!↓ᵢ, \and 
+    G(A_f \!↓ᵢ) = C(A_f)\!↓ᵢ = C(f)\!↓ᵢ.
+  \end{mathpar}
+  \item Finally, run the equivalence algorithm for GKAT automata~\cite{Smolka_Foster_Hsu_Kappé_Kozen_Silva_2020} on \(A_e \!↓ᵢ\) and \(A_f \!↓ᵢ\) for each \(i ∈ I\). 
+  The current algorithm will return true, when all the GKAT automata equivalence checks return true.
+\end{enumerate}
 
-Another use case would be to validate the \emph{control flow structuring} stage found in modern decompilers.
-Briefly put, a decompiler is a program tasked with inferring a high-level language representation of a binary executable file.
-In earlier stages, the decompiler builds a \emph{control-flow graph} from the binary, in which the vertices represent different blocks of instructions, and the edges encode how control may transfer from the end of one block to the beginning of the other.
-The control flow structuring pass is tasked with inferring an equivalent representation of this control flow graph in terms of constructs like \command{if-then-else} and \command{while-do}.
-A tool that validates the output of a control flow structuring algorithm could leverage CF-GKAT, by casting the control flow graph as a GKAT automaton, and comparing that to the GKAT automaton that corresponds to the inferred program.
+The soundness and completeness of this algorithm now follow as a corollary of the corresponding properties for the decision procedure in GKAT.  
+We denote the algorithm introduced above as \(\mathrm{equiv}_{\CFGKAT}\), while the decision algorithm for GKAT automata is denoted as \(\mathrm{equiv}_{\GKAT}\). Thus, we establish the equivalence:
+\begin{align*}
+  \mathrm{equiv}_{\CFGKAT}(e, f) 
+  & ⟺ \mathrm{equiv}_{\GKAT}(A_e \!↓, A_f \!↓)  \\
+  & ⟺ G(A_e \!↓) = G(A_f \!↓) ⟺ C(e)\!↓ = C(f)\!↓.
+\end{align*}
+This equivalence ensures that the algorithm \(\mathrm{equiv}_{\GKAT}\) not only correctly determines whether \(e\) and \(f\) have the same trace semantics; but also guarantees that if \(e\) and \(f\) are trace equivalent, then \(\mathrm{equiv}_{\GKAT}(e, f)\) will return true.
 
-In this section, we test our hypotheses on the applicability and efficiency of CF-GKAT\@.
-We start by describing our implementation of the proposed decision procedure.
-Next, we report on experiments with workloads that reflect the two use cases described above.
+The complexity analysis of this algorithm is straightforward. Starting with an expression \(e\), we can observe through induction that the number of states in the Thompson's automaton \(A_e\) is bounded by \(|e|\), where the size \(|e|\) represents the number of primitive actions in \(e\).
+After the lowering process, each GKAT automaton \(A_e\!↓\) contains at most \(|I|×|e|\) states. 
+Notably, for each \(i ∈ I\), determining the equivalence between \(A_e\!↓ᵢ\) and \(A_f\!↓ᵢ\) is accomplished in nearly linear time relative to their states (assuming a constant number of primitive tests)~\cite{Smolka_Foster_Hsu_Kappé_Kozen_Silva_2020}, which is bounded by \(|I|×(|e|+|f|)\).
+To verify the trace equivalence between \(e\) and \(f\), equivalence checks are required for \(A_e\!↓ᵢ\) and \(A_f\!↓ᵢ\) across all \(i∈I\). 
+Therefore, the overall time complexity is nearly linear with respect to \(|I|^2 × (|e|+|f|)\). 
+This implies that the algorithm's complexity scales nearly linearly with the sizes of \(e\) and \(f\), but nearly quadratically with respect to the number of the indicator values \(|I|\).

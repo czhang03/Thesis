@@ -23,16 +23,17 @@
 
 \section{Motivation and Overview}
 
-The usual baseline to reason about correctness of control-flow manipulation is \emph{trace semantics}. Intuitively, trace semantics abstracts the meaning of the primitive tests and actions that occur in a program, and instead focus on how tests determine which actions are performed, and in what order.
+The usual baseline to reason about correctness of control-flow manipulation is \emph{trace semantics}, which can be represented by guarded languages. 
+Intuitively, trace semantics abstracts the meaning of the primitive tests and actions that occur in a program, and instead focus on how tests determine which actions are performed, and in what order.
+
 \emph{Guarded Kleene Algebra with Tests}~\cite{kozen_BohmJacopiniTheorem_2008a,Schmid_Kappé_Kozen_Silva_2021},
 provides a nice (co)algebraic framework to reason about trace semantics.
-
-For example, GKAT is also able to verify nontrivial  program equivalences like
+For example, GKAT is able to verify nontrivial  program equivalences like
 \[
  \{\ \comWhile{b}{p}\ \};\ \comWhile{s}{\{\ q;\ \comWhile{b}{p}\ \}} ≡
  \comWhile{b ∨ c}{\{\ \comITE{b}{p}{q}\ \}}
 \]
-Furthermore, unlike KAT, GKAT equivalence is decidable in nearly-linear time (assuming the set of primitive tests is fixed)~\cite{Schmid_Kappé_Kozen_Silva_2021}, making GKAT an practical framework to reason about trace semantics for simple \command{while}-programs.
+Furthermore, unlike KAT, GKAT equivalence is decidable in nearly-linear time (assuming the set of primitive tests is fixed)~\cite{Schmid_Kappé_Kozen_Silva_2021}, making GKAT a practical framework to reason about trace semantics of simple \command{while}-programs.
 
 Nevertheless, GKAT still lacks important constructs that are ubiquitous among control-flow transformation algorithms.
 First, as mentioned, GKAT disregards the meaning of primitive programs and tests.
@@ -88,8 +89,8 @@ Specifically, at the end of the trace, the program can either accept (terminate 
 Then, the trace semantics of the program can be obtained by resolving these continuations.
 
 %FIXME: CZ: This paragraph is still bit out of place to me
-Inspired by the triangular correspondence between deterministic trace semantics, GKAT, and GKAT automaton, we were able to design an automaton model for CF-GKAT, where every CF-GKAT expression can be unfolded into an CF-GKAT automaton through thompson's construction (\Cref{tab: thompson's construction}), while preserving the continuation semantic (\Cref{the:thompson-correctness}). 
-Furthermore, CF-GKAT automata and continuation semantics can be lowered into GKAT automata and trace semantics respectively, while preserving their semantical correspondence (\Cref{the:cf-gkat-automaton-lowering-correctness}). 
+Inspired by the triangular correspondence between deterministic trace semantics, GKAT, and GKAT automaton, we were able to design an automaton model for CF-GKAT, where every CF-GKAT expression can be unfolded into an CF-GKAT automaton through Thompson's construction (\Cref{tab: thompson's construction}), while preserving the continuation semantic (\Cref{the:thompson-correctness}). 
+Furthermore, CF-GKAT automata and continuation semantics can be lowered into GKAT automata and trace semantics respectively, while preserving their semantic correspondence (\Cref{the:cf-gkat-automaton-lowering-correctness}). 
 With the Thompson's construction and the lowering, we are able to reduce the problem of deciding trace equivalence of programs into deciding the bisimulation of two GKAT automata, which is known to be efficient~\cite{Smolka_Foster_Hsu_Kappé_Kozen_Silva_2020}. 
 
 \smallskip
@@ -134,7 +135,7 @@ Compared to GKAT and KAT, tests in CF-GKAT include the \emph{indicator variable 
 As the notation suggests, this test holds when the indicator variable $x$ currently has the value $i$.
 % Since the set \(I\) is finite, any complex predicate \(P\) on \(I\) can be encoded as a disjunction that enumerates all the values in \(P\)\ : \[⋁ \{(x = i) ∣ P(i)\}.\]
 
-The top level syntax of GKAT is built using a finite set of uninterpreted commands \(K\) (the \emph{primitive actions}) reader might recall this is also one component of the KAT alphabet; as well as \emph{assertions} of the form $\comAssert{e_b}$, where $e_b \in \BExp_I$ is a boolean expression.
+The top level syntax of GKAT is built using a finite set of uninterpreted commands \(K\) (the \emph{primitive actions}), as well as \emph{assertions} of the form $\comAssert{e_b}$, where $e_b \in \BExp_I$ is a boolean expression.
 Expressions are composed using sequencing, \texttt{if} statements, and \texttt{while} loops.
 CF-GKAT extends the base elements of the syntax with indicator variable assignments \(x := i\) (for each $i \in I$), which changes the value of the indicator variable \(x\) to \(i\).
 In addition, it adds the non-local control flow commands $\comBrk$ and $\comRet$, as well as $\comGoto{\ell}$ and $\comLabel{\ell}$, where $\ell$ is taken from a fixed but finite set of labels $L$.
@@ -571,12 +572,12 @@ In this section, we will formally define CF-GKAT automata and their continuation
 
 Like GKAT automaton, CF-GKAT automaton is defined by a dynamics/signature~\cite{rutten_UniversalCoalgebraTheory_2000,jacobs_IntroductionCoalgebraMathematics_2016}
 \begin{definition}[CF-GKAT dynamics]
- Given a set $X$, we write $G(X)$ for the set
- \[G(X) ≜ I × \At → \reject + C + K × X × I.\]
+ Given a set $X$, we write $D(X)$ for the set
+ \[D(X) ≜ I × \At → \{\reject\} + C + K × X × I.\]
 \end{definition}
 
-Intuitively, the elements of \(G(S)\) represent possible transition behaviors in a CF-GKAT automaton over a state set $S$.
-Given a current indicator value \(i ∈ I\) and an atom $α$ accounting for the truth value of each primitive test, a dynamic $ρ ∈ G(S)$ may either:
+Intuitively, the elements of \(D(S)\) represent possible transition behaviors in a CF-GKAT automaton over a state set $S$.
+Given a current indicator value \(i ∈ I\) and an atom $α$ accounting for the truth value of each primitive test, a dynamic $ρ ∈ D(S)$ may either:
 \begin{itemize}
  \item
        \emph{reject} the input, represented by $ρ(i, α) = \reject$;
@@ -586,13 +587,13 @@ Given a current indicator value \(i ∈ I\) and an atom $α$ accounting for the 
        execute a primitive action in $K$ and set a new indicator value from $I$ while transitioning to a new state in $S$, represented by $ρ(i, α) ∈ K × X × I$.
 \end{itemize}
 
-Then the definition of CF-GKAT automaton is similar to GKAT automaton, except we will need a function \(λ: L → G(S)\) where \(λ(ℓ)\) provides a dynamics representing the ``entry point'' for label \(ℓ\).
+Then the definition of CF-GKAT automaton is similar to GKAT automaton, except we will need a function \(λ: L → D(S)\) where \(λ(ℓ)\) provides a dynamics representing the ``entry point'' for label \(ℓ\).
 \begin{definition}
- A \emph{CF-GKAT automaton} \(A ≜ ⟨S, δ, \hat{s}, λ⟩\) consists of a set of \emph{states} \(S\), a \emph{transition function} \(δ: S → G(S)\),
- a \emph{start state} \(\hat{s} ∈ S\), and a \emph{jump map} \(λ: L → G(S)\).
+ A \emph{CF-GKAT automaton} \(A ≜ ⟨S, δ, \hat{s}, λ⟩\) consists of a set of \emph{states} \(S\), a \emph{transition function} \(δ: S → D(S)\),
+ a \emph{start state} \(\hat{s} ∈ S\), and a \emph{jump map} \(λ: L → D(S)\).
 \end{definition}
 
-Intuitively, the transition map \(δ\) assigns every state in $S$ a dynamics from $G(S)$. The jump map $λ$, on the other hand, assign a dynamics for each label $ℓ ∈ L$, indicating how to resume the computation after a \(\jmp{ℓ, i}\) continuation is reached.
+Intuitively, the transition map \(δ\) assigns every state in $S$ a dynamics from $D(S)$. The jump map $λ$, on the other hand, assign a dynamics for each label $ℓ ∈ L$, indicating how to resume the computation after a \(\jmp{ℓ, i}\) continuation is reached.
 
 \begin{example}[A simple CF-GKAT automaton]
   Consider the following program \[\comITE{b}{\{\comLabel{ℓ}; p\}}{\comGoto{ℓ}},\] then we can construct the following automaton that have the same behavior as the program 
@@ -621,11 +622,11 @@ Intuitively, the transition map \(δ\) assigns every state in $S$ a dynamics fro
 \end{example}
 
 To formalize the intuition of ``behaviors'' in the previous example. We can assign a continuation semantics to each CF-GKAT automaton \(A ≜ ⟨S, δ, ŝ, λ⟩\).
-Before that, it is convenient to first define the semantics for each dynamics in \(G(S)\).
+Before that, it is convenient to first define the semantics for each dynamics in \(D(S)\).
 
 \begin{definition}[continuation semantics]
  Given an automaton \(A ≜ ⟨S, δ, \hat{s}, λ⟩\),
- the continuation semantics of each dynamics \(ρ ∈ G(S)\) is
+ the continuation semantics of each dynamics \(ρ ∈ D(S)\) is
  a family \(C(ρ)_A: I → 𝒞\),
  defined as the (point-wise) smallest set satisfying the following rules for $i, j ∈ I$ and $α ∈ \At$:
  \begin{mathpar}
@@ -678,25 +679,25 @@ The main obstacle to properly resolve jump continuation is that $λ(ℓ, j, α)$
 These jump sequences can be resolved by iterating the jump map, and terminate when either the result is no longer a jump, or a infinite loop is detected.
 
 \begin{definition}[iteration lifting]\label{def: iteration lifting}
-  Given a function \(h: X → X + \reject + E\), where \(X\) is a finite set
-  and \(\reject + E\) specifies the ``exit results'',
+  Given a function \(h: X → X + \{\reject\} + E\), where \(X\) is a finite set
+  and \(\{\reject\} + E\) specifies the ``exit results'',
   then this function can be lifted to \(\iter(h)\) by iterating \(h\).
   We will use \(M\) to keep track of the explored value of \(M\):
   \begin{align*}
-  \iter'(h) & : 2^X → X → \reject + E \\
+  \iter'(h) & : 2^X → X → \{\reject\} + E \\
   \iter'(h) & (M)(m) ≜ \begin{cases}
       \reject & \text{if } m ∈ M  \\
-      h(m) & \text{if } m ∉ M \text{ and } h(m) ∈ \reject + E \\
+      h(m) & \text{if } m ∉ M \text{ and } h(m) ∈ \{\reject\} + E \\
       \iter'(h)(M ∪ \{m\})(h(m)) & \text{if } m ∉ M \text{ and } h(m) ∈ X
     \end{cases};
   \intertext{and \(\iter\) defined as supplying \(∅\) as the starting point of \(M\):}
-    \iter(h) & : X → \reject + E \\
+    \iter(h) & : X → \{\reject\} + E \\
     \iter(h) & ≜ \iter'(h)(∅)
   \end{align*}
   To improve clarity, in the definition of \(h\),
-  we will write \(\injL : X → X + \reject + E\) as \(\contWith\),
+  we will write \(\injL : X → X + \{\reject\} + E\) as \(\contWith\),
   to indicate the iteration will continue;
-  and write \(\injR: \reject + E → X + \reject + E\) as \(\exitWith\),
+  and write \(\injR: \{\reject\} + E → X + \{\reject\} + E\) as \(\exitWith\),
   to indicate the iteration will be exited.
 \end{definition}
 Intuitively, \(M\) keeps track of all the explored value in \(X\),
@@ -705,7 +706,7 @@ then rejection \(\reject\) will be returned to indicate a infinite loop;
 as unproductive infinite iterations will not produce any observable trace.
 Indeed, GKAT treats un-productive infinite iterations
 in the \command{while} loops with the same strategy~\cite{Schmid_Kappé_Kozen_Silva_2021}.
-On the other hand, if \(h(m)\) falls into the exit set \(\reject + E\),
+On the other hand, if \(h(m)\) falls into the exit set \(\{\reject\} + E\),
 then \(\iter(h)\) will stop and return \(h(m)\).
 Finally, if the \(h(m)\) fall into \(X\), then \(\iter(h)\) will continue the loop with \(h(m)\) as input, and mark \(m\) as explored.
 Notice that \(\iter(h)\) will be total when \(h\) is total,
@@ -715,8 +716,8 @@ In the specific case of jump resolution,
 the iteration will continue when the result of \(λ\) is a jump, but exit otherwise.
 
 \begin{definition}[Jump resolution]
- Let $S$ be a finite set, and let $λ∶ L → G(S)$ be a jump function.
- We define the resolved jump map ${λ\!↓}: L → G(S)$, as follows:
+ Let $S$ be a finite set, and let $λ∶ L → D(S)$ be a jump function.
+ We define the resolved jump map ${λ\!↓}: L → D(S)$, as follows:
  \[
   λ\!↓ = \iter \left(
     (ℓ, i, α) ↦ \begin{cases}
@@ -769,7 +770,7 @@ Although automata with start dynamics are equivalent to automata with start stat
 To take advantage of start dynamics, we will define \emph{CF-GKAT automata with start dynamics} in the following definitions:
 
 \begin{definition}
- A CF-GKAT automaton with start dynamics \(A ≜ ⟨S, δ, ι, λ⟩\) consists of $S$, $δ$ and $λ$ as in a CF-GKAT automaton, in addition to a start dynamics \(ι ∈ G(s)\).
+ A CF-GKAT automaton with start dynamics \(A ≜ ⟨S, δ, ι, λ⟩\) consists of $S$, $δ$ and $λ$ as in a CF-GKAT automaton, in addition to a start dynamics \(ι ∈ D(S)\).
 \end{definition}
 
 We elide the definition of the semantics for CF-GKAT automata with start dynamics for the sake of brevity.
@@ -879,7 +880,7 @@ Specifically, when starting from a label \(ℓ ≠ ℓ'\),
   C(\comLabel{ℓ'})ᵢ^ℓ = ∅; \and
   C(\comAssert{\true})ᵢ^ℓ = \{α ⋅ \acc{i} ∣ α ∈ \At \}.
 \end{mathpar}
-This difference is reflected in the jump map \(λ: L → G(S)\), which specifies the entry point for each label.
+This difference is reflected in the jump map \(λ: L → D(S)\), which specifies the entry point for each label.
 In this case, the jump map will map \(ℓ'\) to the behavior of the identity operation \(\comAssert{\true}\), and map every other label to constant rejection, representing that the continuation \(\jmp{ℓ}\) will not resume from \(\comLabel{ℓ'}\) when \(ℓ' ≠ ℓ\).
 
 % FIXME: I think this is too on the nose... Basically just reiterating the definition
@@ -889,12 +890,12 @@ If the input atom-indicator pair satisfies \(e_b\), the start \(ι\) will enter 
 The jump map \(λ\) assigns the entry point for label \(ℓ\) based on where \(ℓ\) appears: namely if \(ℓ\) appears in \(e₁\), then \(ℓ\) will take its entry point in \(A₁\); and similarly, if \(ℓ\) appears in \(e₂\), \(ℓ\) will take its entry point in \(A₂\).
 
 \subsubsection*{Converting Sequencing:}
-Sequencing of automata can be defined by \emph{uniform continuations}, which combines two dynamics $h₁, h₂ ∈ G(S)$ into a new dynamic \(h₁[h₂]\): the resulting dynamic acts like $h₁$ in almost all cases, except when $h₁$ accepts, then it will take on the behavior of \(h₂\).
+Sequencing of automata can be defined by \emph{uniform continuations}, which combines two dynamics $h₁, h₂ ∈ D(S)$ into a new dynamic \(h₁[h₂]\): the resulting dynamic acts like $h₁$ in almost all cases, except when $h₁$ accepts, then it will take on the behavior of \(h₂\).
 In other word, \(h₁[h₂]\) connects all the accepting transition of \(h₁\) to \(h₂\).
 Uniform continuation is typically used to compose two automata or add self-loops to an automaton; and can be formally defined as follows.
 \begin{definition}[Uniform Continuation]
-  Let $S$ be a set and given two dynamic $h₁, h₂ ∈ G(S)$,
-  their \emph{uniform continuation} is the dynamic $h₁[h₂] ∈ G(S)$, defined as follows:
+  Let $S$ be a set and given two dynamic $h₁, h₂ ∈ D(S)$,
+  their \emph{uniform continuation} is the dynamic $h₁[h₂] ∈ D(S)$, defined as follows:
   \[
     h₁[h₂](i, α) ≜
     \begin{cases}
@@ -926,10 +927,10 @@ Even worse, when starting with an indicator variable that is not in \(\{0, 1, 2\
 
 Fortunately, these difficulties can be resolved by the \(\iter\) function (\cref{def: iteration lifting}). We will iterate the loop body until we encounter a primitive action or non-local control.
 \begin{definition}[Iterated Start Dynamics]
-  Let $S$ be a set, let $h ∈ G(S)$, and $e_b ∈ \BExp_I$.
-  We can use the \(\iter\) function to define $hᵇ: G(S)$, as follows:
+  Let $S$ be a set, let $h ∈ D(S)$, and $e_b ∈ \BExp_I$.
+  We can use the \(\iter\) function to define $hᵇ: D(S)$, as follows:
   \begin{align*}
-   h^{e_b} & : G(S)\\
+   h^{e_b} & : D(S)\\
    h^{e_b} & ≜
    \iter\left(
      (i, α) ↦
@@ -990,8 +991,8 @@ And the final case is reached when the program executes an action or encounters 
 With the start dynamics defined, we still need to resolve structures within the loop body, like the \(\comBrk\)-continuation.
 To perform $\comBrk$-resolution, we extend the \(⌊-⌋\) operator to dynamics.
 \begin{definition}
-Let $S$ be a set, and let $h ∈ G(S)$.
-We define $⌊h⌋ ∈ G(S)$ by lifting \(h\) via \(⌊-⌋\) when it returns a continuation:
+Let $S$ be a set, and let $h ∈ D(S)$.
+We define $⌊h⌋ ∈ D(S)$ by lifting \(h\) via \(⌊-⌋\) when it returns a continuation:
 \[
   ⌊h⌋(i, α) = \begin{cases}
   ⌊h(i, α)⌋ & \text{if } h(i, α) ∈ C \\

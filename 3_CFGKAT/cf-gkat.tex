@@ -1017,9 +1017,9 @@ then resolving the \(\brk{i}\) continuations using the break resolution function
 
 
 With the Thompson's construction defined, we can state the correctness of the Thompson's construction as follows.
-\begin{theorem}\label{the:thompson-correctness}
- Let $e ∈ \CFGKAT$, and let $A$ be the Thompson automaton for $e$.
- Then for all $ℓ ∈ L$ we have that $C(A) = C(e)^♯$ and $C(λₑ(ℓ))_A = C(e)^ℓ$.
+\begin{theorem}[Thompson's construction preserves continuation semantics]\label{the:thompson-correctness}
+ Let $e ∈ \CFGKAT$, and let $A_e$ be the Thompson automaton for $e$, then \(C(e) = C(A_e)\). Specifically, unfolding the definition of continuation semantics gives us:
+ \[∀ i ∈ I, ℓ ∈ \{♯\} + L, C(e)ᵢ^ℓ = C(A_e)ᵢ^ℓ\]
 \end{theorem}
 
 \subsection{Algorithm and Complexity}
@@ -1035,7 +1035,7 @@ An even simpler example is:
 where the program executes \(p\) if the initial indicator value is 1, but rejects for indicator values not present in the program.
 
 Fortunately, given an expression \(e\), we can demonstrate that if neither \(i\) nor \(i'\) appears in \(e\), then 
-\[∀ ℓ, ⟦e⟧ᵢ^{ℓ} = ⟦e⟧_{i'}^{ℓ}.\]
+\[∀ ℓ, C(e)ᵢ^{ℓ} = C(e)_{i'}^{ℓ}.\]
 Therefore, when compiling the set of indicator values, it suffices to gather indicator values that appear explicitly in the program and augment this set with a special indicator \(*\) that does not appear in the program.
 
 We summarize our decision procedure as follows:
@@ -1061,8 +1061,10 @@ The soundness and completeness of this algorithm now follow as a corollary of th
 We denote the algorithm introduced above as \(\mathrm{equiv}_{\CFGKAT}\), while the decision algorithm for GKAT automata is denoted as \(\mathrm{equiv}_{\GKAT}\). Thus, we establish the equivalence:
 \begin{align*}
   \mathrm{equiv}_{\CFGKAT}(e, f) 
-  & ⟺ \mathrm{equiv}_{\GKAT}(A_e \!↓, A_f \!↓)  \\
-  & ⟺ G(A_e \!↓) = G(A_f \!↓) ⟺ C(e)\!↓ = C(f)\!↓.
+  & ⟺ ∀ i ∈ I, \mathrm{equiv}_{\GKAT}(A_e \!↓ᵢ, A_f \!↓ᵢ)  \\
+  & ⟺ ∀ i ∈ I, G(A_e \!↓ᵢ) = G(A_f \!↓ᵢ) \\
+  & ⟺ ∀ i ∈ I, C(e)\!↓ᵢ = C(f)\!↓ᵢ   
+  ⟺ C(e)\!↓ = C(f)\!↓.
 \end{align*}
 This equivalence ensures that the algorithm \(\mathrm{equiv}_{\GKAT}\) not only correctly determines whether \(e\) and \(f\) have the same trace semantics; but also guarantees that if \(e\) and \(f\) are trace equivalent, then \(\mathrm{equiv}_{\GKAT}(e, f)\) will return true.
 

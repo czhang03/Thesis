@@ -126,9 +126,9 @@ At the bottom level, there are \emph{tests}; these are Boolean assertions that c
 To model them, we fix a finite set of primitive tests $B$, which represent uninterpreted expressions that may or may not hold.
 The full syntax is as follows.
 \[
- \BExp_I ∋ e_{b}, e_{c} ::=
+ \BExp_I ∋ e_{b}, f_{b} ::=
  \false ∣ \true ∣ b ∈ B ∣ {\color{blue}x = i\ (i ∈ I)}
- ∣ e_{b} ∨ e_{c} ∣ e_{b} ∧ e_{c} ∣ \overline{e_{b}}
+ ∣ e_{b} ∨ f_{b} ∣ e_{b} ∧ f_{b} ∣ \overline{e_{b}}
 \]
 Compared to GKAT and KAT, tests in CF-GKAT include the \emph{indicator variable test} $x = i$ (highlighted in \textcolor{blue}{blue}) for each \emph{indicator value} $i$ drawn from a finite but fixed set of possible indicator values $I$.
 As the notation suggests, this test holds when the indicator variable $x$ currently has the value $i$.
@@ -193,10 +193,10 @@ Formally, we can calculate the semantics of a given Boolean expression \(e_b ∈
  \begin{align*}
   C( \false ) & ≜ ∅
     & C( t )& ≜ \{ (α, i) ∣ t ∈ α, i ∈ I \}
-    & C( e_{b} ∨ e_{c} ) & ≜ C( e_{b} ) ∪ C( e_{c} ) \\
+    & C( e_{b} ∨ f_{b} ) & ≜ C( e_{b} ) ∪ C( f_{b} ) \\
   C( \true )  & ≜ \At × I
     & C( x = i ) & ≜ \{ (α, i) ∣ α ∈ \At \}
-    & C( e_{b} ∧ e_{c} ) & ≜ C( e_{b} ) ∩ C( e_{c} ) \\
+    & C( e_{b} ∧ f_{b} ) & ≜ C( e_{b} ) ∩ C( f_{b} ) \\
   & & & & C( ¬ e_{b} ) & ≜ \At × I \setminus C( e_b )
  \end{align*}
 \end{definition}

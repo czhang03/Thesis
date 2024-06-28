@@ -24,7 +24,7 @@ and program schematology~\cite{Angus_Kozen_2001}.
 
 Notice that despite the decidability of KA and KAT, the decision procedure is PSPACE-complete~\cite{Cohen_Kozen_Smith_1999}, which should be infeasible for large systems.
 However, in real-world testing, network systems based on KAT was able to out-perform state of the art network verifier~\cite{Smolka_Kumar_Kahn_Foster_Hsu_Kozen_Silva_2019}.
-This phenomenon is explained by an efficient fragment of KAT named \emph{Guarded Kleene Algebra with Tests} (GKAT)~\cite{Smolka_Foster_Hsu_Kappé_Kozen_Silva_2020}. Concretely, the particular fragment of GKAT enjoys a more efficient automaton structure that enables fast equivalence checking.
+This phenomenon is explained by an efficient fragment of KAT named \emph{Guarded Kleene Algebra with Tests} (GKAT)~\cite{Smolka_Foster_Hsu_Kappé_Kozen_Silva_2020}. Concretely, the fragment of GKAT enjoys a more efficient automaton structure, which enables faster equivalence checking.
 
 \section{Our Contributions}
 
@@ -34,12 +34,12 @@ To delve deeper into the utility of Kleene Algebra with Tests (KAT) and Guarded 
 
 The first system, named Kleene algebra with tests and top (TopKAT), is used to facilitate domain/reachability reasoning.  
 The standard KAT lacks the capability to adequately encode notions of domain and reachability, in particular we proved that KAT failed to encode incorrectness logic.
-This leads to our development of TopKAT, which extends KAT by requiring a largest element. 
+This inspired our development of TopKAT, which extends KAT by requiring a largest element. 
 In particular, TopKAT is capable of encoding domain comparisons in its relational model. 
 
 Even though TopKAT is incomplete with respect to its relational models, it is complete with respect to domain comparisons, making TopKAT a compact yet complete system to reason about reachability in regular programs.
 To obtain the domain completeness result, a novel perspective on the classical reduction techniques~\cite{Pous_Rot_Wagemaker_2021,Kozen_Smith_1997} arises: we are able to characterize reduction simply as an injective homomorphism. 
-This fresh look into reduction leads to more streamlined proof of completeness of TopKAT, and can potentially ease the burden for future completeness proof about TopKAT.
+This fresh look into reduction leads to more streamlined proof of completeness of TopKAT, and can potentially ease the burden for future completeness proof about other extensions.
 
 The second system, Control-Flow GKAT (CF-GKAT), extends Guarded Kleene Algebra with Tests (GKAT) by incorporating control flow constructs such as indicator variables, \command{break}, \command{return}, and \command{goto}.
 Addressing the non-local nature inherent in these control flow commands, we devised continuation semantics and introduced the CF-GKAT automaton.
@@ -49,7 +49,7 @@ To design a decision procedure for trace equivalence among CF-GKAT programs, we 
 The decision procedure for CF-GKAT programs equivalence then follows from the lowering.
 Leveraging the efficiency, soundness, and completeness of the GKAT decision procedure, our algorithm not only preserves soundness and completeness with respect to trace equivalences, but also exhibits nearly-linear time efficiency relative to the input expression sizes.
 
-To summarize, I compiled our contribution in this thesis as a list for readability:
+To summarize, I compiled our contributions as a list, for readability:
 \begin{itemize}
     \item Proved that KAT insufficiency for domain reasoning, by proving that KAT cannot encode incorrectness logic.
     \item Developed the system TopKAT, and proven it is sound and complete with respect to its trace/language interpretation and general relational model.
@@ -65,13 +65,13 @@ To summarize, I compiled our contribution in this thesis as a list for readabili
 \subsection{Extensions of Kleene algebra And Their Models}
 
 A \emph{Kleene algebra} is an idempotent semiring with a star operation, written
-$p^*$, that satisfies the following \emph{unfolding}, \emph{left induction},
+$p^*$, satisfying the following \emph{unfolding}, \emph{left induction},
 and \emph{right induction} rules:
-\[
-    p^* = 1 + p p^* = 1 + p^* p, \\
-    p r + q  \leq  r  \implies  p^* q  \leq  r, \\
+\begin{mathpar}
+    p^* = 1 + p p^* = 1 + p^* p, \and
+    p r + q  \leq  r  \implies  p^* q  \leq  r, \and
     r p + q  \leq  r  \implies  q p^*  \leq  r;
-\]
+\end{mathpar}
 the ordering here is the conventional ordering in idempotent semirings: \(p  \leq  q  \triangleq  p + q = q.\)
 It is known that the right-hand version of unfolding and induction rule 
 can be removed while preserving the same equational theory~\cite{Kozen_Silva_2020}.
@@ -97,7 +97,7 @@ The free model consists of all the terms formed by \( Σ \) modulo
 provable equivalences of the algebra. The operations of the free model are obtained 
 by lifting the term-level operations to equivalence classes.
 
-The above construction can be extended to the case of KAT and TopKAT, 
+The above construction can be extended to the case of KAT, 
 suppose that we are given two disjoint finite sets $K$ (the
 \emph{action alphabet}) and $B$ (the \emph{test alphabet}).  Elements of $K$ and
 $B$ are called \emph{primitive actions and primitive tests}, respectively. 
@@ -106,30 +106,27 @@ KAT terms over the alphabet \(K, B\) are defined with the following grammar:
 where \(e_b\) does not contain primitive actions.
 The \emph{free KAT} over \(K, B\), written $\KAT_{K,B}$, 
 consists of terms over \(K, B\) modulo provable KAT equivalences.  
-The tests of the free KAT are Boolean terms, i.e. terms formed by
-primitive tests and Boolean operations modulo Boolean axioms.  A similar
-construction applies to TopKAT, where an additional symbol \( ⊤ \) was added 
-as the largest element in the theory; we denote the free TopKAT over $K,B$ as
-\(\TopKAT_{K, B}\).  We sometimes omit the alphabets \(K\) and \(B\) when they
+The tests of the free KAT are Boolean terms, i.e. terms formed by primitive tests and Boolean operations modulo Boolean axioms.
+We sometimes omit the alphabets \(K\) and \(B\) when they
 are irrelevant or can be inferred.
 
 In the thesis, we frequently consider terms modulo provable equalities, i.e. in the
 context of its corresponding free model.  For example, given \(e_1, e_2  \in  \KAT\),
 we will say \(e_1 = e_2\) when they are provably equal using the theory of KAT.
 Although the free model seems trivial, it leads to simpler and more modular
-proofs of some properties of algebraic theories, as we will see in~\Cref{chapter:TopKAT}.
+proofs of some properties of algebraic theories, as we will see in~\Cref{sec: properties of TopKAT}.
 
-Other important models are language (Top)KATs and relational (Top)KATs, which we review here.  
+Other important models are language KATs and relational KATs, which we review here.  
 An \emph{atom} (short for ``atomic test'') over a test alphabet \(B = \{b_{1}, b_{2},  … , b_{n}\}\) is a sequence of the form
-\[\hat{b_{1}}  \cdot  \hat{b_{2}}  \cdot   \cdots   \cdot \hat{b_{n}} \text{ where } \hat{b_{i}}  \in  \{b_{i}, \bar{b_{i}}\}.\] 
+\[\hat{b_{1}}  \cdot  \hat{b_{2}}  \cdot   \cdots   \cdot \hat{b_{n}} \text{ where } \hat{b_{i}}  \in  \{b_{i}, \bar{b_{i}}\},\] 
+where each atom is a record of all the primitive tests that it satisfies, and those it doesn't.
 We denote atoms as \( α ,  β ,  γ ,  … \) and the set of all atoms as \(\At\).
 
 A \emph{guarded string} (or \emph{guarded word}) over \(K, B\) is an alternation 
 between atoms and primitive actions that starts and ends in atoms: 
 \[ \alpha _{0}p_{1} \alpha _{1}  \cdots  p_{n}  \alpha _{n} \text{ where } p_{i}  \in  K,  \alpha _{i}  \in  \At;\] 
 where each action is ``guarded'' by an atom.
-A guarded string is similar to a program trace. These traces record the initial, intermediate and final machine states observed during execution, as well as the actions that occurred between those states. % chktex 36
-Because the value of the indicator variable matters only for control flow, we do not consider indicators to be part of the machine state; hence, machine states in a guarded word are drawn from $\At$.
+A guarded string is similar to a program trace. These traces record the initial, intermediate and final machine states (represented by the atoms \(αᵢ ∈ \At\)) observed during execution, as well as the actions that occurred between those states. % chktex 36
 
 \begin{example} 
     Let $B = \{ b₁, b₂ \}$ and $K = \{ p₁, p₂ \}$.
@@ -235,10 +232,9 @@ for two terms in the free model \(e_1, e_2  ∈  \KAT_{K, B}\),
 For a collection of models \(\mathsf{K}\), 
 we say that \(𝖪  ⊧  e_1 = e_2\) if for all \(\mathcal{K}  ∈  𝖪\),
 \(𝒦  ⊧  e_1 = e_2\).  For example, \(\REL  ⊧  e_1 = e_2\) means that \(e_1 = e_2\) is
-valid in all relational KATs.  All the above notations and terminologies can be
-similarly extended to TopKAT.
+valid in all relational KATs.  
 
-Theories like KAT and TopKAT are designed to model practical
+Theories like KAT are designed to model practical
 programs, so it is important to know if they can model all the desirable
 equations between programs. If the theory of KAT can derive all the equalities
 for a particular interpretation \(I\), namely:
@@ -274,7 +270,7 @@ to denote the composition of \(h: Y  →  Z\) and \(g: X  →  Y\) when it is de
 
 Besides using composition of injective homomorphisms, another technique commonly
 used to prove injectivity is to construct a left inverse: 
-if a (Top)KAT homomorphism \(f: 𝒦  →  𝒦'\) has a left inverse homomorphism \(g: 𝒦'  →  𝒦\) 
+if a KAT homomorphism \(f: 𝒦  →  𝒦'\) has a left inverse homomorphism \(g: 𝒦'  →  𝒦\) 
 i.e. \(g  ∘  f = id_{𝒦}\), then \(f\) is injective.  
 Notice that \(g\) does not need to be a homomorphism for \(f\) to be injective,
 however, in the case where \(f\) is an interpretation, 
@@ -285,7 +281,7 @@ they are equal if and only if they have the same action on all the primitives.
 
 \section{Guarded Kleene Algebra With Tests}
 
-Guarded Kleene Algebra with Tests (GKAT)~\cite{Smolka_Foster_Hsu_Kappé_Kozen_Silva_2020} is a efficient fragment of Kleene Algebra with tests. Specifically, GKAT uses tests to ``guard'' the non-deterministic operations like \(+\) and \(*\), to make it more akin to simply \command{while}-programs. 
+Guarded Kleene Algebra with Tests (GKAT)~\cite{Smolka_Foster_Hsu_Kappé_Kozen_Silva_2020} is an efficient fragment of Kleene algebra with tests. Specifically, GKAT utilizes tests as ``guards'' of the non-deterministic operations like \(+\) and \(*\), to make it more akin to \command{while}-programs. 
 A GKAT expression over an alphabet \(K, B\) is defined as follow:
 \begin{align*}
     \BExp ∋ e_b, f_b & ≜ 
@@ -306,13 +302,13 @@ The main advantage of GKAT, compare to KAT, is its efficient decision procedure.
 \begin{definition}[GKAT automaton]\label{def:GKAT-automaton}
     A GKAT automaton \(A ≜ ⟨S, δ, ŝ⟩\) over an alphabet \(K, B\) consists of a state set \(S\), a transition function \(δ: S → 2 + K × S\), and a start state \(ŝ ∈ S\).
 \end{definition}
-where \(2\) denotes \(\{\accept, \reject\}\), which represents accept and reject respectively.
-Intuitively, the transition function of a GKAT automaton tells us, given a state $q$ and an atom $α$ accounting for the truth value of each primitive test, to either \emph{reject} the input, represented by $δ(q, α) = \reject$, \emph{accept} the input, represented by $δ(q, α) = \accept$, or to \emph{transition} to a new state in $S$ after executing an action from $K$, represented by $δ(q, α) ∈ K × S$.
+In the above definition \(2\) denotes \(\{\accept, \reject\}\), which represents accept and reject respectively.
+Intuitively, the transition function of a GKAT automaton tells us, given a state $s$ and an atom $α$ accounting for the truth value of each primitive test, to either \emph{reject} the input, represented by $δ(s, α) = \reject$; \emph{accept} the input, represented by $δ(s, α) = \accept$; or to \emph{transition} to a new state in $S$ after executing an action from $K$, represented by $δ(s, α) ∈ K × S$.
 
 People familiar with coalgebra~\cite{jacobs_IntroductionCoalgebraMathematics_2016,rutten_UniversalCoalgebraTheory_2000} might realize that this definition is a pointed coalgebra over the following \emph{signature} (or \emph{dynamics}):
 \[2 + K × (-).\]
 
-A GKAT automaton induces a guarded language in a fairly straightforward manner.
+A GKAT automaton induces a guarded language in an intuitive manner.
 \begin{definition}
  Given a GKAT automaton $A ≜ ⟨ S, δ, \hat{s} ⟩$, we define $G( - )_A: S → 𝒢$ as the (pointwise) smallest function satisfying the following rules for all $s ∈ S$ and $α ∈ \At$:
  \begin{mathpar}
@@ -332,16 +328,17 @@ A GKAT automaton induces a guarded language in a fairly straightforward manner.
  Finally, we define the guarded language semantics of $A$ by setting $G( A ) = G( \hat{s} )_A$.
 \end{definition}
 
-\citet{Smolka_Foster_Hsu_Kappé_Kozen_Silva_2020} was able to design a efficient trace equivalence decision procedure based on the classical Hopcroft-Karp algorithm~\cite{hopcroft_LinearAlgorithmTesting_1971}
+\citet{Smolka_Foster_Hsu_Kappé_Kozen_Silva_2020} was able to design a efficient trace equivalence decision procedure based on the classical Hopcroft-Karp algorithm~\cite{hopcroft_LinearAlgorithmTesting_1971}. 
+We record this result below.
 
 \begin{theorem}[Decidability for GKAT~\cite{Schmid_Kappé_Kozen_Silva_2021}]
     Given two finite GKAT automata $A₀$ and $A₁$, it is decidable whether they represent the same guarded language, i.e., whether $G( A₀ ) = G( A₁ )$.
     The algorithm to do this has a complexity that is nearly-linear\footnote{$𝒪(\hat{α}(n))$, where $\hat{α}$ is the inverse Ackermann function; c.f.~\cite{Tarjan75}.} in the total number of states.
 \end{theorem}
 
-When given two expression \(e\) and \(f\), the decision procedure will first convert it into two trace equivalent automaton via the \emph{Thompson's Construction}~\cite{Smolka_Foster_Hsu_Kappé_Kozen_Silva_2020}. Concretely, two GKAT automata \(A_e\) and \(A_f\) s.t.
+When given two expression \(e\) and \(f\), the decision procedure will first convert it into two trace equivalent automaton via the \emph{Thompson's Construction}~\cite{Smolka_Foster_Hsu_Kappé_Kozen_Silva_2020}. Concretely, the Thompson's construction give rise to two GKAT automata \(A_e\) and \(A_f\) s.t.
 \[G(A_e) = G(e); \qquad G(A_f) = G(f).\]
-Then, apply the efficient decision procedure to decide the trace-equivalence of \(A_e\) and \(A_f\)
+Then, apply the efficient decision procedure of GKAT automata to decide the trace-equivalence of \(A_e\) and \(A_f\)
 
 
 

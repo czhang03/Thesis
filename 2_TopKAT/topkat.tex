@@ -23,7 +23,7 @@ specifications, which state that, if we run \(p\) on an initial state satisfying
 \(b\), all the final states (if reached) will satisfy \(c\). In other words, \(c\)
 \emph{over-approximates} the set of final states of \(p\) starting from \(b\). 
 
-Despite their popularity, \emph{equational reasoning}, like Kleene Algebra with Tests has also prevailed in parallel.
+Despite the popularity of program logics, \emph{equational reasoning}, like Kleene Algebra with Tests has also prevailed in parallel.
 The two approaches turned out to be not so different. \citet{Kozen_2000}
 showed that KAT can express the validity of a Hoare triple as an equation, in
 such a way that the deduction rules of a large fragment of Hoare Logic can be
@@ -69,7 +69,7 @@ and relational verification for noninterference~\cite{murray_UnderApproximateRel
 
 It is natural to wonder whether \citeauthor{Kozen_2000}'s idea could be
 adapted to encode incorrectness logic in Kleene algebra with tests.
-Unfortunately, this is not the case. As we will show in this thesis, there are
+Unfortunately, this is not the case. As we will show in this chapter, there are
 incorrectness triples that cannot be expressed by any KAT equation.  This might
 appear surprising, given the symmetry between over- and under-approximation in
 the formulation of Hoare logic and incorrectness logic.  However, the symmetry
@@ -288,7 +288,7 @@ to be reachable from \(b\) by executing \(p\).
         {∀ n ∈ ℕ,~ \incorTriple{b(n)}{p}{\okState: b(n+1)}}
         {\incorTriple{b(0)}{{p}^*}{\okState: \exists n, b(n)}}
     \end{mathpar}
-    \caption{Generic incorrectness logic proof rules~\cite{OHearn_2020}}\label{fig: orignal proof rules of inc logic}
+    \caption{Propositional incorrectness logic proof rules~\cite{OHearn_2020}}\label{fig: orignal proof rules of inc logic}
 \end{figure}
 
 If Hoare logic is an ``over-approximation'' logic, incorrectness logic is an
@@ -540,9 +540,9 @@ that are capable of formulating incorrectness logic.
             is true, then there exists \((x, z)\) and \((z', y)\) in \(I(p)\)
             hence the result is valid
         \end{itemize}
-        \item If \(e\) is of the form \((e_1)*\) for some \(e_1\).
+        \item If \(e\) is of the form \((e_1)^*\) for some \(e_1\).
         Then by definition of the star operator in \(\REL\),
-        \((x, y) ∈ (e_1)*\) means there exists \(n ∈ ℕ\),
+        \((x, y) ∈ (e_1)^*\) means there exists \(n ∈ ℕ\),
         s.t. \((x, y) ∈ {(e_1)}^{n}\).
         Then we can prove this result by induction on \(n\), 
         using a strategy similar to the multiplication case.
@@ -649,6 +649,7 @@ work~\cite[Section~4]{Mamouras_2017}, though for a different purpose.
   element \(⊤\); that is, for all elements \(p ∈ 𝒦\),
   \[⊤ ≥ p.\]
   A relational TopKAT over \(X\) is a relational KAT that includes the complete relation \(X × X\).
+  The class of all relational TopKAT is denoted \(\TopREL\).
 \end{definition}
 
 \begin{theorem}[TopKAT can Express Codomain]\label{the: TopKAT encodes domain PRIMITIVE}
@@ -946,12 +947,14 @@ TopKATs: there are identities that are valid for every relational TopKAT that
 cannot be proven using the TopKAT identities alone. This contrasts with what
 happens for KAT, which is complete for relational KATs.
 %
-We will then show the completeness of TopKATs with respect to a class of
-\emph{language-based} TopKATs and also with respect to a more general class of
-\emph{relational} TopKATs, as well as the decidability of TopKAT equalities.
-Finally we will introduce the concept of equational expressiveness,
+We will then show the completeness of TopKATs with respect to a class of \emph{language-based} TopKATs and also with respect to a more general class of \emph{relational} TopKATs, as well as the decidability of TopKAT equalities.
+Then, we will introduce the concept of equational expressiveness,
 and show that the general relational TopKAT has the same expressiveness as relational KAT,
 hence cannot express incorrectness logic.
+All the above completeness, decidability, and equational expressiveness results are all corollaries of our new perspective on the classical reduction technique~\cite{Pous_Rot_Wagemaker_2021,Kozen_Smith_1997}.
+
+Finally, following from the completeness with respect to language TopKAT, we will derive the (co)domain completeness of TopKAT, asserting that all TopKAT inequalities that encode (co)domain comparisons are derivable, just using the theory of TopKAT.
+
 
 \subsection{Incompleteness with Respect to Relational TopKATs}
 
@@ -974,7 +977,7 @@ We start with our negative result, which is the incompleteness over relational T
   \end{align*}
   (Note that this KAT is \emph{not} a relational TopKAT\@: the largest
   element is not the complete relation.)
-  Then, by taking a interpretation lifted by \(I(p) ≜\{(0, 1)\}\), we see that
+  Then, by taking the interpretation lifted from \(I(p) ≜\{(0, 1)\}\), we see that
   \begin{align*}
     I(⊤ p) & = \{(0, 1)\} \\
     I((⊤ p) (⊤ p)) & 
@@ -986,7 +989,7 @@ We start with our negative result, which is the incompleteness over relational T
   \(p ⊤ p ≥ p\).
 \end{proof}
 
-In fact, \citeauthor{Pous_Wagemaker_2022}~\cite{Pous_Wagemaker_2023,Pous_Wagemaker_2022} has shown that with the additional axiom \(p ⊤ p ≥ p\), the theory of TopKAT is indeed complete with relational model.
+To remedy the incompleteness, \citeauthor{Pous_Wagemaker_2022}~\cite{Pous_Wagemaker_2023,Pous_Wagemaker_2022} has shown that with the additional axiom \(p ⊤ p ≥ p\), the theory of TopKAT is indeed complete with relational model.
 
 Without this additional axiom, the incompleteness result might be discouraging, since we might not be able to derive some valid theorems of incorrectness logic using TopKAT. However in \Cref{the: incor logic rule sound ok} and \Cref{the: incorrectness logic fail rule sound}, we show that all the rules of incorrectness logic are derivable using either the equational theory of TopKAT or FailTopKAT\@.  Thus,
 our framework is at least as strong as the structural proof rules presented by~\citet{OHearn_2020}.
@@ -1038,10 +1041,10 @@ straightforward induction.
               Because \((∑ K)^* = (∑ K)^* ⋅ (∑ K)^*\)
               and multiplication preserves order, 
               \[(∑ K)^* = (∑ K)^* ⋅ (∑ K)^* ≥ e₁ ⋅ e₂.\]
-        \item Given a expression \(e\),
-              if \((∑ K)^* ≥ t\), then \((∑ K)^* ≥ t^*\).
+        \item Given an expression \(e\),
+              if \((∑ K)^* ≥ e\), then \((∑ K)^* ≥ e^*\).
               Since \((∑ K)^* = ((∑ K)^*)^*\) and star preserves order:
-              \[(∑ K)^* = ((∑ K)^*)^* ≥ t^*. \qedhere\]
+              \[(∑ K)^* = ((∑ K)^*)^* ≥ e^*. \qedhere\]
     \end{itemize}
 \end{proof}
 
@@ -1264,7 +1267,7 @@ since relational TopKAT can encode incorrectness logic, where relational KAT can
 \subsection{(Co)domain Completeness}\label{sec: domain completeness of TopKAT}
 
 As we have shown in~\Cref{the: topkatstar incomplete over relational model}, TopKAT is not complete over relational models, which are crucial for applications in program logics (\Cref{the: top element represent domain}).  
-However, \citet{Pous_Wagemaker_2023} later showed that we can obtain a complete theory for relational models by simply adding the axiom \(p ⊤ p ≥ p\) to the theory of TopKAT. 
+As we mentioned before, \citet{Pous_Wagemaker_2023} showed that we can obtain a complete theory for relational models by simply adding the axiom \(p ⊤ p ≥ p\) to the theory of TopKAT. 
 
 Here, we take a different approach than Pous et al.~\cite{Pous_Wagemaker_2023}: instead of extending the TopKAT framework, we will restrict the completeness result.
 In particular, the encoding of incorrectness logic and Hoare Logic in TopKAT~\cite{Zhang_de_Amorim_Gaboardi_2022}

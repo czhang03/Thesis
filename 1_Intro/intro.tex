@@ -6,14 +6,14 @@
 \label{sec:history}
 
 Kleene algebra, named after the eminent mathematician Stephen Cole Kleene, represents a pivotal development in mathematical logic, computer science, and formal languages. 
-Originating in the mid-20th century, Kleene algebra emerged from Kleene's seminal work on regular sets and expressions~\cite{Kleene_1956}, where he introduced algebraic structures to formalize fundamental operations on regular languages. 
-Kleene left a important open question about Kleene Algebra: whether there exists \emph{complete} algebraic system for regular language equality: an algebraic system that is capable of derive all the language equalities of regular expression.
+Originating in the mid-20th century, Kleene algebra emerged from Kleene's seminal work on regular sets and expressions~\cite{Kleene_1956}, where he introduced algebraic structures to formalize language equalities between regular expression. 
+Kleene then left an important open question about Kleene Algebra: whether there exists \emph{complete} algebraic system for regular language equality: an algebraic system that is capable of derive \emph{all} the language equalities of regular expression.
 There are numerous systems proposed and are closely related~\cite{Kozen_1990}, yet the modern Kleene Algebra and its completeness proof is often attributed to Kozen~\cite{Kozen_2001,Kozen_1994}.
 
 Given the close relation to regular languages, it is no surprise that the study of Kleene Algebra often makes heavy use of automata theory.
 The automata perspective underpins another important property of Kleene Algebra: decidability.
 Specifically, the behavioral equivalence of two automata (or more generally, coalgebra) can be obtained by bisimulation on the automata~\cite{rutten_UniversalCoalgebraTheory_2000}; and bisimulation is usually decidable for finite automata~\cite{Kozen_2008,Smolka_Foster_Hsu_Kappé_Kozen_Silva_2020,Silva_2010}.
-This framework is characterized by the bialgebraic approach using category theory~\cite{jacobs_BialgebraicReviewDeterministic_2006}, although we will not dive deep into coalgebra, many of the techniques used in this paper are inspired by this framework.
+This framework is characterized by the bialgebraic approach using category theory~\cite{jacobs_BialgebraicReviewDeterministic_2006}, although we will not dive deep into coalgebra, many of the techniques used in this thesis are inspired by this framework.
 
 The decidability and completeness of Kleene Algebra has inspired a suite of applications in programming languages and verifications; specifically, in the areas of network system~\cite{Anderson_Foster_Guha_Jeannin_Kozen_Schlesinger_Walker_2014,Foster_Kozen_Milano_Silva_Thompson_2015, Smolka_Kumar_Kahn_Foster_Hsu_Kozen_Silva_2019},
 concurrent programs~\cite{hoare_ConcurrentKleeneAlgebra_2009,Kappé_Brunet_Silva_Wagemaker_Zanasi_2020,Kappé_Brunet_Silva_Zanasi_2018}, 
@@ -75,7 +75,7 @@ and \emph{right induction} rules:
 the ordering here is the conventional ordering in idempotent semirings: \(p  \leq  q  \triangleq  p + q = q.\)
 It is known that the right-hand version of unfolding and induction rule 
 can be removed while preserving the same equational theory~\cite{Kozen_Silva_2020}.
-Yet, we will focus on the standard definition of KA in this paper.
+Yet, we will focus on the standard definition of KA in this thesis.
 \begin{lemma}\label{the: well known fact about KA}
     Following are well-known facts in Kleene algebra
     \begin{itemize}
@@ -113,15 +113,14 @@ as the largest element in the theory; we denote the free TopKAT over $K,B$ as
 \(\TopKAT_{K, B}\).  We sometimes omit the alphabets \(K\) and \(B\) when they
 are irrelevant or can be inferred.
 
-In the paper, we frequently consider terms modulo provable equalities, i.e. in the
+In the thesis, we frequently consider terms modulo provable equalities, i.e. in the
 context of its corresponding free model.  For example, given \(e_1, e_2  \in  \KAT\),
 we will say \(e_1 = e_2\) when they are provably equal using the theory of KAT.
 Although the free model seems trivial, it leads to simpler and more modular
 proofs of some properties of algebraic theories, as we will see in~\Cref{chapter:TopKAT}.
 
-Other important models that we will use in this paper are language (Top)KATs and
-relational (Top)KATs, which we review here.  An \emph{atom} (short for ``atomic
-test'') over a test alphabet \(B = \{b_{1}, b_{2},  … , b_{n}\}\) is a sequence of the form
+Other important models are language (Top)KATs and relational (Top)KATs, which we review here.  
+An \emph{atom} (short for ``atomic test'') over a test alphabet \(B = \{b_{1}, b_{2},  … , b_{n}\}\) is a sequence of the form
 \[\hat{b_{1}}  \cdot  \hat{b_{2}}  \cdot   \cdots   \cdot \hat{b_{n}} \text{ where } \hat{b_{i}}  \in  \{b_{i}, \bar{b_{i}}\}.\] 
 We denote atoms as \( α ,  β ,  γ ,  … \) and the set of all atoms as \(\At\).
 
@@ -267,15 +266,11 @@ then the completeness of \(h  ∘  G\) implies
 \[\KAT_{K, B}  ⊧  e_1 = e_2  ⟺  \REL  ⊧  e_1 = e_2,\]
 i.e. the theory of KAT is complete with respect to relational KAT.
 
-% Function/homomorphism composition will be used frequently in this paper,
-% but sometimes simply writing \(f  \circ  g\) will be confusing without knowing
-% the domain and codomain of function \(f\) and \(g\).
-% Therefore, we will use the notation \(X \xrightarrow{g} Y \xrightarrow{f} Z\)
-% to denote the composition of \(f: Y  \to  Z\) and \(g: X  \to  Y\) when it is desirable.
-
-% AAA: I think the above notation is standard enough; we don't have to explain
-% what it means.
-% CZ: Removed
+Function/homomorphism composition will be used frequently in this paper,
+but sometimes simply writing \(h  ∘  g\) will be confusing without knowing
+the domain and codomain of function \(h\) and \(g\).
+Therefore, we will use the notation \(X \xrightarrow{g} Y \xrightarrow{h} Z\)
+to denote the composition of \(h: Y  →  Z\) and \(g: X  →  Y\) when it is desirable.
 
 Besides using composition of injective homomorphisms, another technique commonly
 used to prove injectivity is to construct a left inverse: 

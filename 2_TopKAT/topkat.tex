@@ -69,7 +69,7 @@ and relational verification for noninterference~\cite{murray_UnderApproximateRel
 
 It is natural to wonder whether \citeauthor{Kozen_2000}'s idea could be
 adapted to encode incorrectness logic in Kleene algebra with tests.
-Unfortunately, this is not the case. As we will show in this paper, there are
+Unfortunately, this is not the case. As we will show in this thesis, there are
 incorrectness triples that cannot be expressed by any KAT equation.  This might
 appear surprising, given the symmetry between over- and under-approximation in
 the formulation of Hoare logic and incorrectness logic.  However, the symmetry
@@ -1969,7 +1969,7 @@ The next example demonstrates the mix of equational reasoning and assignment rul
     \[\incorTriple{x > 0}{\comITE{x < 0}{\comSkip}{\comAssign{x}{-x}}}{x < 0}.\]
 
     Even though the assignment rule from Incorrectness Logic is not propositional, 
-    in the sense we use in this paper,  
+    in the sense we use in this thesis,  
     we can use specific inequalities to represent specific instances of these rules. 
     For example, we can use an instance represented by the following incorrectness triple:
 \[\incorTriple{x > 0}{\comAssign{x}{-x}}{x < 0},\]
@@ -2031,7 +2031,7 @@ and concluded that TopKAT is not complete with relational models.
 Later, Pous et al.~\cite{Pous_Wagemaker_2022,Pous_Wagemaker_2023} showed that 
 both TopKA and TopKAT is complete with relational model with one additional axiom: \(p ⊤ p ≥ p\),
 and the theory remains PSPACE-complete, like KAT and TopKAT.
-In this paper, we showed that TopKAT without the additional axiom is complete 
+In this section, we showed that TopKAT without the additional axiom is complete 
 for a specific form of inequalities, namely when top only appears in the front or the end of the term.
 Although this form of inequalities seem restrictive, 
 they are enough to encode both Hoare and incorrectness logic~\cite{Zhang_de_Amorim_Gaboardi_2022}.

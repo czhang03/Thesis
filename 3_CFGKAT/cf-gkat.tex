@@ -10,6 +10,7 @@
 \newcommand{\contWith}{\mathbf{cont}}
 \newcommand{\exitWith}{\mathbf{exit}}
 \newcommand{\iter}{\mathrm{iter}}
+\newcommand{\const}{\mathrm{const}}
 
 
 \chapter{CF-GKAT, fast control-flow verification}
@@ -175,7 +176,7 @@ For the sake of simplicity, we assume that the reader does not require a more fo
 %FIXME: move to semantics
 \begin{remark}
  For soundness, it is important that the indicator variable $x$ does not
- occur in any primitive test $t ∈ T$ or action $p ∈ K$.
+ occur in any primitive test $b ∈ B$ or action $p ∈ K$.
  In other words, $x$ is completely divorced from the other actions in the program,
  and may influence execution only by affecting flow control.
 \end{remark}
@@ -186,19 +187,19 @@ To assign a semantics to CF-GKAT expressions, we first need to talk about the se
 Similar to GKAT~\cite{Smolka_Foster_Hsu_Kappé_Kozen_Silva_2020}, the semantics of a boolean is defined as a set of program states that satisfy the boolean expression. 
 The difference however is that we not only need to keep track of which primitive tests are satisfied under the boolean expression (represented by atoms), but also need to record the indicator variables that satisfy the boolean expression.
 
-Thus the semantics of a boolean expression is a set of atom-indicator pairs.
+Thus, the semantics of a boolean expression is a set of indicator-atom pairs.
 Formally, we can calculate the semantics of a given Boolean expression \(e_b ∈ \BExp_I\) by induction.
 \begin{definition}
- We define the \emph{Boolean semantics} function $C(-): \BExp_I → 2^{\At × I}$ inductively,
+ We define the \emph{Boolean semantics} function $C(-): \BExp_I → 2^{I  × \At}$ inductively,
  as follows.
  \begin{align*}
   C( \false ) & ≜ ∅
-    & C( t )& ≜ \{ (α, i) ∣ t ∈ α, i ∈ I \}
+    & C( t )& ≜ \{ (i, α) ∣ i ∈ I, b ≤ α \}
     & C( e_{b} ∨ f_{b} ) & ≜ C( e_{b} ) ∪ C( f_{b} ) \\
-  C( \true )  & ≜ \At × I
-    & C( x = i ) & ≜ \{ (α, i) ∣ α ∈ \At \}
+  C( \true )  & ≜ I × \At
+    & C( x = i ) & ≜ \{ (i, α) ∣ α ∈ \At \}
     & C( e_{b} ∧ f_{b} ) & ≜ C( e_{b} ) ∩ C( f_{b} ) \\
-  & & & & C( ¬ e_{b} ) & ≜ \At × I \setminus C( e_b )
+  & & & & C( ¬ e_{b} ) & ≜ I × \At \setminus C( e_b )
  \end{align*}
 \end{definition}
 We will overload the notation \(C\) later for continuation semantics/interpretation, because the boolean semantics is a restriction of the continuation semantics to assertions.
@@ -337,7 +338,7 @@ We start with the base cases.
 \begin{definition}[continuation semantics, base]
  For all $i, j ∈ I$, we define the following sets:
  \begin{align*}
-  C(\comAssert{e_b})ᵢ^♯ & ≜ \{ α ⋅ \acc{i} ∣ (α, i) ∈ C( e_b ) \}
+  C(\comAssert{e_b})ᵢ^♯ & ≜ \{ α ⋅ \acc{i} ∣ (i, α) ∈ C( e_b ) \}
     & C( \comGoto{ℓ} )ᵢ^♯ & ≜ \{ α ⋅ \jmp{(ℓ, i)} ∣ α ∈ \At \} \\
   C(p)ᵢ^♯             & ≜ \{α p β ⋅ \mathbf{acc}\ i ∣ α, β ∈ \At\}
     & C( \comLabel{ℓ} )ᵢ^♯ & ≜ \{ α ⋅ \acc{i} ∣ α ∈ \At \} \\
@@ -675,8 +676,8 @@ First, we "embed" the indicator values into the state set; the new state set the
 Second, we resolve all the continuations in transition results.
 In particular, we need to resolve the jump continuations using the jump map $λ$: when $δ(s, i, α) = \jmp{(ℓ, j)}$, the $α$-transition leaving the state $(s, i)$ in the resulting GKAT automaton is determined by looking at the $α$-behavior starting from the label $ℓ$ with indicator value $j$, given by $λ(ℓ, j, α)$.
 
-The main obstacle to properly resolve jump continuation is that $λ(ℓ, j, α)$ may itself point to a different label by returning $\jmp{(ℓ', k)}$, then \(λ(ℓ', k, α)\) may also yield a another jump, et cetera.
-These jump sequences can be resolved by iterating the jump map, and terminate when either the result is no longer a jump, or a infinite loop is detected.
+The main obstacle to properly resolve jump continuation is that $λ(ℓ, j, α)$ may itself point to a different label by returning $\jmp{(ℓ', k)}$, then \(λ(ℓ', k, α)\) may also yield another jump, et cetera.
+These jump sequences can be resolved by iterating the jump map, and terminate when either the result is no longer a jump, or an infinite loop is detected.
 
 \begin{definition}[iteration lifting]\label{def: iteration lifting}
   Given a function \(h: X → X + \{\reject\} + E\), where \(X\) is a finite set
@@ -762,117 +763,80 @@ Having defined our lowering operation, we can state its correctness as follows.
 \subsection{Converting expressions to CF-GKAT automata}
 
 The final piece of our puzzle is to convert CF-GKAT expressions to CF-GKAT automata.
-To accomplish this, we generalize a construction proposed for GKAT, which turns a GKAT expression into a GKAT automaton in a trace-equivalent manner~\cite{Schmid_Kappé_Kozen_Silva_2021}.
-This construction proceeds by induction on the structure of the expression and was inspired by Thompson's construction to obtain a non-deterministic finite automaton from a regular expression~\cite{thompson_ProgrammingTechniquesRegular_1968}, which is why we refer to it as the \emph{Thompson construction for CF-GKAT}.
+To accomplish this, we generalize a construction proposed for GKAT, which turns a GKAT expression into a GKAT automaton in a trace-equivalent manner~\cite{Smolka_Foster_Hsu_Kappé_Kozen_Silva_2020}.
+This construction proceeds by induction on the structure of the expression, and was inspired by Thompson's construction to obtain a non-deterministic finite automaton from a regular expression~\cite{thompson_ProgrammingTechniquesRegular_1968}, which is why we refer to it as the \emph{Thompson construction for CF-GKAT}.
 
 In contrast to the original Thompson's construction, the Thompson's construction for GKAT produces a GKAT automaton with a \emph{start dynamics} instead of an explicit start state. 
 Although automata with start dynamics are equivalent to automata with start states; using start dynamics will help us efficiently compose automata, avoiding the silent transitions present in the original algorithm.
-To take advantage of start dynamics, we will define \emph{CF-GKAT automata with start dynamics} in the following definitions:
+To take advantage of start dynamics, we will define \emph{CF-GKAT automata with start dynamics} in the following definition:
 
 \begin{definition}
- A CF-GKAT automaton with start dynamics \(A ≜ ⟨S, δ, ι, λ⟩\) consists of $S$, $δ$ and $λ$ as in a CF-GKAT automaton, in addition to a start dynamics \(ι ∈ D(S)\).
+ A CF-GKAT automaton with start dynamics \(A ≜ ⟨S, δ, ι, λ⟩\) consists of $S$, $δ$ and $λ$ as in a CF-GKAT automaton, in addition to a start dynamics \(ι ∈ G(s)\).
 \end{definition}
 
 We elide the definition of the semantics for CF-GKAT automata with start dynamics for the sake of brevity.
-Suffice it to say that they can be easily converted to a plain CF-GKAT automata by adding a start state \(\hat{s}\) that takes the start dynamics:
+Suffice it to say that they can be easily converted to a plain CF-GKAT automata by adding a start state \(\hat{s}\) that takes the behavior of the start dynamics \(ι\):
 \begin{equation}\label{cons: CF-GKAT pseudo start to CF-GKAT automata}
  ⟨S, δ, ι, λ⟩ ↦ ⟨S + \hat{s}, δ_ι, \hat{s}, λ⟩,
- \text{ where }
- δ_ι(i, s, α) ≜
+ \qquad
+ \text{where}
+ \qquad
+ δ_ι(s, i, α) ≜
  \begin{cases}
   ι(i, α)    & \text{if } s = \hat{s} \\
-  δ(s)(i, α) & \text{if } s ≠ \hat{s}
+  δ(s, i, α) & \text{if } s ≠ \hat{s}
  \end{cases}
 \end{equation}
 
-
-% FIXME: The syntax in the expression column is the compact one... we probably want to change that - T
-% FIXME: CZ: we don't have enough space, we need to think about this.
-\begin{table}
-  \centering
-  \begin{tabular}{c || c | l | l | l}
-   \(e\)  & \(S\) & \(δ(s)\) & \(ι(i, α)\) & \(λ(ℓ)\) \\[5px]
-   \hline
-   \(\comAssert{e_b}\)& \(∅\)& \(!\)& \(
-   \begin{cases}
-    \acc{i} & (α, i) ∈ C( e_b )   \\
-    \reject       & \text{otherwise}
-   \end{cases}
-   \) & \(\reject\) \\[20px]
-   %
-   \(x := i'\) & \(∅\) & \(!\) & \(\acc{i}\) & \(\reject\) \\[20px]
-   \(p\) & \(\{*\}\) & \(\acc{i}\) & \((p, *, i)\) & \( \reject \) \\[20px]
-   \(\comRet\) & \(∅\) & \(!\) & \(\ret\) & \(\reject\) \\[20px]
-   \(\comBrk\) & \(∅\) & \(!\) & \(\brk{i}\) & \(\reject\) \\[20px]
-   \(\comGoto{ℓ}\) & \(∅\) & \(!\) & \(\jmp{(ℓ, i)}\) & \(\reject\) \\[20px]
-   \(\comLabel{ℓ'}\) & \(∅\) & \(!\)  & \(\acc{i}\) &
-    \(\begin{cases}
-      \acc{i} & ℓ = ℓ' \\
-      \reject    & \text{otherwise}
-     \end{cases}
-   \)\\[25px]
-   %
-   \(e₁ +_{e_b} e₂\) & \(S₁ + S₂\) & \(
-   \begin{cases}
-    δ₁(s) & s ∈ S₁ \\
-    δ₂(s) & s ∈ S₂
-   \end{cases}
-   \) & \(
-   \begin{cases}
-    ι₁(i, α) & (α, i) ∈ C( e_b ) \\
-    ι₂(i, α) & (α, i) ∉ C( e_b )
-   \end{cases}
-   \) & \(
-   \begin{cases}
-    λ₁(ℓ) & \text{\(ℓ\) in \(e₁\)} \\
-    λ₂(ℓ) & \text{\(ℓ\) in \(e₂\)} \\
-    \reject & \text{otherwise}
-   \end{cases}
-   \)\\[30px]
-   %
-   \(e₁ ⋅ e₂\) & \(S₁ + S₂\) & \(
-   \begin{cases}
-    δ₁(s)[ι₂] & s ∈ S₁ \\
-    δ₂(s)      & s ∈ S₂
-   \end{cases}
-   \) & \( ι₁[ι₂](i, α) \) & \(
-   \begin{cases}
-    λ₁(ℓ)[ι₂] & \text{\(ℓ\) in \(e₁\)} \\
-    λ₂(ℓ) & \text{\(ℓ\) in \(e₂\)} \\
-    \reject & \text{otherwise}
-   \end{cases}
-   \) \\[30px]
-   %
-   \({e₁}^{(e_b)}\)
-   & \(S_{e₁}\)
-   & \(⌊δ₁(s)[ι₁^{e_b}]⌋\)
-   & \(⌊ι₁^{e_b}⌋(i, α)\)
-   & \( ⌊ λ(ℓ)[ι₁^{e_b}] ⌋ \) \\[10px]
-  \end{tabular}
-  %FIXME: CZ: I don't feel like we need a new notation 0
-  \caption{Thompson's construction for CF-GKAT. Here,
-  \(!\) denotes the unique function \(!: ∅ → X\) for any $X$,
-  and $\reject, \acc{i}$, depends on the type, sometimes will denote the constant $\reject, \acc{i}$ function}
-  \label{tab: thompson's construction}
-\end{table}
-
 Thompson's construction turns a CF-GKAT expression \(e\) to a CF-GKAT automaton with start dynamics.
 We call the result of said construction \emph{the Thompson's automaton} for \(e\).
-The following paragraphs describe the construction and intuition behind Thompson's construction by cases, and \cref{tab: thompson's construction} serves as a summary; we will use \(A₁ ≜ ⟨S₁, δ₁, ι₁, λ₁⟩\) and \(A₂ ≜ ⟨S₂, δ₂, ι₂, λ₂⟩\) to denote the Thompson's automata for \(e₁\) and \(e₂\) respectively.
+The following paragraphs describe the construction and intuition behind Thompson's construction by cases. 
+We will use \(A₁ ≜ ⟨S₁, δ₁, ι₁, λ₁⟩\) and \(A₂ ≜ ⟨S₂, δ₂, ι₂, λ₂⟩\) to denote the Thompson's automata for \(e₁\) and \(e₂\) respectively; and use \({!}\) to be the unique function from the empty set \({!}: ∅ → X\).
 Finally, to obtain a CF-GKAT automaton with the same continuation semantics as \(e\), we will convert the Thompson's automaton of \(e\) to CF-GKAT automaton by construction \labelcref{cons: CF-GKAT pseudo start to CF-GKAT automata}.
 
 %FIXME: CZ: I think all the following paragraphs should have formally defined the thompson's construction using notation. And the table should only be used as a reference.
 % in this way we can make the table more compact.
-\subsubsection*{Converting \comBrk, \comRet, \command{goto}, and indicator assignment:}
+\paragraph{Converting \comBrk, \comRet, \command{goto}, and indicator assignment:}
 recall the semantics of \(\comBrk\), \(\comRet\), \(\comGoto{ℓ}\), and indicator assignments will simply emit the corresponding continuations.
-Thus, the Thompson's automata for these commands consist only of a start dynamic which yields the desired continuation.
+Thus, the non-trivial part of these Thompson's automata are the start dynamics \(ι\), which output said continuations:
+\begin{align*}
+  S_{\comBrk} & ≜ ∅ &
+    S_{\comRet} & ≜ ∅ &
+    S_{\comGoto{ℓ}} & ≜ ∅ &
+    S_{x := i} & ≜ ∅ \\
+  δ_{\comBrk} & ≜ {!} &
+    δ_{\comRet} & ≜ {!} &
+    δ_{\comGoto{ℓ}} & ≜ {!} &
+    δ_{x := i} & ≜ {!}\\
+  ι_{\comBrk}(i, α) & ≜ \brk{i} &
+    ι_{\comRet}(i, α) & ≜ \ret &
+    ι_{\comGoto{ℓ}}(i, α) & ≜ \jmp{(ℓ, i)} &
+    ι_{x := i}(i, α) & ≜ \acc{i}\\
+  λ_{\comBrk}(ℓ) & ≜ ⊥ &
+    λ_{\comRet}(ℓ) & ≜ ⊥ &
+    λ_{\comGoto{ℓ}}(ℓ) & ≜ ⊥ &
+    λ_{x := i}(ℓ) & ≜ ⊥
+\end{align*}
 
-\subsubsection*{Converting tests and primitive actions:}
+\paragraph{Converting tests and primitive actions:}
 the conversions of primitive tests and primitive actions largely inherit the Thompson's construction for GKAT.
-The Thompson's automaton for tests \(e_b\) will contain only a start dynamic, which will accept the input indicator-atom pairs if and only if they satisfy \(e_b\).
+The Thompson's automaton for tests \(\comAssert{e_b}\) will contain only a start dynamic, which accepts the input indicator-atom pairs if and only if they satisfy \(e_b\).
 The Thompson's automata for primitive actions \(p\) will contain a start dynamic that always transition to the unique state while executing the action \(p\), then the unique state will accept all inputs.
+\begin{align*}
+  S_{\comAssert{e_b}} & ≜ ∅ &
+    S_{p} & ≜ \{*\} \\
+  δ_{\comAssert{e_b}} & ≜ {!} &
+    δ_{p}(s, i, α) & ≜ \acc{i} \\
+  ι_{\comAssert{e_b}}(i, α) & ≜ \begin{cases}
+      \acc{i} & (i, α) ∈ ⟦e_b⟧ \\  
+      ⊥ & (i, α) ∉ ⟦e_b⟧
+    \end{cases} &
+    ι_{p}(i, α) & ≜ (p, *, i) \\
+  λ_{\comAssert{e_b}}(ℓ) & ≜ ⊥ &
+    λ_{p}(ℓ) & ≜ ⊥ 
+\end{align*}
 
-\subsubsection*{Converting labels:}
+\paragraph{Converting labels:}
 recall that \(\comLabel{ℓ'}\) is a non-operation when computing the semantics from the start of the program, i.e. its semantics coincides with the sequential identity: \(\comAssert{\true}\).
 However, the behavior of \(\comLabel{ℓ'}\) and \(\comAssert{\true}\) diverges when we consider the semantics starting from labels.
 Specifically, when starting from a label \(ℓ ≠ ℓ'\),
@@ -880,22 +844,48 @@ Specifically, when starting from a label \(ℓ ≠ ℓ'\),
   C(\comLabel{ℓ'})ᵢ^ℓ = ∅; \and
   C(\comAssert{\true})ᵢ^ℓ = \{α ⋅ \acc{i} ∣ α ∈ \At \}.
 \end{mathpar}
-This difference is reflected in the jump map \(λ: L → D(S)\), which specifies the entry point for each label.
-In this case, the jump map will map \(ℓ'\) to the behavior of the identity operation \(\comAssert{\true}\), and map every other label to constant rejection, representing that the continuation \(\jmp{ℓ}\) will not resume from \(\comLabel{ℓ'}\) when \(ℓ' ≠ ℓ\).
+because the continuation \(\jmp{(ℓ,i)}\) will not resume from \(\comLabel{ℓ'}\) when \(ℓ' ≠ ℓ\).
+This difference is reflected in the jump map \(λ: L → G(S)\), which specifies the entry point for each label.
+In this case, the jump map will map \(ℓ'\) to the behavior of the identity operation \(\comAssert{\true}\), and map every other label to constant rejection.
+\begin{align*}
+  S_{\comLabel{ℓ'}} & ≜ ∅ & 
+  δ_{\comLabel{ℓ'}} & ≜ {!} \\
+  ι_{\comLabel{ℓ'}}(i, α) & ≜ \acc{i} &
+  λ_{\comLabel{ℓ'}}(ℓ, i, α) & ≜ \begin{cases}
+    \acc{i} & ℓ = ℓ'  \\
+    ⊥ & ℓ ≠ ℓ'
+  \end{cases}
+\end{align*}
 
 % FIXME: I think this is too on the nose... Basically just reiterating the definition
-\subsubsection*{Converting \command{if} statements:}
-the Thompson automaton for \(\comITE{e_b}{e₁}{e₂}\) is also similar to that of GKAT:
-If the input atom-indicator pair satisfies \(e_b\), the start \(ι\) will enter the Thompson automaton of \(e₁\) by taking on the behavior of \(ι₁\) ; and when the starting atom-indicator pair doesn't satisfy \(e_b\), then \(ι\) will take on the behavior of \(ι₂\).
+\paragraph{Converting \command{if} statements:}
+the Thompson automaton for \(\comITE{b}{e₁}{e₂}\) is also similar to that of GKAT:
+If the input indicator-atom pair satisfies \(b\), the start \(ι\) will enter the Thompson automaton of \(e₁\) by taking on the behavior of \(ι₁\); and when the starting indicator-atom pair doesn't satisfy \(b\), then \(ι\) will take on the behavior of \(ι₂\).
 The jump map \(λ\) assigns the entry point for label \(ℓ\) based on where \(ℓ\) appears: namely if \(ℓ\) appears in \(e₁\), then \(ℓ\) will take its entry point in \(A₁\); and similarly, if \(ℓ\) appears in \(e₂\), \(ℓ\) will take its entry point in \(A₂\).
+\begin{align*}
+  S_{e₁ +_b e₂} & ≜ S₁ + S₂ \\
+  δ_{e₁ +_b e₂}(s) & ≜ \begin{cases}
+    δ₁(s) & \text{if } s ∈ S₁ \\
+    δ₂(s) & \text{if } s ∈ S₂ \\
+  \end{cases} \\
+  ι_{e₁ +_b e₂}(i, α) & ≜ \begin{cases}
+    ι₁(i, α) & (i, α) ∈ ⟦b⟧ \\  
+    ι₂(i, α) & (i, α) ∉ ⟦b⟧
+  \end{cases} & \\
+  λ_{e₁ +_b e₂}(ℓ, i, α) & ≜ \begin{cases}
+    λ₁(ℓ, i, α) & (\comLabel{ℓ}) \text{ appears in } e₁\\
+    λ₂(ℓ, i, α) & (\comLabel{ℓ}) \text{ appears in } e₂\\
+    ⊥ & \text{otherwise}
+  \end{cases}
+\end{align*}
 
-\subsubsection*{Converting Sequencing:}
-Sequencing of automata can be defined by \emph{uniform continuations}, which combines two dynamics $h₁, h₂ ∈ D(S)$ into a new dynamic \(h₁[h₂]\): the resulting dynamic acts like $h₁$ in almost all cases, except when $h₁$ accepts, then it will take on the behavior of \(h₂\).
+\paragraph{Converting Sequencing:}
+Sequencing of automata can be defined by \emph{uniform continuations}, which combines two dynamics $h₁, h₂ ∈ G(S)$ into a new dynamic \(h₁[h₂]\): the resulting dynamic acts like $h₁$ in almost all cases, except when $h₁$ accepts, then it will take on the behavior of \(h₂\).
 In other word, \(h₁[h₂]\) connects all the accepting transition of \(h₁\) to \(h₂\).
 Uniform continuation is typically used to compose two automata or add self-loops to an automaton; and can be formally defined as follows.
 \begin{definition}[Uniform Continuation]
-  Let $S$ be a set and given two dynamic $h₁, h₂ ∈ D(S)$,
-  their \emph{uniform continuation} is the dynamic $h₁[h₂] ∈ D(S)$, defined as follows:
+  Let $S$ be a set and given two dynamics $h₁, h₂ ∈ G(S)$,
+  their \emph{uniform continuation} is the dynamic $h₁[h₂] ∈ G(S)$, defined as follows:
   \[
     h₁[h₂](i, α) ≜
     \begin{cases}
@@ -907,9 +897,21 @@ Uniform continuation is typically used to compose two automata or add self-loops
 To construct the Thompson's automaton for \(e₁; e₂\),
 we will simply connect all the accepting transition in \(A₁\) to \(A₂\),
 by applying uniform continuations on start dynamics \(ι₁\), transitions \(δ₁\), and jump map \(λ₁\); while preserving the dynamics in \(A₂\).
+\begin{align*}
+  S_{e₁; e₂} & ≜ S₁ + S₂ &
+  δ_{e₁; e₂}(s) & ≜ \begin{cases}
+    δ₁(s)[ι₂] & \text{if } s ∈ S₁ \\
+    δ₂(s) & \text{if } s ∈ S₂ \\
+  \end{cases} \\
+  ι_{e₁; e₂} & ≜ ι₁[ι₂] &
+  λ_{e₁; e₂}(ℓ, i, α) & ≜ \begin{cases}
+    λ₁(ℓ, i, α) & (\comLabel{ℓ}) \text{ appears in } e₁\\
+    λ₂(ℓ, i, α) & (\comLabel{ℓ}) \text{ appears in } e₂\\
+    ⊥ & \text{otherwise}
+  \end{cases}
+\end{align*}
 
-\subsubsection*{Converting \command{while} loops:}
-
+\paragraph{Converting \command{while} loops:}
 Like GKAT automata, CF-GKAT automata require every transition between states to execute a primitive action.
 This characteristic presents a unique challenge in defining the start dynamics for while loops.
 Namely, the primitive action is not necessarily encountered in the first iteration of the loop; for example, consider 
@@ -923,20 +925,20 @@ Namely, the primitive action is not necessarily encountered in the first iterati
   \end{aligned}
  \end{equation}
 with the input indicator \(0\), then the first primitive action \(p\) will be encountered on the second iteration of the loop.
-Even worse, when starting with an indicator variable that is not in \(\{0, 1, 2\}\), the program will be stuck in an infinite loop by the skip (written as \(\comAssert{\true}\)), and never encounter its first primitive action. 
+Even worse, when starting with an indicator variable that doesn't appear in the program, like \(x = 3\), the program will be stuck in an infinite loop by the skip (written as \(\comAssert{\true}\)), and never encounter its first primitive action. 
 
-Fortunately, these difficulties can be resolved by the \(\iter\) function (\cref{def: iteration lifting}). We will iterate the loop body until we encounter a primitive action or non-local control.
+Fortunately, these difficulties can be resolved by the \(\iter\) function (\cref{def: iteration lifting}). We can iterate the loop body until we encounter a primitive action or non-local control.
 \begin{definition}[Iterated Start Dynamics]
-  Let $S$ be a set, let $h ∈ D(S)$, and $e_b ∈ \BExp_I$.
-  We can use the \(\iter\) function to define $hᵇ: D(S)$, as follows:
+  Let $S$ be a set, let $h ∈ G(S)$, and $e_b ∈ \BExp$.
+  We can use the \(\iter\) function to define $h^{(e_b)}: G(S)$, as follows:
   \begin{align*}
-   h^{e_b} & : D(S)\\
-   h^{e_b} & ≜
+   h^{(e_b)} & : G(S)\\
+   h^{(e_b)} & ≜
    \iter\left(
      (i, α) ↦
      \begin{cases}
-       \exitWith(\acc{i}) & \text{if } (i, α) ∉ C(e_b) \\
-       \contWith(i', α) & \text{if } (i, α) ∈ C(e_b) \text{ and } h(i, α) = \acc{i'} \\
+       \exitWith(\acc{i}) & \text{if } (i, α) ∉ ⟦e_b⟧ \\
+       \contWith(i', α) & \text{if } (i, α) ∈ ⟦e_b⟧ \text{ and } h(i, α) = \acc{i'} \\
        \exitWith(h(i, α)) & \text{otherwise}
      \end{cases}
    \right)
@@ -945,10 +947,9 @@ Fortunately, these difficulties can be resolved by the \(\iter\) function (\cref
 In the first case, the input \((i, a)\) doesn't satisfy \(b\), causing the while loop to terminate.
 In the second case, the loop body accepts \((i, α)\) immediately and returns the exit indicator value \(i'\), thus the iteration of loop body will continue with \((i', α)\).
 And the final case is reached when the program executes an action or encounters a non-local control, then the iteration can also be stopped.
-
-\begin{example} 
-  Consider the~\cref{prog:loop-head-iter-example} above with indicator set \(\{0, 1, 2, 3\}\), primitive action \(\{p\}\), no label, and no primitive boolean.
-  Then the only atom is \(∅\), and thompson's automaton \(A₁ ≜ ⟨S₁, δ₁, ι₁, λ₁⟩\) for the loop body
+\begin{example}[Iterated Start Dynamics]
+  Consider the~\cref{prog:loop-head-iter-example} with indicator set \(\{0, 1, 2, 3\}\), primitive action \(\{p\}\), no label, and no primitive test.
+  Then we use \(1 ∈ \At_{∅}\) to denote the unique atom over the empty set. The Thompson's automaton \(A₁ ≜ ⟨S₁, δ₁, ι₁, λ₁⟩\) for the loop body
   \begin{align*}
     & \comITE{x = 0}{x := 1 \\
     &}{\comITE{x = 1}{\{p; x := 2\} \\
@@ -973,26 +974,26 @@ And the final case is reached when the program executes an action or encounters 
   \]
   where \(λ ≜ {!}\) is the unique function \(∅ → G(S₁)\), since the label set is empty.
   %FIXME: this derivation does not exactly follow the definition of iter, but a intuitive account
-  Then the iterated start dynamics \(ι^{x≠2}\) with starting indicator \(0\) can be computed as follows:
+  Then the iterated start dynamics \(ι^{(x≠2)}\) with starting indicator \(0\) can be computed as follows:
   \begin{align*}
-    ι₁^{x≠2}(0, ∅) 
-    & = ι₁^{x≠2}(1, ∅) 
-      & \text{because }(0, ∅) ∈ C(x ≠ 2) \text{ and } ι₁(0, ∅) = \acc{1} \\  
+    ι₁^{(x≠2)}(0, 1) 
+    & = ι₁^{(x≠2)}(1, 1) 
+      & \text{because }(0, 1) ∈ ⟦x ≠ 2⟧ \text{ and } ι₁(0, 1) = \acc{1} \\  
     & = (p, s, 2)
-      & \text{because } ι₁(1, ∅) = (p, s, 2) \\
-    ι₁^{x≠2}(3, ∅) 
-    & = ι₁^{x≠2}(3, ∅) 
-      & \text{because }(3, ∅) ∈ C(x ≠ 2) \text{ and } ι₁(3, ∅) = \acc{3} \\  
-    & = \reject
-      & \text{the input \((3, ∅)\) is already explored}
+      & \text{because } ι₁(1, 1) = (p, s, 2) \\
+    ι₁^{(x≠2)}(3, ∅) 
+    & = ι₁^{(x≠2)}(3, ∅) 
+      & \text{because }(3, 1) ∈ ⟦x ≠ 2⟧ \text{ and } ι₁(3, 1) = \acc{3} \\  
+    & = ⊥
+      & \text{because the input \((3, 1)\) is already explored}
   \end{align*}
 \end{example}
 
 With the start dynamics defined, we still need to resolve structures within the loop body, like the \(\comBrk\)-continuation.
 To perform $\comBrk$-resolution, we extend the \(⌊-⌋\) operator to dynamics.
 \begin{definition}
-Let $S$ be a set, and let $h ∈ D(S)$.
-We define $⌊h⌋ ∈ D(S)$ by lifting \(h\) via \(⌊-⌋\) when it returns a continuation:
+Let $S$ be a set, and let $h ∈ G(S)$.
+We define $⌊h⌋ ∈ G(S)$ by lifting \(h\) via \(⌊-⌋\) when it returns a continuation:
 \[
   ⌊h⌋(i, α) = \begin{cases}
   ⌊h(i, α)⌋ & \text{if } h(i, α) ∈ C \\
@@ -1003,8 +1004,13 @@ We define $⌊h⌋ ∈ D(S)$ by lifting \(h\) via \(⌊-⌋\) when it returns a 
 
 Finally, the transition function \(δ\) and jump map \(λ\) can be defined by first connecting \(δ₁\) and \(λ₁\) back to start dynamics \(ι\), forming a loop in the automaton;
 then resolving the \(\brk{i}\) continuations using the break resolution function \(⌊-⌋\).
-
-% FIXME: we need an example here, based on the unproductive loop shown above - T
+Formally, the Thompson's automaton for loop \(e^{(e_b)}\) can be defined as follows:
+\begin{align*}
+  S_{e₁^{(e_b)}} & ≜ S₁ & 
+  δ_{e₁^{(e_b)}} & ≜ ⌊ δ₁(s)[{ι₁}^{(e_b)}] ⌋ &  
+  ι_{e₁^{(e_b)}} & ≜ ⌊ {ι₁}^{(e_b)} ⌋ &
+  λ_{e₁^{(e_b)}}(ℓ) & ≜ ⌊ λ(ℓ)[{ι₁}^{(e_b)}] ⌋
+\end{align*}
 
 
 % FIXME: I think this is good to say, but should be in a separate remark after the construction is fully presented - T
@@ -1015,14 +1021,82 @@ then resolving the \(\brk{i}\) continuations using the break resolution function
 % However, for a fixed atom \(α\), we can cache the result of each \(i\),
 % leading to a \(|I|\)-timed algorithm to compute \(γ\) for every input \(i\).
 
-
-
-With the Thompson's construction defined, we can state the correctness of the Thompson's construction as follows.
+We present a summary of the Thompson's construction in~\cref{tab: thompson's construction}, and we will state the correctness of the Thompson's construction as follows.
 \begin{theorem}[Thompson's construction preserves continuation semantics]\label{the:thompson-correctness}
- Let $e ∈ \CFGKAT$, and let $A_e$ be the Thompson automaton for $e$, then \(C(e) = C(A_e)\). Specifically, unfolding the definition of continuation semantics gives us:
- \[∀ i ∈ I, ℓ ∈ \{♯\} + L, C(e)ᵢ^ℓ = C(A_e)ᵢ^ℓ\]
-\end{theorem}
+  Given an expression $e ∈ \CFGKAT$, let $A_e$ be the Thompson automaton for $e$, then \(C(e) = C(A_e)\). By unfolding the definition of continuation semantics:
+  \[∀ i ∈ I, ℓ ∈ \{♯\} + L, C(e)ᵢ^ℓ = C(A_e)ᵢ^ℓ\]
+ \end{theorem}
 
+
+% FIXME: The syntax in the expression column is the compact one... we probably want to change that - T
+% FIXME: CZ: we don't have enough space, we need to think about this.
+\begin{table}
+  \centering
+  \renewcommand\arraystretch{2}
+  \begin{tabular}{c || c | l | l | l}
+   \(e\)  & \(S\) & \(δ(s)\) & \(ι(i, α)\) & \(λ(ℓ)\) \\
+   \hline
+   \(x := i'\) & \(∅\) & \(!\) & \(\acc{i}\) & \(\const(⊥)\) \\
+   \(\comRet\) & \(∅\) & \(!\) & \(\ret\) & \(\const(⊥)\) \\
+   \(\comBrk\) & \(∅\) & \(!\) & \(\brk{i}\) & \(\const(⊥)\) \\
+   \(\comGoto{ℓ}\) & \(∅\) & \(!\) & \(\jmp{(ℓ, i)}\) & \(\const(⊥)\) \\
+   \(\comAssert{b}\)& \(∅\)& \(!\)& \(
+   \begin{cases}
+    \acc{i} & (i, α) ∈ ⟦ b ⟧   \\
+    ⊥       & (i, α) ∉ ⟦ b ⟧ 
+   \end{cases}
+   \) & \(\const(⊥)\) \\
+   \(p\) & \(\{*\}\) & \(λ i.\const(\acc{i})\) & \((p, *, i)\) & \(\const(⊥)\) \\
+   %
+   \(\comLabel{ℓ'}\) & \(∅\) & \(!\)  & \(\acc{i}\) &
+    \(\begin{cases}
+      λ i.\const(\acc{i}) & ℓ = ℓ' \\
+      \const(⊥)    & ℓ ≠ ℓ'
+      \end{cases}
+   \)\\
+   %
+   \(e₁ +_{e_b} e₂\) & \(S₁ + S₂\) & \(
+   \begin{cases}
+    δ₁(s) & s ∈ S₁ \\
+    δ₂(s) & s ∈ S₂
+   \end{cases}
+   \) & \(
+   \begin{cases}
+    ι₁(i, α) & (i, α) ∈ ⟦ b ⟧ \\
+    ι₂(i, α) & (i, α) ∉ ⟦ b ⟧
+   \end{cases}
+   \) & \(
+   \begin{cases}
+    λ₁(ℓ) & \text{\(ℓ\) in \(e₁\)} \\
+    λ₂(ℓ) & \text{\(ℓ\) in \(e₁\)} \\
+    0 & \text{otherwise}
+   \end{cases}
+   \)\\
+   %
+   \(e₁ ⋅ e₂\) & \(S₁ + S₂\) & \(
+   \begin{cases}
+    δ₁(s)[ι₂] & s ∈ S₁ \\
+    δ₂(s)      & s ∈ S₂
+   \end{cases}
+   \) & \( ι₁[ι₂](i, α) \) & \(
+   \begin{cases}
+    λ₁(ℓ)[ι₂] & \text{\(ℓ\) in \(e₁\)} \\
+    λ₂(ℓ) & \text{\(ℓ\) in \(e₁\)} \\
+    0 & \text{otherwise}
+   \end{cases}
+   \) \\
+   %
+   \({e₁}^{(b)}\)
+   & \(S_{₁}\)
+   & \(⌊δ₁(s)[{ι₁}ᵇ]⌋\)
+   & \(⌊{ι₁}ᵇ⌋(i, α)\)
+   & \( ⌊ λ(ℓ)[{ι₁}ᵇ] ⌋ \) \\
+  \end{tabular}
+  %FIXME: CZ: I don't feel like we need a new notation 0
+  \caption{Thompson's construction for CF-GKAT. Here,
+  \(!\) denotes the unique function \(!: ∅ → X\) for any $X$, and \(\const(x)\) denotes the constant function that always return \(x\)}
+  \label{tab: thompson's construction}
+\end{table}
 \subsection{Algorithm and Complexity}
 
 With the definitions of lowering and Thompson's construction established, the decision procedure mostly follows.

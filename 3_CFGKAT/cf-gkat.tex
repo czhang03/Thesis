@@ -954,34 +954,34 @@ In the second case, the loop body accepts \((i, α)\) immediately and returns th
 And the final case is reached when the program executes an action or encounters a non-local control, then the iteration can also be stopped.
 \begin{example} [Iterated Start Dynamics]
   Consider~\cref{prog:loop-head-iter-example} above with indicator set \(\{0, 1, 2\}\), no primitive action, no label, and no primitive test.
-  Then the only atom is \(∅\), and Thompson's automaton \(A₁ ≜ ⟨S₁, δ₁, ι₁, λ₁⟩\) for the loop body
+  We use \(\true\) to denote the only atom over empty set. Thus, the  Thompson's automaton \(A₁ ≜ ⟨S₁, δ₁, ι₁, λ₁⟩\) of the loop body
   \begin{align*}
     & \comITE{x = 0}{x := 1 \\
     &}{\comITE{x = 1}{\comBrk \\
     &}{\{\comAssert{\true}\}}}
   \end{align*}
-  can be computed to be following
+  can be computed as the following
   \begin{align*}
-    && ι₁(0, ∅) & ≜ \acc{1} &&&\\
+    && ι₁(0, \true) & ≜ \acc{1} &&&\\
     S₁ & ≜ ∅ & 
-    ι₁(1, ∅) & ≜ \brk{1} &
+    ι₁(1, \true) & ≜ \brk{1} &
     δ₁ & ≜ {!} & 
     λ & ≜ {!}\\
-    && ι₁(2, ∅) & ≜ \acc{2} &&&
+    && ι₁(2, \true) & ≜ \acc{2} &&&
   \end{align*}
   %FIXME: this derivation does not exactly follow the definition of iter, but a intuitive account
-  Then we compute iterated start dynamics \(ι^{(\true)}\) with input \((0,∅)\) and \((2,∅)\):
+  Then we compute iterated start dynamics \(ι^{(\true)}\) with input \((0,\true)\) and \((2,\true)\):
   \begin{align*}
-    {ι₁}^{(\true)}(0, ∅) 
-    & = {ι₁}^{(\true)}(1, ∅) 
-      & \text{because }(0, ∅) ∈ ⟦\true⟧ \text{ and } {ι₁}(0, ∅) = \acc{1} \\  
+    {ι₁}^{(\true)}(0, \true) 
+    & = {ι₁}^{(\true)}(1, \true) 
+      & \text{because }(0, \true) ∈ ⟦\true⟧ \text{ and } {ι₁}(0, \true) = \acc{1} \\  
     & = \brk{1}
-      & \text{because } {ι₁}(1, ∅) = \brk{1} \\[10px]
-    {ι₁}^{(\true)}(2, ∅) 
-    & = {ι₁}^{(\true)}(2, ∅) 
-      & \text{because }(2, ∅) ∈ ⟦\true⟧ \text{ and } ι₁(2, ∅) = \acc{2} \\  
+      & \text{because } {ι₁}(1, \true) = \brk{1} \\[10px]
+    {ι₁}^{(\true)}(2, \true) 
+    & = {ι₁}^{(\true)}(2, \true) 
+      & \text{because }(2, \true) ∈ ⟦\true⟧ \text{ and } ι₁(2, \true) = \acc{2} \\  
     & = ⊥
-      & \text{because the input \((2, ∅)\) is already explored}
+      & \text{because the input \((2, \true)\) is already explored}
   \end{align*}
 \end{example}
 

@@ -792,6 +792,11 @@ Thompson's construction turns a CF-GKAT expression \(e\) to a CF-GKAT automaton 
 We call the result of said construction \emph{the Thompson's automaton} for \(e\).
 The following paragraphs describe the construction and intuition behind Thompson's construction by cases. 
 We will use \(A₁ ≜ ⟨S₁, δ₁, ι₁, λ₁⟩\) and \(A₂ ≜ ⟨S₂, δ₂, ι₂, λ₂⟩\) to denote the Thompson's automata for \(e₁\) and \(e₂\) respectively; and use \({!}\) to be the unique function from the empty set \({!}: ∅ → X\).
+For brevity, we will use the compact notation~\cite{Smolka_Foster_Hsu_Kappé_Kozen_Silva_2020} for \command{if}-statements and \command{while}-loop:
+\begin{mathpar}
+  e₁ +_b e₂ ≜ \comITE{b}{e₁}{e₂}, \and 
+  e₁^{(b)} ≜ \comWhile{b}{e₁}.
+\end{mathpar}
 Finally, to obtain a CF-GKAT automaton with the same continuation semantics as \(e\), we will convert the Thompson's automaton of \(e\) to CF-GKAT automaton by construction \labelcref{cons: CF-GKAT pseudo start to CF-GKAT automata}.
 
 %FIXME: CZ: I think all the following paragraphs should have formally defined the thompson's construction using notation. And the table should only be used as a reference.
@@ -917,15 +922,15 @@ This characteristic presents a unique challenge in defining the start dynamics f
 Namely, the primitive action is not necessarily encountered in the first iteration of the loop; for example, consider 
 \begin{equation}\label[prog]{prog:loop-head-iter-example}
   \begin{aligned}
-    \comWhile{ & x ≠ 2}{\{\\
+    \comWhile{ & \true}{\{\\
       & \comITE{x = 0}{x := 1 \\
-      &}{\comITE{x = 1}{\{p; x := 2\} \\
+      &}{\comITE{x = 1}{\comBrk \\
       &}{\{\comAssert{\true}\}}}\\ 
       \}}
   \end{aligned}
  \end{equation}
-with the input indicator \(0\), then the first primitive action \(p\) will be encountered on the second iteration of the loop.
-Even worse, when starting with an indicator variable that doesn't appear in the program, like \(x = 3\), the program will be stuck in an infinite loop by the skip (written as \(\comAssert{\true}\)), and never encounter its first primitive action. 
+with the input indicator \(0\), then the first continuation \(\brk{1}\) will be encountered on the second iteration of the loop.
+Even worse, when starting with an indicator value that does not appear in the program, like \(x = 2\), the program will enter an infinite loop and never encounter its first primitive action or continuation. 
 
 Fortunately, these difficulties can be resolved by the \(\iter\) function (\cref{def: iteration lifting}). We can iterate the loop body until we encounter a primitive action or non-local control.
 \begin{definition}[Iterated Start Dynamics]
@@ -947,45 +952,36 @@ Fortunately, these difficulties can be resolved by the \(\iter\) function (\cref
 In the first case, the input \((i, a)\) doesn't satisfy \(b\), causing the while loop to terminate.
 In the second case, the loop body accepts \((i, α)\) immediately and returns the exit indicator value \(i'\), thus the iteration of loop body will continue with \((i', α)\).
 And the final case is reached when the program executes an action or encounters a non-local control, then the iteration can also be stopped.
-\begin{example}[Iterated Start Dynamics]
-  Consider the~\cref{prog:loop-head-iter-example} with indicator set \(\{0, 1, 2, 3\}\), primitive action \(\{p\}\), no label, and no primitive test.
-  Then we use \(1 ∈ \At_{∅}\) to denote the unique atom over the empty set. The Thompson's automaton \(A₁ ≜ ⟨S₁, δ₁, ι₁, λ₁⟩\) for the loop body
+\begin{example} [Iterated Start Dynamics]
+  Consider~\cref{prog:loop-head-iter-example} above with indicator set \(\{0, 1, 2\}\), no primitive action, no label, and no primitive test.
+  Then the only atom is \(∅\), and Thompson's automaton \(A₁ ≜ ⟨S₁, δ₁, ι₁, λ₁⟩\) for the loop body
   \begin{align*}
     & \comITE{x = 0}{x := 1 \\
-    &}{\comITE{x = 1}{\{p; x := 2\} \\
+    &}{\comITE{x = 1}{\comBrk \\
     &}{\{\comAssert{\true}\}}}
   \end{align*}
   can be computed to be following
-  \[
-    S₁ ≜ \{s\} \qquad 
-    \begin{aligned}
-      ι₁(0, ∅) & ≜ \acc{1}\\
-      ι₁(1, ∅) & ≜ (p, s, 2)\\
-      ι₁(2, ∅) & ≜ \acc{2}\\
-      ι₁(3, ∅) & ≜ \acc{3}
-    \end{aligned} \qquad
-    \begin{aligned}
-      δ₁(s, 0, ∅) & ≜ \acc{0}\\
-      δ₁(s, 1, ∅) & ≜ \acc{1}\\
-      δ₁(s, 2, ∅) & ≜ \acc{2}\\
-      δ₁(s, 3, ∅) & ≜ \acc{3}
-    \end{aligned} \qquad
-    λ ≜ {!}
-  \]
-  where \(λ ≜ {!}\) is the unique function \(∅ → G(S₁)\), since the label set is empty.
-  %FIXME: this derivation does not exactly follow the definition of iter, but a intuitive account
-  Then the iterated start dynamics \(ι^{(x≠2)}\) with starting indicator \(0\) can be computed as follows:
   \begin{align*}
-    ι₁^{(x≠2)}(0, 1) 
-    & = ι₁^{(x≠2)}(1, 1) 
-      & \text{because }(0, 1) ∈ ⟦x ≠ 2⟧ \text{ and } ι₁(0, 1) = \acc{1} \\  
-    & = (p, s, 2)
-      & \text{because } ι₁(1, 1) = (p, s, 2) \\
-    ι₁^{(x≠2)}(3, ∅) 
-    & = ι₁^{(x≠2)}(3, ∅) 
-      & \text{because }(3, 1) ∈ ⟦x ≠ 2⟧ \text{ and } ι₁(3, 1) = \acc{3} \\  
+    && ι₁(0, ∅) & ≜ \acc{1} &&&\\
+    S₁ & ≜ ∅ & 
+    ι₁(1, ∅) & ≜ \brk{1} &
+    δ₁ & ≜ {!} & 
+    λ & ≜ {!}\\
+    && ι₁(2, ∅) & ≜ \acc{2} &&&
+  \end{align*}
+  %FIXME: this derivation does not exactly follow the definition of iter, but a intuitive account
+  Then we compute iterated start dynamics \(ι^{(\true)}\) with input \((0,∅)\) and \((2,∅)\):
+  \begin{align*}
+    {ι₁}^{(\true)}(0, ∅) 
+    & = {ι₁}^{(\true)}(1, ∅) 
+      & \text{because }(0, ∅) ∈ ⟦\true⟧ \text{ and } {ι₁}(0, ∅) = \acc{1} \\  
+    & = \brk{1}
+      & \text{because } {ι₁}(1, ∅) = \brk{1} \\[10px]
+    {ι₁}^{(\true)}(2, ∅) 
+    & = {ι₁}^{(\true)}(2, ∅) 
+      & \text{because }(2, ∅) ∈ ⟦\true⟧ \text{ and } ι₁(2, ∅) = \acc{2} \\  
     & = ⊥
-      & \text{because the input \((3, 1)\) is already explored}
+      & \text{because the input \((2, ∅)\) is already explored}
   \end{align*}
 \end{example}
 

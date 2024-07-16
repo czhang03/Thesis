@@ -1139,9 +1139,438 @@ We denote the algorithm introduced above as \(\mathrm{equiv}_{\CFGKAT}\), while 
 \end{align*}
 This equivalence ensures that the algorithm \(\mathrm{equiv}_{\GKAT}\) not only correctly determines whether \(e\) and \(f\) have the same trace semantics; but also guarantees that if \(e\) and \(f\) are trace equivalent, then \(\mathrm{equiv}_{\GKAT}(e, f)\) will return true.
 
-The complexity analysis of this algorithm is straightforward. Starting with an expression \(e\), we can observe through induction that the number of states in the Thompson's automaton \(A_e\) is bounded by \(|e|\), where the size \(|e|\) represents the number of primitive actions in \(e\).
-After the lowering process, each GKAT automaton \(A_e\!↓\) contains at most \(|I|×|e|\) states. 
-Notably, for each \(i ∈ I\), determining the equivalence between \(A_e\!↓ᵢ\) and \(A_f\!↓ᵢ\) is accomplished in nearly linear time relative to their states (assuming a constant number of primitive tests)~\cite{Smolka_Foster_Hsu_Kappé_Kozen_Silva_2020}, which is bounded by \(|I|×(|e|+|f|)\).
-To verify the trace equivalence between \(e\) and \(f\), equivalence checks are required for \(A_e\!↓ᵢ\) and \(A_f\!↓ᵢ\) across all \(i∈I\). 
-Therefore, the overall time complexity is nearly linear with respect to \(|I|^2 × (|e|+|f|)\). 
-This implies that the algorithm's complexity scales nearly linearly with the sizes of \(e\) and \(f\), but nearly quadratically with respect to the number of the indicator values \(|I|\).
+\paragraph*{Algorithm complexity:}
+We now give a rough account of the computational cost for deciding equivalence of CF-GKAT programs.
+Like GKAT, we consider the primitive tests \(B\) to be fixed for the purpose of analyzing complexity; otherwise, deciding equivalence of (CF-)GKAT programs is co-NP hard~\cite{Smolka_Foster_Hsu_Kappé_Kozen_Silva_2020}.
+
+Starting with an expression \(e\), we observe that the number of states in the Thompson automaton \(A_e\) is bounded by \(|e|\), which is the size of $e$ as a term.
+While computing this automaton we must bear in mind that deriving the iterated start dynamics of a loop using $\iter$ may take up to $|I|$ steps (assuming we use memoization to compute the output for each input), and this happens at most $|e|$ times.
+After lowering, each GKAT automaton \(A_e\!↓\) contains at most \(|I|×|e|\) states, and computing the jump resolution using $\iter$ takes on the order of $|L| \times |I|$ steps (again using memoization). 
+
+For each \(i ∈ I\), determining the equivalence between \(A_e\!↓ᵢ\) and \(A_f\!↓ᵢ\) is accomplished in (nearly\footnote{We omit the factor coming from the inverse Ackermann function $\hat{\alpha}(n)$, which is at most $5$ for any realistic number of states, out of consideration for the sake of simplicity.}) linear time relative to the number of states, so this check takes about \(|I|×(|e|+|f|)\) steps.
+To verify trace equivalence between \(e\) and \(f\), this check is required for \(A_e\!↓ᵢ\) and \(A_f\!↓ᵢ\) across all \(i∈I\). 
+
+Therefore, the overall time spent on the equivalence checks is on the order of \(|I|^2 × (|e|+|f|)\), while computing the automata can take roughly $|L| × |I| + |I| × (|e| + |f|)$ time. 
+This implies that the algorithm's complexity scales (nearly) linearly with the sizes of \(e\) and \(f\), linearly in the size of $L$, and quadratically with respect to the number of indicator values \(|I|\).
+
+
+\section{Control Flow Verification}%
+\label{sec:experiments}
+
+% Our theory can be specialized into control flow verification in two different way: first, we can decide the equivalence between a program with a flowchart, where the flowchart is represented by a GKAT automaton; second, we can directly decide the equivalence between to programs.
+
+We hypothesize that CF-GKAT can be a useful tool to check whether two programs have the same control flow, i.e.:\ under the same circumstances, they execute the same sequence of primitive commands.
+An example use case could be to validate
+the \emph{control flow structuring} stage of a decompiler.
+Briefly put, a decompiler is a program tasked with inferring a high-level language representation of a binary executable file.
+In earlier stages, the decompiler builds a \emph{control-flow graph} from the binary, in which the vertices represent different blocks of instructions, and the edges encode how control may transfer from the end of one block to the beginning of the other.
+The control flow structuring pass is tasked with inferring an equivalent representation of this control flow graph in terms of constructs like \command{if-then-else} and \command{while-do}.
+A tool that validates the output of a control flow structuring algorithm could leverage CF-GKAT, by casting the control flow graph as a GKAT automaton, and comparing that to the GKAT automaton that corresponds to the inferred program.
+
+Another use case would be to validate
+the correctness of refactoring operations aimed at making code more readable by eliminating or introducing early loop termination.
+In general, algorithms along these lines can never be \emph{complete} with respect to input-output equivalences, as they cannot automatically validate the correctness of refactorings that introduce or eliminate primitive commands, even when this produces a functionally equivalent program.
+However, CF-GKAT should be applicable to refactoring operations that rearrange the code for the sake of improving the presentation of the control flow.
+
+In this section, we test our hypotheses on the applicability and efficiency of CF-GKAT\@.
+We start by describing our proof of concept of the proposed decision procedure.
+Next, we report on a case study that reflects the two use cases described above.
+
+\subsection{Implementation}
+
+We target the C language as it is a widely used programming language that allows for non-local flow control.
+Our implementation is written in OCaml and can be divided into two parts:
+\begin{itemize}
+    \item
+    The \emph{front-end} converts a function defined in a C file to a CF-GKAT expression.
+    This conversion is based on the \command{clangML}\footnote{\url{https://memcad.gitlabpages.inria.fr/clangml/}} project which provides OCaml bindings for the \command{clang} compiler.\footnote{\url{https://clang.llvm.org/}}
+    The conversion first determines which variables, if any, qualify as indicator variables and picks one variable from the set when possible.
+    Next, it lifts the C syntax tree to a CF-GKAT program, mapping (1)~all assignments and comparisons of the indicator variable to their CF-GKAT counterparts, (2)~all other primitive statements to uninterpreted actions, and (3)~all control flow constructs to the corresponding CF-GKAT operator whenever possible.
+    % TODO: We should probably have a figure with an example somewhere here.
+    \item
+    The \emph{back-end} is responsible for compiling a CF-GKAT expression down to a GKAT automaton, and for comparing two GKAT automata.
+    This GKAT automaton is derived via the Thompson construction described in \Cref{section:decision procedure}; the equivalence check for GKAT automata uses the bisimulation checking procedure proposed in~\cite{Smolka_Foster_Hsu_Kappé_Kozen_Silva_2020}.
+\end{itemize}
+
+The front-end and back-end combine into a tool that accepts two C files, and checks whether the functions defined therein (paired by their name) have the same control flow.
+Given that not all C programs can be faithfully converted to CF-KAT expressions, our front-end does not aim to be complete; instead, we aimed to support the transformation of a sizeable portion of the code in the GNU \command{coreutils} project to perform the experiments described in the next section.
+
+\begin{remark}
+In particular, our front-end internally converts \command{for}-loops to \command{while}-loops, and \command{do-while} loops to (partially unrolled) \command{while} loops. The former transformation is sound; the latter is admissible when the loop body does not contain \command{break} or a label, which is the case for our experiment below.
+\end{remark}
+
+\subsection{A Case Study From GNU coreutils}
+
+\begin{figure}[hbtp]
+\centering
+ \begin{subfigure}{0.46\textwidth}
+ \begin{lstlisting}[basicstyle=\tiny\ttfamily]
+  static void mp_factor_using_pollard_rho(...) {
+  mpz_t x, z, y, P;
+  mpz_t t, t2;
+  devmsg("...", a);
+  ...
+  while (mpz_cmp_ui(n, 1) != 0) {
+    for (;;) {
+      do {
+        mpz_mul(t, x, x);
+        ...
+        if (k % 32 == 1) {
+          mpz_gcd(t, P, n);
+          if (mpz_cmp_ui(t, 1) != 0)
+            goto factor_found;
+          mpz_set(y, x);
+        }
+      } while (--k != 0);
+      mpz_set(z, x);
+      ...
+      for (unsigned long long int i = 0; i < k; i++) {
+        mpz_mul(t, x, x);
+        ...
+      }
+      mpz_set(y, x);
+    }
+  factor_found:
+    do {
+      mpz_mul(t, y, y);
+      ...
+    } while (mpz_cmp_ui(t, 1) == 0);
+    mpz_divexact(n, n, t);
+    if (!mp_prime_p(t)) {
+      devmsg("...");
+      ...
+    } else {
+      mp_factor_insert(factors, t);
+    }
+    if (mp_prime_p(n)) {
+      mp_factor_insert(factors, n);
+      break;
+    }
+    mpz_mod(x, x, n);
+    ...
+  }
+  mpz_clears(P, t2, t, z, x, y, nullptr);
+}
+ \end{lstlisting}
+ \caption{\label{c:orig}Original code of the function.}
+ \end{subfigure}
+ \begin{subfigure}{0.46\textwidth}
+ \begin{lstlisting}[basicstyle=\tiny\ttfamily]
+void mp_factor_using_pollard_rho() {
+  pact(197);
+  ...
+  do {
+    if (pbool(83)) {
+      pact(194);
+    }
+
+  } while (0);
+  pact(193);
+  ...
+  while (pbool(83)) {
+    for (;;) {
+      do {
+        pact(176);
+        ...
+        if (pbool(183)) {
+          pact(182);
+          if (pbool(83)) {
+            goto factor_found;
+          }
+          pact(173);
+        }
+
+      } while (pbool(181));
+      pact(180);
+      ...
+      for (pact(177); pbool(138); pbool(59)) {
+        pact(176);
+        ...
+      }
+      pact(173);
+    }
+  factor_found:
+    do {
+      pact(172);
+      ...
+    } while (pbool(83));
+    pact(166);
+    if (!pbool(165)) {
+      do {
+        if (pbool(83)) {
+          pact(164);
+        }
+      } while (0);
+      pact(163);
+    } else {
+      pact(161);
+    }
+    if (pbool(160)) {
+      pact(159);
+      break;
+    }
+    pact(158);
+    ...
+  }
+  pact(155);
+}
+ \end{lstlisting}
+ \caption{\label{c:blinded}``Blinded'' code of the function.}
+ \end{subfigure}
+ \caption{Different versions of \command{mp\_factor\_using\_pollard\_rho} in \command{factor.c}, part of GNU \command{coreutils}.}
+ \vspace{3mm} % HACK
+\end{figure}
+\begin{figure}
+ \begin{subfigure}{0.46\textwidth}
+ \begin{lstlisting}[basicstyle=\tiny\ttfamily]
+void mp_factor_using_pollard_rho(void) {
+  pact(0xc5);
+  ...
+  if (pbool(0x53)) {
+    pact(0xc2);
+  }
+  pact(0xc1);
+  ...
+LAB_00100a0c:
+  if (pbool(0x53)) {
+  LAB_00100a2d:
+    pact(0xb0);
+    ...
+    if (pbool(0xb7)) {
+      pact(0xb6);
+      if (pbool(0x53))
+        goto LAB_00100b47;
+      pact(0xad);
+    }
+    if (!pbool(0xb5)) {
+      pact(0xb4);
+      ...
+      while (pbool(0x8a)) {
+        pact(0xb0);
+        ...
+      }
+      pact(0xad);
+    }
+    goto LAB_00100a2d;
+  }
+LAB_00100c34:
+  pact(0x9b);
+  return;
+LAB_00100b47:
+  do {
+    pact(0xac);
+    ...
+  } while (pbool(0x53));
+  pact(0xa6);
+  if (!pbool(0xa5)) {
+    if (pbool(0x53)) {
+      pact(0xa4);
+    }
+    pact(0xa3);
+  } else {
+    pact(0xa1);
+  }
+  if (pbool(0xa0)) {
+    pact(0x9f);
+    goto LAB_00100c34;
+  }
+  pact(0x9e);
+  ...
+  goto LAB_00100a0c;
+}
+ \end{lstlisting}
+ \caption{\label{c:ghidra}Code of the Ghidra's decompilation of the function.}
+ \end{subfigure}
+ \begin{subfigure}{0.46\textwidth}
+ \begin{lstlisting}[basicstyle=\tiny\ttfamily]
+void mp_factor_using_pollard_rho() {
+  int factor_found = 0;
+  pact(197);
+  ...
+  do {
+    if (pbool(83)) {
+      pact(194);
+    }
+  } while (0);
+  pact(193);
+  ...
+  while (pbool(83)) {
+    for (; factor_found == 0;) {
+      do {
+        pact(176);
+        ...
+        if (pbool(183)) {
+          pact(182);
+          if (pbool(83)) {
+            factor_found = 1;
+          }
+          if (factor_found == 0)
+            pact(173);
+        }
+      } while ((factor_found == 0) && pbool(181));
+      if (factor_found == 0) {
+        pact(180);
+        ...
+        for (pact(177); pbool(138); pbool(59)) {
+          pact(176);
+          ...
+        }
+        pact(173);
+      }
+    }
+    factor_found = 0;
+    do {
+      pact(172);
+      ...
+    } while (pbool(83));
+    pact(166);
+    if (!pbool(165)) {
+      do {
+        if (pbool(83)) {
+          pact(164);
+        }
+      } while (0);
+      pact(163);
+    } else {
+      pact(161);
+    }
+    if (pbool(160)) {
+      pact(159);
+      break;
+    }
+    pact(158);
+    ...
+  }
+  pact(155);
+}
+ \end{lstlisting}
+ \caption{\label{c:calipso}Code of the function with \command{goto}s removed by \command{Calipso}.}
+ \end{subfigure}
+ \caption{Different versions of the function \command{mp\_factor\_using\_pollard\_rho} in \command{factor.c}, part of GNU \command{coreutils}.}
+\end{figure}
+
+% We tested our implementation by attempting to validate the results of certain program transformations.
+% In each experiment we take a function body, apply a code transformation, and then check whether our implementation can certify that the input code has the same control flow as the output code.
+
+We used GNU \command{coreutils} as a source of C code containing non-local control flow.
+%
+As is customary with projects of this size, the code is organized into several files that collectively define thousands of functions, ranging from very simple to very complex, that implement utilities commonly found in POSIX systems.
+%
+%FIXME: I think it is helpful to describe the code size (number of lines) and the complex structure the function has.
+Throughout this section, we will use the function \command{mp\_factor\_using\_pollard\_rho} in \command{factor.c} as an example of the validation machinery we built on top of CF-GKAT. The code in Figure~\ref{c:orig} shows an abridged version of this function in \command{coreutils} version 9.5. We now discuss the two transformations we targeted as applications that can be validated via CF-GKAT.
+
+\paragraph{Compilation-decompilation}
+We hypothesize that the theory behind CF-GKAT should be usable to validate the output of control flow structuring algorithms in decompilers.
+To fully test this hypothesis, we would need to have access to the internal representations used before and after control flow structuring, and convert those to GKAT automata and CF-GKAT expressions, respectively.
+Unfortunately, doing this would entail a substantial engineering effort, which would go beyond the scope of this project.
+As a more feasible but slightly less rigorous benchmark, we opted to \emph{compile} C code to x86 binary code, and then \emph{decompile} the result using Ghidra.\footnote{\url{https://ghidra-sre.org/}}
+This transformation can be implemented without modifying existing codebases, and should still give some insight into decompiler correctness in that it lets us compare the decompiled source to the original.
+% We manually inspected negative outcomes to rule out compiler bugs, but did not rule out the (theoretical) possibility of ``two wrongs making a right'', i.e., a bug in the decompiler unwittingly compensating a bug in the compiler, leading to a false positive outcome.
+
+However, we immediately face the challenge of pairing the primitive actions from the decompiled code to their corresponding actions in the source code. 
+For instance, a primitive action \lstinline{i += 1} in the source code can be decompiled to \lstinline{i++} in certain contexts.
+Detecting \emph{all} such transformations would require a large engineering effort. 
+To address this, we make the compiler \emph{blind} to the nature of the primitive actions and primitive tests by replacing primitive actions and primitive tests with calls to new functions \lstinline{void pact(int)} and \lstinline{bool pbool(int)}, respectively. The parameter distinguishes the primitives, and the correspondence in the decompiled code can be inferred from it. Figure~\ref{c:blinded} shows the (abbreviated) \emph{blinded} version of our case study function. Note that this transformation does not alter control flow, but the blinded code can be longer, as the blinder also expands preprocessor macros.
+Crucially, blinding depends on indicator variable detection, since indicator tests and assignments need to remain in the blinded code.
+
+In this experiment, we utilize Ghidra as our decompiler of choice, and clang as our compiler.
+%FIXME: verify the above sentence 
+The C code obtained from compiling and then decompiling the blinded code (Figure~\ref{c:blinded}) is shown in Figure~\ref{c:ghidra}. 
+We have manually removed some decompilation artifacts, for example the expression \lstinline{(pbool(n) & 1) != 0} is simplified to \lstinline{pbool(n)} in conditional expressions.
+The code produced by Ghidra is markedly different from the source---it has 3 more labels (and 3 additional corresponding \command{goto}s)---yet our implementation is able to validate that this output is equivalent to the original.
+
+\paragraph{Goto-elimination}
+In general, \command{goto} statements can be eliminated from C code by introducing additional indicator variables to guide the control flow~\cite{yakdan_NoMoreGotos_2015,DBLP:journals/cacm/BohmJ66,erosa-hendren-1994}.
+% TODO: We need an example here.
+% CZ: is the reference enough?
+This is the idea that underpins a classic \command{goto}-elimination algorithm proposed by Erosa and Hendren~\cite{erosa-hendren-1994}.
+% We used our implementation to validate the results of two implementations of this algorithm: \emph{goto-be-gone}, an implementation available on GitHub\footnote{\url{https://github.com/rdbliss/gbg}}, and
+Calipso~\cite{casse_ApprochePourReduire_2002}\footnote{\url{https://github.com/BinaryAnalysisPlatform/FrontC}} provides an improved implementation of their algorithm.
+
+We ran Calipso on the blinded code in Figure~\ref{c:blinded}, and manually adjusted the output to change instances where the newly-introduced variable \lstinline{factor_found} is used as a Boolean (as integers and Booleans are indistinguishable in C) into proper comparisons (e.g., \lstinline{if (factor_found == 0)}). Our tool confirms that the code thus obtained is equivalent to the blinded input. Note that indicator detection is crucial: if \lstinline{factor_found} is not detected as an indicator, its assignments and tests will be converted into primitive actions and tests respectively. Thus, the output by Calipso will be fundamentally different from the blinded source, as it contains at least one primitive action or test that is not present in the input.
+
+Overall, we consider our results quite promising: despite the fact that our current prototype does not support C constructs like the \command{switch} statement, we are able to blind 836 of the approximately 1.4K functions in \command{coreutils} for our experiments. A relatively simple program transformation would allow us to support \command{switch} statements when the expression being switched on is a variable. 
+However, supporting \command{switch} statements in general still requires notable additions to our theory.
+Support for other constructs, e.g., properly supporting \command{do-while} loops and providing robust support for the conditional (ternary) operator would also require extensions to our theory, but it is quite possible to embed special cases in the current theory of CF-GKAT.
+
+
+\section{Related Work}%
+\label{sec:related-work}
+
+% We identify and discuss related work in three distinct areas.
+% Kleene algebra, program equivalence, and abstract interpretation.
+
+% \subsection{Kleene Algebra}
+
+Existing work has explored non-local control-flow structures and indicator variables within the framework of KAT, albeit with a number of differences from our work.  
+
+Kozen characterized the semantics for programs with non-local control-flow structures as a family of KAT expressions~\cite{kozen_NonlocalFlowControl_2008}.
+This approach yields a decision procedure for program equivalences, by reducing them to KAT equivalences.
+In contrast, CF-GKAT takes a more explicit approach by defining the continuation semantics, and the equivalence is computed by converting programs directly into automata.
+Our method closed an open question by \citet{kozen_NonlocalFlowControl_2008}, on whether non-local control flow structures can be treated ``directly'', without being converted into KAT expressions.
+
+\citet{grathwohl_KAT_2014} proposed \emph{KAT+B!} an extension of KAT with ``mutable tests'', which can be regarded as indicator variable where there are only two possible indicator values \(I = \{\true, \false\}\).
+Concretely, their setter \(b!\) equates to indicator assignment \(x = \true\) and \(\overline{b}!\) to \(x = \false\); similarly, their tester \(b?\) corresponds to primitive indicator tests. % chktex 40
+Although this is a special case of indicator variable, KAT+B!\@ can simulate indicator variable over a finite set \(I\) with \(|I|\) mutable tests.
+For example, indicator assignments $x := i$ can be simulated by ${b_i!} ; Π_{i' ≠ i}(\overline{b_{i'}}!)$, where each mutable test \(b_i\) records whether the indicator variable \(x\) is assigned to \(i\). 
+We opt to treat indicator assignments and tests as primitives, rather than restricting ourselves to (boolean-valued) mutable tests.
+
+Our treatment of indicator variables also draw inspirations from NetKAT~\cite{Anderson_Foster_Guha_Jeannin_Kozen_Schlesinger_Walker_2014}. 
+Specifically, NetKAT can be seen as a special case of KAT with indicator variables, the only primitive action is \texttt{dup}.
+
+To reason about variable assignment beyond indicator variables, Schematic KAT~\cite{angus_KleeneAlgebraTests_2001} provides a fine-grained algebraic theory for assignments over uninterpreted functions.
+Later, Schematic KAT was also extended to reason about local variables~\cite{aboul-hosn_LocalVariableScoping_2008a}.
+Neither work covers the complexity of the equivalence problem for schematic KAT and its extensions.
+Kleene algebra can also be extended with nominal techniques~\cite{kozen_CompletenessIncompletenessNominal_2015,kozen_NominalKleeneCoalgebra_2015,gabbay_FreshnessNameRestrictionSets_2011a}, which may help to reason about potentially infinite data domains, although the inclusion of tests to nominal Kleene algebra has not yet been investigated.
+
+Separately, \citet{kozen_CertificationCompilerOptimizations_2000c} have applied KAT to verify compiler correctness. 
+Their system directly uses postulated equalities for parts of their verification task. 
+In contrast, our framework is based on the trace semantics, a commonly accepted semantics for \command{while}-programs.
+
+Finally, unlike the systems above, our system is based on GKAT, instead of KAT\@. 
+This enhances the scalability of our equivalence checking algorithms to accommodate larger programs: whereas equivalence of KAT expressions is PSPACE-complete~\cite{Cohen_Kozen_Smith_1999}, equivalence of CF-GKAT expressions can be verified in polynomial time for a fixed number of tests~\cite{Smolka_Foster_Hsu_Kappé_Kozen_Silva_2020}.
+Symbolic techniques previously applied to KAT may also provide better ways of mitigating the complexity of tests~\cite{pous_SymbolicAlgorithmsLanguage_2015}.
+
+Our system is the first to integrate both indicator variables and non-local control flow in a unified framework, which enables the verification of complex control-flow transformations that leverage both indicator variables and non-local control flow~\cite{yakdan_NoMoreGotos_2015}.
+Our notion of trace equivalence is also coarser than previous systems; CF-GKAT equates programs ending in different indicator values:
+\[
+    \begin{array}{c}
+    x := \true; \comITE{x = \true}{\command{print(1)}}{\command{print(2)}} \\[1mm]
+    x := \false; \comITE{x = \false}{\command{print(1)}}{\command{print(2)}}
+    \end{array}
+\]
+The above two programs are equivalent to an outside observer, as both of them will print 1; yet the assignment of \(x\) is different at the end of the program, thus previous systems like KAT+B!~\cite{grathwohl_KAT_2014} will not be able to equate these two programs.
+As a trade-off, our equivalence is not a congruence.
+For example, equivalence is not preserved under sequencing with \(\comAssert{(x = 1)}\):
+\begin{align*}
+    (x := 1) & ≡ (x := 0)\\
+    (x := 1); \comAssert{(x = 1)} ≡ \comAssert{\true} & ≢ \comAssert{\false} ≡ (x := 0); \comAssert{(x = 1)}.
+\end{align*}
+Intuitively, \((x := 1) ≡ (x := 0)\) because we disregard the different ending indicator values \(1\) and \(0\). However, this distinction can be observed by sequencing both programs with the assertion \(\comAssert{(x = 1)}\): if the the indicator value is \(1\), then the assertion will not have any observable effect; if the indicator value is \(0\), the assertion will reject all the previous traces.
+Thus sequencing an assertion after two equivalent programs will not necessarily preserve the equivalence.
+
+
+
+\section{Conclusion And Future Work}%
+\label{sec:conclusion}
+
+In this paper, we introduced CF-GKAT (Control Flow GKAT), a system that extends GKAT with non-local control flow and indicator variables to validate control flow transformation programs. 
+We formalized two semantics for CF-GKAT\@.
+The first is the continuation semantics, where each trace, represented as a guarded word, is augmented with a continuation. The second is the trace semantics, which is obtained by resolving the continuations in the continuation semantics.
+
+We proposed CF-GKAT automata as the operational model for CF-GKAT programs, where the operational semantics is obtained by the Thompson's construction~\cite{thompson_ProgrammingTechniquesRegular_1968,Smolka_Foster_Hsu_Kappé_Kozen_Silva_2020}.
+Concretely, Thompson's construction for CF-GKAT turns every CF-GKAT program into a CF-GKAT automaton, while preserving its continuation semantics.
+This conversion allows us to design an efficient equivalence checker for CF-GKAT programs, by lowering their Thompson automata into GKAT automata.
+Notably, the complexity of this decision procedure scales nearly linearly with respect to the size of the input CF-GKAT programs. 
+Thus, our work provides an efficient validation algorithm for various control flow transformations that utilize indicator variables and non-local control flow~\cite{yakdan_NoMoreGotos_2015,erosa-hendren-1994}.
+
+While we successfully addressed one of Kozen's questions~\cite{kozen_NonlocalFlowControl_2008} by presenting an algorithm to directly convert CF-GKAT programs into automata, we have yet to develop a coalgebraic perspective on non-local control flow utilizing Brzozowski derivatives~\cite{brzozowski_DerivativesRegularExpressions_1964}.
+Such an approach could streamline several proofs, such as trace preservation of the lowering (\Cref{the:cf-gkat-automaton-lowering-correctness}) and the correctness of the operational semantics (\Cref{the:thompson-correctness}), and lead to a memory-efficient on-the-fly algorithm for trace equivalences between CF-GKAT programs.
+A coalgebraic checker could also make use of symbolic techniques~\cite{pous_SymbolicAlgorithmsLanguage_2015} to prevent explicit calculations based on the atoms of a Boolean algebra.
+
+Additional future work could be the inclusion of the \command{continue} command within loops, as well as other types of control flow found in modern programming languages such as \command{do}-\command{while} and \command{switch}.
+In terms of the theory's extensibility, it would be beneficial to separate the treatment of indicator variables and non-local control. 
+Currently, both components are integrated into the CF-GKAT automata signature as a unified entity. 
+While this approach provides a compact definition of operational semantics, it also introduces complexities when incorporating other non-local controls like \command{continue}.  
+Specifically, we will need to pass the indicator value in the continuation for \command{continue}, despite none of the non-local control-flow structures changing the indicator variable.
+

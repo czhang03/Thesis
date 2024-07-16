@@ -7,24 +7,24 @@
 
 Kleene algebra, named after the eminent mathematician Stephen Cole Kleene, represents a pivotal development in mathematical logic, computer science, and formal languages. 
 Originating in the mid-20th century, Kleene algebra emerged from Kleene's seminal work on regular sets and expressions~\cite{Kleene_1956}, where he introduced algebraic structures to formalize language equalities between regular expression. 
-Kleene then left an important open question about Kleene Algebra: whether there exists \emph{complete} algebraic system for regular language equality: an algebraic system that is capable of derive \emph{all} the language equalities of regular expression.
-There are numerous systems proposed and are closely related~\cite{Kozen_1990}, yet the modern Kleene Algebra and its completeness proof is often attributed to Kozen~\cite{Kozen_2001,Kozen_1994}.
+In said work, Kleene left an important open question about Kleene Algebra: whether there exists a \emph{complete} algebraic system for regular language equality, i.e. an algebraic system that is capable of derive \emph{all} the language equalities of regular expression.
+There are numerous systems proposed, and they are closely related~\cite{Kozen_1990}, yet the modern Kleene Algebra and its completeness proof are often attributed to Kozen~\cite{Kozen_2001,Kozen_1994}.
 
-Given the close relation to regular languages, it is no surprise that the study of Kleene Algebra often makes heavy use of automata theory.
-The automata perspective underpins another important property of Kleene Algebra: decidability.
-Specifically, the behavioral equivalence of two automata (or more generally, coalgebra) can be obtained by bisimulation on the automata~\cite{rutten_UniversalCoalgebraTheory_2000}; and bisimulation is usually decidable for finite automata~\cite{Kozen_2008,Smolka_Foster_Hsu_Kappé_Kozen_Silva_2020,Silva_2010}.
+Given its close relation to regular languages, the study of Kleene Algebra often makes heavy use of automata theory,
+and the automata perspective underpins another important property of Kleene Algebra: decidability.
+Specifically, the trace equivalence of two automata (or more generally, behavioral equivalences of coalgebras) can be obtained by bisimulation on these automata~\cite{rutten_UniversalCoalgebraTheory_2000}; and bisimulation is usually decidable for finite automata~\cite{Kozen_2008,Smolka_Foster_Hsu_Kappé_Kozen_Silva_2020,Silva_2010}.
 This framework is characterized by the bialgebraic approach using category theory~\cite{jacobs_BialgebraicReviewDeterministic_2006}, although we will not dive deep into coalgebra, many of the techniques used in this thesis are inspired by this framework.
 
-The decidability and completeness of Kleene Algebra has inspired a suite of applications in programming languages and verifications; specifically, in the areas of network system~\cite{Anderson_Foster_Guha_Jeannin_Kozen_Schlesinger_Walker_2014,Foster_Kozen_Milano_Silva_Thompson_2015, Smolka_Kumar_Kahn_Foster_Hsu_Kozen_Silva_2019},
+The decidability and completeness of Kleene Algebra has led to a suite of applications in programming languages and verifications; specifically, in the areas of network system~\cite{Anderson_Foster_Guha_Jeannin_Kozen_Schlesinger_Walker_2014,Foster_Kozen_Milano_Silva_Thompson_2015, Smolka_Kumar_Kahn_Foster_Hsu_Kozen_Silva_2019},
 concurrent programs~\cite{hoare_ConcurrentKleeneAlgebra_2009,Kappé_Brunet_Silva_Wagemaker_Zanasi_2020,Kappé_Brunet_Silva_Zanasi_2018}, 
 probabilistic systems~\cite{mciver_UsingProbabilisticKleene_2006, McIver_Rabehaja_Struth_2011}, 
 relational verification~\cite{Antonopoulos_Koskinen_Le_Nagasamudram_Naumann_Ngo_2022},
 compiler verification~\cite{Kozen_Patron_2000},
 and program schematology~\cite{Angus_Kozen_2001}.
 
-Notice that despite the decidability of KA and KAT, the decision procedure is PSPACE-complete~\cite{Cohen_Kozen_Smith_1999}, which should be infeasible for large systems.
+Notice that despite the decidability of KA and KAT, the decision procedure is PSPACE-complete~\cite{Cohen_Kozen_Smith_1999}, making equality checking infeasible for large systems.
 However, in real-world testing, network systems based on KAT was able to out-perform state of the art network verifier~\cite{Smolka_Kumar_Kahn_Foster_Hsu_Kozen_Silva_2019}.
-This phenomenon is explained by an efficient fragment of KAT named \emph{Guarded Kleene Algebra with Tests} (GKAT)~\cite{Smolka_Foster_Hsu_Kappé_Kozen_Silva_2020}. Concretely, the fragment of GKAT enjoys a more efficient automaton structure, which enables faster equivalence checking.
+This achievement can be attributed to  \emph{Guarded Kleene Algebra with Tests} (GKAT)~\cite{Smolka_Foster_Hsu_Kappé_Kozen_Silva_2020}, an efficient fragment of KAT. Concretely, GKAT enjoys more compact automaton structures, which enabled faster equivalence checking.
 
 \section{Our Contributions}
 
@@ -34,8 +34,7 @@ To delve deeper into the utility of Kleene Algebra with Tests (KAT) and Guarded 
 
 The first system, named Kleene algebra with tests and top (TopKAT), is used to facilitate domain/reachability reasoning.  
 The standard KAT lacks the capability to adequately encode notions of domain and reachability, in particular we proved that KAT failed to encode incorrectness logic.
-This inspired our development of TopKAT, which extends KAT by requiring a largest element. 
-In particular, TopKAT is capable of encoding domain comparisons in its relational model. 
+This inspired our development of TopKAT, which extends KAT by requiring a largest element, allowing TopKAT to encode domain comparisons in its relational model. 
 
 Even though TopKAT is incomplete with respect to its relational models, it is complete with respect to domain comparisons, making TopKAT a compact yet complete system to reason about reachability in regular programs.
 To obtain the domain completeness result, a novel perspective on the classical reduction techniques~\cite{Pous_Rot_Wagemaker_2021,Kozen_Smith_1997} arises: we are able to characterize reduction simply as an injective homomorphism. 
@@ -293,7 +292,7 @@ Sometimes, like in~\cref{tab: thompson's construction}, we will use the compact 
 In fact, these new \command{if}-statement and \command{while}-loop can be embedded back into KAT in the usual manner~\cite{Kozen_1997}:
 \begin{align*}
     \comITE{e_b}{e}{f} & ≜ e_b ⋅ e + \overline{e_b} ⋅ f \\  
-    \comWhile{e_b}{e} & ≜ (e_b ⋅ e)* ⋅ \overline{e_b}
+    \comWhile{e_b}{e} & ≜ (e_b ⋅ e)^* ⋅ \overline{e_b}
 \end{align*}
 This embedding into KAT gives Guarded Kleene Algebra with Tests a natural trace semantics: by computing the trace of the underlying KAT term; and a PSPACE decision procedure for trace-equivalence. Because the trace semantics of GKAT is obtained by the embedding into KAT we will overload the notation \(G(e)\) as the trace interpretation of a GKAT expression \(e\). 
 

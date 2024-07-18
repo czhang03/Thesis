@@ -1017,82 +1017,82 @@ Formally, the Thompson's automaton for loop \(e^{(e_b)}\) can be defined as foll
 % However, for a fixed atom \(α\), we can cache the result of each \(i\),
 % leading to a \(|I|\)-timed algorithm to compute \(γ\) for every input \(i\).
 
-We present a summary of the Thompson's construction in~\cref{tab: thompson's construction}, and we will state the correctness of the Thompson's construction as follows.
+We will state the correctness of the Thompson's construction as follows.
 \begin{theorem}[Thompson's construction preserves continuation semantics]\label{the:thompson-correctness}
   Given an expression $e ∈ \CFGKAT$, let $A_e$ be the Thompson automaton for $e$, then \(C(e) = C(A_e)\). By unfolding the definition of continuation semantics:
   \[∀ i ∈ I, ℓ ∈ \{♯\} + L, C(e)ᵢ^ℓ = C(A_e)ᵢ^ℓ\]
  \end{theorem}
 
 
-% FIXME: The syntax in the expression column is the compact one... we probably want to change that - T
-% FIXME: CZ: we don't have enough space, we need to think about this.
-\begin{table}
-  \centering
-  \renewcommand\arraystretch{2}
-  \begin{tabular}{c || c | l | l | l}
-   \(e\)  & \(S\) & \(δ(s)\) & \(ι(i, α)\) & \(λ(ℓ)\) \\
-   \hline
-   \(x := i'\) & \(∅\) & \(!\) & \(\acc{i}\) & \(\const(⊥)\) \\
-   \(\comRet\) & \(∅\) & \(!\) & \(\ret\) & \(\const(⊥)\) \\
-   \(\comBrk\) & \(∅\) & \(!\) & \(\brk{i}\) & \(\const(⊥)\) \\
-   \(\comGoto{ℓ}\) & \(∅\) & \(!\) & \(\jmp{(ℓ, i)}\) & \(\const(⊥)\) \\
-   \(\comAssert{b}\)& \(∅\)& \(!\)& \(
-   \begin{cases}
-    \acc{i} & (i, α) ∈ ⟦ b ⟧   \\
-    ⊥       & (i, α) ∉ ⟦ b ⟧ 
-   \end{cases}
-   \) & \(\const(⊥)\) \\
-   \(p\) & \(\{*\}\) & \(λ i.\const(\acc{i})\) & \((p, *, i)\) & \(\const(⊥)\) \\
-   %
-   \(\comLabel{ℓ'}\) & \(∅\) & \(!\)  & \(\acc{i}\) &
-    \(\begin{cases}
-      λ i.\const(\acc{i}) & ℓ = ℓ' \\
-      \const(⊥)    & ℓ ≠ ℓ'
-      \end{cases}
-   \)\\
-   %
-   \(e₁ +_{e_b} e₂\) & \(S₁ + S₂\) & \(
-   \begin{cases}
-    δ₁(s) & s ∈ S₁ \\
-    δ₂(s) & s ∈ S₂
-   \end{cases}
-   \) & \(
-   \begin{cases}
-    ι₁(i, α) & (i, α) ∈ ⟦ b ⟧ \\
-    ι₂(i, α) & (i, α) ∉ ⟦ b ⟧
-   \end{cases}
-   \) & \(
-   \begin{cases}
-    λ₁(ℓ) & \text{\(ℓ\) in \(e₁\)} \\
-    λ₂(ℓ) & \text{\(ℓ\) in \(e₁\)} \\
-    0 & \text{otherwise}
-   \end{cases}
-   \)\\
-   %
-   \(e₁ ⋅ e₂\) & \(S₁ + S₂\) & \(
-   \begin{cases}
-    δ₁(s)[ι₂] & s ∈ S₁ \\
-    δ₂(s)      & s ∈ S₂
-   \end{cases}
-   \) & \( ι₁[ι₂](i, α) \) & \(
-   \begin{cases}
-    λ₁(ℓ)[ι₂] & \text{\(ℓ\) in \(e₁\)} \\
-    λ₂(ℓ) & \text{\(ℓ\) in \(e₁\)} \\
-    0 & \text{otherwise}
-   \end{cases}
-   \) \\
-   %
-   \({e₁}^{(b)}\)
-   & \(S_{₁}\)
-   & \(⌊δ₁(s)[{ι₁}ᵇ]⌋\)
-   & \(⌊{ι₁}ᵇ⌋(i, α)\)
-   & \( ⌊ λ(ℓ)[{ι₁}ᵇ] ⌋ \) \\
-  \end{tabular}
-  %FIXME: CZ: I don't feel like we need a new notation 0
-  \caption{Thompson's construction for CF-GKAT. Here,
-  \(!\) denotes the unique function \(!: ∅ → X\) for any $X$, and \(\const(x)\) denotes the constant function that always return \(x\)}
-  \label{tab: thompson's construction}
-\end{table}
+% % FIXME: The syntax in the expression column is the compact one... we probably want to change that - T
+% % FIXME: CZ: we don't have enough space, we need to think about this.
+% \begin{table}
+%   \centering
+%   \renewcommand\arraystretch{2}
+%   \begin{tabular}{c || c | l | l | l}
+%    \(e\)  & \(S\) & \(δ(s)\) & \(ι(i, α)\) & \(λ(ℓ)\) \\
+%    \hline
+%    \(x := i'\) & \(∅\) & \(!\) & \(\acc{i}\) & \(\const(⊥)\) \\
+%    \(\comRet\) & \(∅\) & \(!\) & \(\ret\) & \(\const(⊥)\) \\
+%    \(\comBrk\) & \(∅\) & \(!\) & \(\brk{i}\) & \(\const(⊥)\) \\
+%    \(\comGoto{ℓ}\) & \(∅\) & \(!\) & \(\jmp{(ℓ, i)}\) & \(\const(⊥)\) \\
+%    \(\comAssert{b}\)& \(∅\)& \(!\)& \(
+%    \begin{cases}
+%     \acc{i} & (i, α) ∈ ⟦ b ⟧   \\
+%     ⊥       & (i, α) ∉ ⟦ b ⟧ 
+%    \end{cases}
+%    \) & \(\const(⊥)\) \\
+%    \(p\) & \(\{*\}\) & \(λ i.\const(\acc{i})\) & \((p, *, i)\) & \(\const(⊥)\) \\
+%    %
+%    \(\comLabel{ℓ'}\) & \(∅\) & \(!\)  & \(\acc{i}\) &
+%     \(\begin{cases}
+%       λ i.\const(\acc{i}) & ℓ = ℓ' \\
+%       \const(⊥)    & ℓ ≠ ℓ'
+%       \end{cases}
+%    \)\\
+%    %
+%    \(e₁ +_{e_b} e₂\) & \(S₁ + S₂\) & \(
+%    \begin{cases}
+%     δ₁(s) & s ∈ S₁ \\
+%     δ₂(s) & s ∈ S₂
+%    \end{cases}
+%    \) & \(
+%    \begin{cases}
+%     ι₁(i, α) & (i, α) ∈ ⟦ b ⟧ \\
+%     ι₂(i, α) & (i, α) ∉ ⟦ b ⟧
+%    \end{cases}
+%    \) & \(
+%    \begin{cases}
+%     λ₁(ℓ) & \text{\(ℓ\) in \(e₁\)} \\
+%     λ₂(ℓ) & \text{\(ℓ\) in \(e₁\)} \\
+%     0 & \text{otherwise}
+%    \end{cases}
+%    \)\\
+%    %
+%    \(e₁ ⋅ e₂\) & \(S₁ + S₂\) & \(
+%    \begin{cases}
+%     δ₁(s)[ι₂] & s ∈ S₁ \\
+%     δ₂(s)      & s ∈ S₂
+%    \end{cases}
+%    \) & \( ι₁[ι₂](i, α) \) & \(
+%    \begin{cases}
+%     λ₁(ℓ)[ι₂] & \text{\(ℓ\) in \(e₁\)} \\
+%     λ₂(ℓ) & \text{\(ℓ\) in \(e₁\)} \\
+%     0 & \text{otherwise}
+%    \end{cases}
+%    \) \\
+%    %
+%    \({e₁}^{(b)}\)
+%    & \(S_{₁}\)
+%    & \(⌊δ₁(s)[{ι₁}ᵇ]⌋\)
+%    & \(⌊{ι₁}ᵇ⌋(i, α)\)
+%    & \( ⌊ λ(ℓ)[{ι₁}ᵇ] ⌋ \) \\
+%   \end{tabular}
+%   %FIXME: CZ: I don't feel like we need a new notation 0
+%   \caption{Thompson's construction for CF-GKAT. Here,
+%   \(!\) denotes the unique function \(!: ∅ → X\) for any $X$, and \(\const(x)\) denotes the constant function that always return \(x\)}
+%   \label{tab: thompson's construction}
+% \end{table}
 \subsection{Algorithm and Complexity}
 
 With the definitions of lowering and Thompson's construction established, the decision procedure mostly follows.
